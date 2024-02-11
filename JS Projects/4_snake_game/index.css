@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.body {
+  background-color: whitesmoke;
+  min-height: 100vh;
+  background-size: 100vw 100vh;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#board {
+  background: linear-gradient(green, blue);
+  width: 90vmin;
+  height: 92vmin;
+  border: 2px solid black;
+  display: grid;
+  grid-template-rows: repeat(18, 1fr);
+  grid-template-columns: repeat(18, 1fr);
+}
+
+.head {
+  /* This is head of snake */
+  background-color: red;
+}
+
+.snake {
+  /* This is leftover part of snake except head  */
+  background-color: blue;
+  border: 0.25vmin solid white;
+  border-radius: 12px;
+}
+
+.food {
+  background-color: black;
+}
+
+#score {
+  position: absolute;
+  top: 9px;
+  right: 200px;
+  font-size: 39px;
+  font-weight: bold;
+}
