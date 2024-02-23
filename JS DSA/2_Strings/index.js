@@ -1,5 +1,6 @@
 // Strings in JS
 // Collection of characters is string
+// String Methods in JS: https://www.geeksforgeeks.org/javascript-string-methods/
 let firstName = "Lokesh";
 
 // Length of a string
