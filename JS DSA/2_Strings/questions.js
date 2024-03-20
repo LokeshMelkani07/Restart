@@ -189,3 +189,70 @@ var compress = function (temp) {
 
 // Reverse words in a string
 // Given an input string s, reverse the order of the words. A word is defined as a sequence of non-space characters. The words in s will be separated by at least one space. Return a string of the words in reverse order concatenated by a single space. Note that s may contain leading or trailing spaces or multiple spaces between two words. The returned string should only have a single space separating the words. Do not include any extra spaces.
+var reverseWords = function (s) {
+  // split the string into an array
+  // begin from end of the array and add words in the result string while ignoring whitespaces
+  let arr = s.trim().split(" ");
+  console.log(arr);
+  let res = "";
+  for (let j = arr.length - 1; j >= 0; j--) {
+    if (arr[j] == "") {
+      continue;
+    }
+
+    // if length of result string is more than 0 then add a whitespace before adding new word
+    if (res.length > 0) {
+      res += " ";
+    }
+
+    res += arr[j];
+  }
+
+  return res;
+};
+
+// Reverse Vowels of a String
+// Given a string s, reverse only all the vowels in the string and return it. The vowels are 'a', 'e', 'i', 'o', and 'u', and they can appear in both lower and upper cases, more than once.
+var reverseVowels = function (s) {
+  const vowels = new Set(["a", "e", "i", "o", "u", "A", "E", "I", "O", "U"]);
+  let chars = s.split(""); // Convert string to character array for in-place modification
+
+  let left = 0,
+    right = chars.length - 1;
+
+  while (left < right) {
+    while (left < right && !vowels.has(chars[left])) {
+      left++; // Skip non-vowels on the left
+    }
+    while (left < right && !vowels.has(chars[right])) {
+      right--; // Skip non-vowels on the right
+    }
+    if (left < right) {
+      // Swap vowels if both pointers meet vowels
+      [chars[left], chars[right]] = [chars[right], chars[left]];
+      left++;
+      right--;
+    }
+  }
+
+  return chars.join(""); // Join the character array back into a string
+};
+
+// Rotate String
+// Given two strings s and goal, return true if and only if s can become goal after some number of shifts on s. A shift on s consists of moving the leftmost character of s to the rightmost position. For example, if s = "abcde", then it will be "bcdea" after one shift.
+var rotateString = function (s, goal) {
+  // just take substring, everytime add first character to the end of string
+  // s.substring(1) skips first character from string everytime, abcde becomes bcde
+  console.log(s.substring(1));
+  let n = s.length;
+  let i = 0;
+  while (i < n) {
+    s = s.substring(1) + s[0];
+    if (s === goal) {
+      return true;
+    }
+    i++;
+  }
+
+  return false;
+};
