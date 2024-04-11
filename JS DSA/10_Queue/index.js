@@ -252,3 +252,115 @@ class MyCircularQueue {
     return this.size === this.capacity;
   }
 }
+
+// Number of Recent Calls
+// You have a RecentCounter class which counts the number of recent requests within a certain time frame. Implement the RecentCounter class: RecentCounter() Initializes the counter with zero recent requests. int ping(int t) Adds a new request at time t, where t represents some time in milliseconds, and returns the number of requests that has happened in the past 3000 milliseconds (including the new request). Specifically, return the number of requests that have happened in the inclusive range [t - 3000, t]. It is guaranteed that every call to ping uses a strictly larger value of t than the previous call.
+var RecentCounter = function () {
+  // this array will act like a queue for us
+  this.requests = [];
+};
+
+RecentCounter.prototype.ping = function (t) {
+  this.requests.push(t);
+
+  // We need to gather requests between [t-3000, t]
+  // if first requets does not come under the range, pop it from front
+  while (this.requests[0] < t - 3000) {
+    this.requests.shift();
+  }
+
+  // return length of array at the end
+  return this.requests.length;
+};
+
+// Design Circular Deque
+/*
+Design your implementation of the circular double-ended queue (deque).
+
+Implement the MyCircularDeque class:
+
+MyCircularDeque(int k) Initializes the deque with a maximum size of k.
+boolean insertFront() Adds an item at the front of Deque. Returns true if the operation is successful, or false otherwise.
+boolean insertLast() Adds an item at the rear of Deque. Returns true if the operation is successful, or false otherwise.
+boolean deleteFront() Deletes an item from the front of Deque. Returns true if the operation is successful, or false otherwise.
+boolean deleteLast() Deletes an item from the rear of Deque. Returns true if the operation is successful, or false otherwise.
+int getFront() Returns the front item from the Deque. Returns -1 if the deque is empty.
+int getRear() Returns the last item from Deque. Returns -1 if the deque is empty.
+boolean isEmpty() Returns true if the deque is empty, or false otherwise.
+boolean isFull() Returns true if the deque is full, or false otherwise.
+*/
+// This is an Circular Deque
+var MyCircularDeque = function (k) {
+  this.data = [];
+  this.front = 0;
+  this.rear = 0;
+  this.size = k;
+  this.length = 0;
+};
+
+MyCircularDeque.prototype.insertFront = function (value) {
+  if (this.isFull()) {
+    return false;
+  } else {
+    // This is an Circular Deque so if indexes exceed we need to take care of it using modulo operator
+    this.front = (this.front + this.size - 1) % this.size;
+    this.data[this.front] = value;
+    this.length++;
+    return true;
+  }
+};
+
+MyCircularDeque.prototype.insertLast = function (value) {
+  if (this.isFull()) {
+    return false;
+  } else {
+    this.data[this.rear] = value;
+    this.rear = (this.rear + 1) % this.size;
+    this.length++;
+    return true;
+  }
+};
+
+MyCircularDeque.prototype.deleteFront = function () {
+  if (this.isEmpty()) {
+    return false;
+  } else {
+    this.front = (this.front + 1) % this.size;
+    this.length--;
+    return true;
+  }
+};
+
+MyCircularDeque.prototype.deleteLast = function () {
+  if (this.isEmpty()) {
+    return false;
+  } else {
+    this.rear = (this.rear + this.size - 1) % this.size;
+    this.length--;
+    return true;
+  }
+};
+
+MyCircularDeque.prototype.getFront = function () {
+  if (!this.isEmpty()) {
+    return this.data[this.front];
+  }
+
+  return -1;
+};
+
+MyCircularDeque.prototype.getRear = function () {
+  if (!this.isEmpty()) {
+    return this.data[(this.rear + this.size - 1) % this.size];
+  }
+
+  return -1;
+};
+
+MyCircularDeque.prototype.isEmpty = function () {
+  return this.length === 0;
+};
+
+MyCircularDeque.prototype.isFull = function () {
+  return this.length === this.size;
+};

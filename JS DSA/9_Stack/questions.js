@@ -321,3 +321,111 @@ function findNLE(NLE, arr) {
     stack.push(i);
   }
 }
+
+// Implement Stack using Queues
+/*
+Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (push, top, pop, and empty).
+
+Implement the MyStack class:
+
+void push(int x) Pushes element x to the top of the stack.
+int pop() Removes the element on the top of the stack and returns it.
+int top() Returns the element on the top of the stack.
+boolean empty() Returns true if the stack is empty, false otherwise.
+Notes:
+
+You must use only standard operations of a queue, which means that only push to back, peek/pop from front, size and is empty operations are valid.
+Depending on your language, the queue may not be supported natively. You may simulate a queue using a list or deque (double-ended queue) as long as you use only a queue's standard operations.
+*/
+// Implementing our Queue class
+class MyQueue {
+  constructor() {
+    this.data = [];
+    this.front = 0;
+    this.rear = 0;
+  }
+
+  // Add the 'element' to the rear of the queue
+  // Time: O(1)
+  enqueue(element) {
+    this.data[this.rear] = element;
+    this.rear++;
+  }
+
+  isEmpty() {
+    return this.front == this.rear;
+  }
+
+  print() {
+    for (let i = this.front; i < this.rear; ++i) console.log(this.data[i]);
+  }
+
+  // Delete the front element and return the deleted element
+  // Time: O(1)
+  dequeue() {
+    if (this.isEmpty()) {
+      throw new Error("Queue Underflow");
+    }
+    let frontElement = this.data[this.front];
+    this.front++;
+    return frontElement;
+  }
+
+  length() {
+    return this.rear - this.front;
+  }
+
+  // Just return the front element
+  // Time: O(1)
+  getFront() {
+    if (this.isEmpty()) {
+      throw new Error("Queue is Empty!");
+    }
+    return this.data[this.front];
+  }
+}
+
+var MyStack = function () {
+  // Making 2 new Queues
+  this.q1 = new MyQueue();
+  this.q2 = new MyQueue();
+};
+
+MyStack.prototype.push = function (x) {
+  // Push x into Q2
+  // Push all elements of Q1 to Q2
+  // Now swap Q2 with Q1
+  this.q2.enqueue(x);
+  if (!this.q1.isEmpty()) {
+    while (!this.q1.isEmpty()) {
+      var ele = this.q1.dequeue();
+      this.q2.enqueue(ele);
+    }
+  }
+
+  // swap
+  if (!this.q2.isEmpty()) {
+    while (!this.q2.isEmpty()) {
+      var ele = this.q2.dequeue();
+      this.q1.enqueue(ele);
+    }
+  }
+};
+
+MyStack.prototype.pop = function () {
+  // Get the top element of Q2, thats the Last element pushed into the stack
+  var ele = this.q1.getFront();
+  // pop it out
+  this.q1.dequeue();
+  return ele;
+};
+
+MyStack.prototype.top = function () {
+  // Top element of Queue 1
+  return this.q1.getFront();
+};
+
+MyStack.prototype.empty = function () {
+  // check if q1 is empty or not
+  return this.q1.isEmpty();
+};
