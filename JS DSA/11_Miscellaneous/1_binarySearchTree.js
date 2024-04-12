@@ -289,3 +289,92 @@ var binaryTreePaths = function (root) {
   }
   return result;
 };
+
+// Print all leaf nodes of a tree
+// Leaf nodes are nodes which do not have children
+class Node {
+  constructor() {
+    this.data = 0;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+// Function to print leaf
+// nodes from left to right
+function printLeafNodes(root) {
+  // If node is null, return
+  if (root == null) return;
+
+  // If node is leaf node, print its data
+  if (root.left == null && root.right == null) {
+    document.write(root.data + " ");
+    return;
+  }
+
+  // If left child exists, check for leaf
+  // recursively
+  if (root.left != null) printLeafNodes(root.left);
+
+  // If right child exists, check for leaf
+  // recursively
+  if (root.right != null) printLeafNodes(root.right);
+}
+
+// Utility function to create a new tree node
+function newNode(data) {
+  var temp = new Node();
+  temp.data = data;
+  temp.left = null;
+  temp.right = null;
+  return temp;
+}
+
+// Let us create binary tree
+var root = newNode(1);
+root.left = newNode(2);
+root.right = newNode(3);
+root.left.left = newNode(4);
+root.right.left = newNode(5);
+root.right.right = newNode(8);
+root.right.left.left = newNode(6);
+root.right.left.right = newNode(7);
+root.right.right.left = newNode(9);
+root.right.right.right = newNode(10);
+
+// Print leaf nodes of the given tree
+printLeafNodes(root);
+
+// Invert Binary Tree
+// Given the root of a binary tree, invert the tree, and return its root.
+/*
+                1
+              /    \
+            2        3
+          /   \    /   \
+        4      5  6     7
+*/
+
+/*
+                1
+              /    \
+            3        2
+          /   \    /   \
+        7      6  5     4
+*/
+
+var invertTree = function (root) {
+  // We just need to swap left and right subtree at each level
+  // Pick each node, swap left and right node everytime
+  // then move to the left and right
+  if (root == null) return root;
+
+  let temp = root.left;
+  root.left = root.right;
+  root.right = temp;
+
+  if (root.left) invertTree(root.left);
+  if (root.right) invertTree(root.right);
+
+  return root;
+};
