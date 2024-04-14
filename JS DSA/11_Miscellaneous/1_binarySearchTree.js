@@ -378,3 +378,42 @@ var invertTree = function (root) {
 
   return root;
 };
+
+// Sum of Left Leaves
+// Given the root of a binary tree, return the sum of all left leaves. A leaf is a node with no children. A left leaf is a leaf that is the left child of another node.
+// Input: root = [3,9,20,null,null,15,7]
+// Output: 24
+// Explanation: There are two left leaves in the binary tree, with values 9 and 15 respectively.
+var sumOfLeftLeaves = function (root) {
+  // Using BFS Traversal
+  let sum = 0,
+    res = [];
+
+  let node,
+    queue = [root];
+  while (queue.length) {
+    node = queue.shift();
+    if (node.left) {
+      if (!node.left.left && !node.left.right) sum = sum + node.left.val;
+      queue.push(node.left);
+    }
+
+    if (node.right) {
+      queue.push(node.right);
+    }
+  }
+
+  return sum;
+};
+
+var sumOfLeftLeaves = function (root, left = false) {
+  // Using DFS
+  // if root has no left and right children and left = true means its a left leave so return its value
+  if (!root) {
+    return 0;
+  }
+
+  if (!root.left && !root.right) return left ? root.val : 0;
+  // On going right, we mark left as default i.e false
+  return sumOfLeftLeaves(root.left, true) + sumOfLeftLeaves(root.right);
+};

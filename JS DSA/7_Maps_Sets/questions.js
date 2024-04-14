@@ -53,6 +53,36 @@ var intersection = function (nums1, nums2) {
   return res;
 };
 
+// Intersection of Two Arrays II
+// Given two integer arrays nums1 and nums2, return an array of their intersection. Each element in the result must appear as many times as it shows in both arrays and you may return the result in any order.
+// Example 1:
+// Input: nums1 = [1,2,2,1], nums2 = [2,2]
+// Output: [2,2]
+// Example 2:
+// Input: nums1 = [4,9,5], nums2 = [9,4,9,8,4]
+// Output: [4,9]
+// Explanation: [9,4] is also accepted.
+var intersect = function (nums1, nums2) {
+  let res = [];
+  const mpp = new Map();
+  for (let i = 0; i < nums1.length; i++) {
+    mpp.set(nums1[i], (mpp.get(nums1[i]) || 0) + 1);
+  }
+
+  for (let y of nums2) {
+    if (mpp.has(y)) {
+      console.log(y);
+      res.push(y);
+      mpp.set(y, mpp.get(y) - 1);
+      if (mpp.get(y) == 0) {
+        mpp.delete(y);
+      }
+    }
+  }
+
+  return res;
+};
+
 // Distribute Candies
 /*
 Alice has n candies, where the ith candy is of type candyType[i]. Alice noticed that she started to gain weight, so she visited a doctor.
@@ -374,4 +404,30 @@ var lengthOfLongestSubstring = function (s) {
   }
 
   return maxLen;
+};
+
+// Minimum Common Value
+/*
+Given two integer arrays nums1 and nums2, sorted in non-decreasing order, return the minimum integer common to both arrays. If there is no common integer amongst nums1 and nums2, return -1.
+
+Note that an integer is said to be common to nums1 and nums2 if both arrays have at least one occurrence of that integer.
+
+Example 1:
+Input: nums1 = [1,2,3], nums2 = [2,4]
+Output: 2
+Explanation: The smallest element common to both arrays is 2, so we return 2.
+*/
+var getCommon = function (nums1, nums2) {
+  let st = new Set();
+  for (let x of nums1) {
+    st.add(x);
+  }
+
+  for (let y of nums2) {
+    if (st.has(y)) {
+      return y;
+    }
+  }
+
+  return -1;
 };
