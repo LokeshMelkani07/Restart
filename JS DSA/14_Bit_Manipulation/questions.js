@@ -229,3 +229,187 @@ var singleNumber = function (nums) {
 
   return ones;
 };
+
+// Single Number III
+// Given an integer array nums, in which exactly two elements appear only once and all the other elements appear exactly twice. Find the two elements that appear only once. You can return the answer in any order.
+// Input: nums = [1,2,1,3,2,5]
+// Output: [3,5]
+// Explanation:  [5, 3] is also a valid answer.
+var singleNumber = function (nums) {
+  // We can think of using Map but it will take TC: O(nLogm + m) and SC: O(n)
+  // To Optimise it, we can think of solution of buckets
+  // We will first take XOR of all elements in nums, a^a = 0 and 0^a = a
+  // So all duplicates get to 0 and we get XOR of 2 unique elements as result
+  // Now we know if we have something inside num = 100100 then num-1 = 100011 i.e all bits after rightmost set bit inside num will flip in num-1 and rest remains same
+  // if we do num & num-1 say res we get all bits as same in both 100000 and rest all becomes 0
+  // Now when we do res ^ num say rightmost, we get the first rightmost set bit of number num
+  // Now we take 2 buckets b1 and b2, we put all numbers whose rightmost set bit = 1 in B1 and those who have rightmost set bit as 0 in B2
+  // how to check rightmost bit, we do element & rightmost
+  // Now when we store like that, we know that both unique element will have difference in their rightmost bit so one will go inside B1 and other go inside B2
+  // We do XOR while putting numbers inside B1 and B2 so that duplicates get cancelled and we are left with only unique
+  // return B1 and B2
+  let XORR = 0;
+  for (let i = 0; i < nums.length; i++) {
+    XORR = XORR ^ nums[i];
+  }
+
+  let B1 = 0;
+  let B2 = 0;
+  let rightmost = (XORR & (XORR - 1)) ^ XORR;
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] & rightmost) {
+      B1 = B1 ^ nums[i];
+    } else {
+      B2 = B2 ^ nums[i];
+    }
+  }
+
+  return [B1, B2];
+};
+
+// Find XOR of numbers in given Range
+//You are given two numbers 'L' and 'R'.
+// Find the XOR of the elements in the range [L, R].
+// For Example:
+// For 'L' = 1 and ‘R’ = 5.
+// The answer is 1.
+function findXOR(N) {
+  // Let say we are given and Number N and we are asked to find XOR of numbers from 1 to N
+  // We can do looping and do XOR but it will take TC: O(N)
+  // Let say N = 13, Let us observe a pattern
+  /*
+  N = 13
+  1 = 1
+  1^2 = 3
+  1^2^3 = 0
+  1^2^3^4 = 4
+
+  1^2^3^4^5 = 1
+  1^2^3^4^5^6 = 7
+  1^2^3^4^5^6^7 = 0
+  1^2^3^4^5^6^7^8 = 8
+
+  1^2^3^4^5^6^7^8^9 = 1
+  1^2^3^4^5^6^7^8^9^10 = 11
+  1^2^3^4^5^6^7^8^9^10^11 = 0
+  1^2^3^4^5^6^7^8^9^10^12 = 12
+
+  1^2^3^4^5^6^7^8^9^10^12^13 = 1
+
+  We see if N%4 == 1, XOR is 1
+  We see if N%4 == 2, XOR is N+1
+  We see if N%4 == 3, XOR is 0
+  We see if N%4 == 0 (multiple of 4), XOR is N
+
+  So we can use this observation
+  */
+
+  if (N % 4 == 1) return 1;
+  else if (N % 4 == 2) return N + 1;
+  else if (N % 4 == 3) return 0;
+  else return N;
+}
+
+// Now let us find the XOR from given range L to R
+function XorFromLtoR(L, R) {
+  // We can use the above logic and think of solution like
+  // L = 4, R = 7
+  // if we find XOR of 1 to L-1 = 1^2^3 say res1 using above logic in O(1)
+  // we find XOR of 1 to R, 1^2^3^4^5^6^7 say res2
+  // we find res1^res2
+  // All duplicate terms get 0 and we are left with 4^5^6^7 which is needed so this way we do it in O(1)
+  let res1 = findXOR(L - 1);
+  let res2 = findXOR(R);
+
+  return res1 ^ res2;
+}
+
+// Divide Two Integers
+/*
+Given two integers dividend and divisor, divide two integers without using multiplication, division, and mod operator.
+The integer division should truncate toward zero, which means losing its fractional part. For example, 8.345 would be truncated to 8, and -2.7335 would be truncated to -2.
+Return the quotient after dividing dividend by divisor.
+Note: Assume we are dealing with an environment that could only store integers within the 32-bit signed integer range: [−231, 231 − 1]. For this problem, if the quotient is strictly greater than 231 - 1, then return 231 - 1, and if the quotient is strictly less than -231, then return -231.
+
+Input: dividend = 10, divisor = 3
+Output: 3
+Explanation: 10/3 = 3.33333.. which is truncated to 3.
+*/
+var divide = function (dividend, divisor) {
+  // Naive Solution
+  // It is given that if answer exceed INT_MAX, return INT_MAX and sameway for INT_MIN
+  // We can think of adding divisor till we do not get the dividend and store the count
+  // dividend = 22, divisor = 3, we can do 3+3+3+3+3+3+3 so count = 7
+  // TC: O(dividend) in worst case if dividend is 22, divisor is 1
+  let sum = 0;
+  let count = 0;
+  while (sum + divisor <= dividend) {
+    count = count + 1;
+    sum = sum + divisor;
+  }
+
+  return count;
+};
+
+var divide = function (dividend, divisor) {
+  // Optimised Approach
+  // Say dividend = 22, divisor = 3
+  // We try to deal in power of 2's,
+  // we check if we can reduce 3*2^0 = 3 from 22, yeah
+  // can we remove 3*2^1 = 6 from 22, yeah yeah
+  // can we remove 3*2^2 = 12 from 22, yeah yeah
+  // can we remove 3*2^3 = 24 from 22, Nooooo
+  // So we take 2^2 and store in answer, now 22 becomes 22-12 = 10
+  // Again we start from 3*2^0 = 3, can we remove it from 10, yeah
+  // Can we remove 3*2^1 = 6 from 10, yeah yeah
+  // Can we remove 3*2^2 = 12 from 10, Noooo
+  // So we take 2^1 and store in answer, answer becomes 2^2+2^1 = 6, now 10 becomes 10-6 = 4
+  // Again we start from 3*2^0 = 3, can we remove it from 4, yeah yeah
+  // can we remove from 3*2^1 = 6, can we remove it from 4, Noooo
+  // So we take 2^0 and store in answer, answer becomes 2^2+2^1+2^0 = 7, now 4 becomes 4-3 = 1
+  // Now dividend becomes < divisor so stop and return answer
+  // For negatives we know answer will be negative if divisor +ve, dividend -ve
+  // Or dividend +ve, divisor -ve
+  // So we handle it accordinlgy at the end, we also handle overflow at the end accordingly
+  if (dividend == divisor) return 1;
+  if (divisor === 0) return 0;
+  if (dividend === 0) return 0;
+  let sign = true; // means positive
+  if (dividend < 0 && divisor >= 0) sign = false;
+  if (dividend >= 0 && divisor < 0) sign = false;
+  let dDend = Math.abs(dividend);
+  let dSor = Math.abs(divisor);
+  let ans = 0;
+  let maxi = Math.pow(2, 31) - 1;
+  let mini = Math.pow(-2, 31);
+
+  if ((dividend >= maxi || dividend <= mini) && dSor === 1)
+    return sign ? maxi : mini;
+
+  while (dDend >= dSor) {
+    let count = 0;
+    while (dDend > dSor << (count + 1)) {
+      count = count + 1;
+    }
+    ans += 1 << count;
+    dDend = dDend - (dSor << count);
+  }
+
+  if (ans >= Math.pow(2, 31) - 1) {
+    if (sign == true) {
+      return Math.pow(2, 31) - 1;
+    } else {
+      return (Math.pow(2, 31) - 1) * -1;
+    }
+  }
+
+  if (ans < Math.pow(-2, 31)) {
+    if (sign == true) {
+      return Math.pow(-2, 31);
+    } else {
+      return Math.pow(-2, 31) * -1;
+    }
+  }
+
+  return sign === true ? ans : ans * -1;
+};
