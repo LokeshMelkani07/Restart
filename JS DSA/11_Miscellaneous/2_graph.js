@@ -577,3 +577,176 @@ class Graph {
     return distances;
   }
 }
+
+// Union And Find By Rank (Dis-joint Set)
+// In this Union means to make a set of 2 elements or nodes where one act as a parent another act as a child (for assumption: Take it as a tree)
+// Find means to check whether one is inside set of another and way of checking it is check who is its parent, if parent is same means they are inside same set
+// For Union operation, we first find parent of both elements, if parents is same, we return back, else we see rank of both parents
+// Rank is an array which stores, number of elements whose parent a particular element is say rank[0] tells number of children 0 has
+// so we check whose rank is greater from both parents. The one with greater rank becomes the parent to one with smaller
+// if rank of both is same, pick anyone as parent and increase its rank by 1
+// For find operation we just recursively traverse the parent array for that element till we get parent[x] = x itself means the top parent itself which can also be considered as root node
+class UnionFind {
+  constructor(size) {
+    // Initialise parent and rank array
+    this.parent = new Array(size);
+    this.rank = new Array(size);
+
+    // Initialize each element's parent to itself and rank to 0
+    // Initially all has rank = 0, parent is element itself
+    for (let i = 0; i < size; i++) {
+      this.parent[i] = i;
+      this.rank[i] = 0;
+    }
+  }
+
+  // find operation
+  find(x) {
+    // if element is not parent of itself means we have not reached the top root yet, call recursively but to make our work easy
+    // update the parent array value for that x with current parent so that we do not have to again go to depth of same element
+    if (this.parent[x] !== x) {
+      // Path compression: Make the parent of x point to the root
+      this.parent[x] = this.find(this.parent[x]);
+    }
+    return this.parent[x];
+  }
+
+  /*
+  Without path compression, does the work but less optimised
+  find(x) {
+    if (this.parent[x] === x) {
+      return x;
+    }
+
+    return this.find(this.parent[x]);
+  }
+  */
+
+  union(x, y) {
+    // Get the parent of both element before doing union
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    // if parent is same means both belong already to same set so return
+    if (rootX === rootY) {
+      return; // Same set, no need to union
+    }
+
+    // Union by rank: Attach smaller rank tree under root of higher rank tree
+    // if parent are different, check rank and make one as parent of another accordingly
+    if (this.rank[rootX] < this.rank[rootY]) {
+      this.parent[rootX] = rootY;
+    } else if (this.rank[rootX] > this.rank[rootY]) {
+      this.parent[rootY] = rootX;
+    } else {
+      // if rank of both is same, choose any
+      this.parent[rootY] = rootX;
+      // make sure to increase rank of one you are choosing by 1
+      this.rank[rootX]++;
+    }
+  }
+}
+
+// Using Disjoint Set Approach
+// We can find minimum spanning tree which is called Krushkal's algorithm
+// Where we sort all the edges depending on increasing order of weights
+// Now we want to pick the edges and include the weights till we have V-1 number of edges
+// We pick the shortest weight and check if both are union of each other if yes then ignore them else consider them in your answer
+// This was we go on till number of edges considered = V-1
+// V-1 because if we have to form a tree of V vertices such that there are no loops in it, there will be V-1 edges in it
+// At the end we have Minimum spanning tree
+class UnionFind {
+  // To implement Disjoint set operation
+  constructor(size) {
+    this.parent = new Array(size);
+    this.rank = new Array(size);
+
+    // Initialize each element's parent to itself and rank to 0
+    for (let i = 0; i < size; i++) {
+      this.parent[i] = i;
+      this.rank[i] = 0;
+    }
+  }
+
+  find(x) {
+    if (this.parent[x] !== x) {
+      // Path compression: Make the parent of x point to the root
+      this.parent[x] = this.find(this.parent[x]);
+    }
+    return this.parent[x];
+  }
+
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    if (rootX === rootY) {
+      return; // Same set, no need to union
+    }
+
+    // Union by rank: Attach smaller rank tree under root of higher rank tree
+    if (this.rank[rootX] < this.rank[rootY]) {
+      this.parent[rootX] = rootY;
+    } else if (this.rank[rootX] > this.rank[rootY]) {
+      this.parent[rootY] = rootX;
+    } else {
+      this.parent[rootY] = rootX;
+      this.rank[rootX]++;
+    }
+  }
+}
+
+// The below class forms edges from adj list given to us so that we can sort it in our algo based on weights
+class Edge {
+  constructor(src, dest, weight) {
+    this.src = src;
+    this.dest = dest;
+    this.weight = weight;
+  }
+}
+
+class Graph {
+  // graph has vertices map and edges array
+  constructor(vertices) {
+    this.vertices = vertices;
+    this.edges = [];
+  }
+
+  // make edges
+  addEdge(src, dest, weight) {
+    this.edges.push(new Edge(src, dest, weight));
+  }
+
+  kruskalMST() {
+    // sort all edges based on weights
+    const sortedEdges = this.edges.sort((a, b) => a.weight - b.weight);
+    // get parent and rank array of vertices size to implement disjoint set
+    const uf = new UnionFind(this.vertices);
+
+    const result = [];
+    let edgeCount = 0;
+
+    for (const edge of sortedEdges) {
+      // pick shortest weight edge one by one
+      const rootSrc = uf.find(edge.src);
+      const rootDest = uf.find(edge.dest);
+
+      // if ther both do not belong to one set, consider them
+      if (rootSrc !== rootDest) {
+        // push it in result
+        result.push(edge);
+        // make them as one set
+        uf.union(rootSrc, rootDest);
+        // do edge count++
+        edgeCount++;
+      }
+
+      // if we get V-1 edges, break out, we have our MST
+      if (edgeCount === this.vertices - 1) {
+        break; // MST found
+      }
+    }
+
+    return result;
+  }
+}
