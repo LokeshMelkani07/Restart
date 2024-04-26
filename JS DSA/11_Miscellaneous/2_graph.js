@@ -195,3 +195,307 @@ function dijkstra(graph, start) {
   // Return the shortest distance from the start node to all nodes
   return distances;
 }
+
+// Implement Prim's algorithm for minimum spanning tree
+// This algorithm is used to get the minimum spanning tree means a tree where all nodes are connected in such a way that the addition of weights gives us the minimum number
+// For that purpose we will use a priority queue, where we store {node, weight} and pq always sorts in such a way that minimum weight is at top
+// We store first element of graph in pq with weight 0 and start it
+// we will make a visited set to store already visited nodes
+// we will make an ans variable to store sum of minimum weights
+// Start
+// Run a loop till either pq is not empty or we have visited all the nodes i.e vis.size == graph.length
+// Pick first element of pq which will be the one with minimum weight
+// Mark it visited if its already not visited, if its already visited leave it
+// now add it in answer
+// Go to its all neighbours, if they are not visited, store them in pq and pq automatically brings one with minimum wieght to the top
+// loop ends
+// return ans
+class PriorityQueue {
+  // Implementing priority queue
+  constructor() {
+    this.queue = [];
+  }
+
+  enqueue(node, priority) {
+    this.queue.push({ node, priority });
+    this.sort();
+  }
+
+  dequeue() {
+    if (this.isEmpty()) {
+      return null;
+    }
+    return this.queue.shift().node;
+  }
+
+  isEmpty() {
+    return this.queue.length === 0;
+  }
+
+  // Sort on the basis of increasing weights
+  sort() {
+    this.queue.sort((a, b) => a.priority - b.priority);
+  }
+}
+
+const graph1 = {
+  A: { B: 1, C: 4 },
+  B: { A: 1, C: 2, D: 5 },
+  C: { A: 4, B: 2, D: 1 },
+  D: { B: 5, C: 1 },
+};
+
+function Prim(graph1) {
+  // pq to store {node,weight}
+  let pq = new PriorityQueue();
+  // ans to store answer
+  let ans = 0;
+  // vis to store visited nodes
+  let vis = new Set();
+
+  // get first element of adj list and start with it as weight 0 with itself
+  let firstEle = Object.keys(graph1)[0];
+  pq.enqueue(firstEle, 0);
+
+  // till pq not empty, run loop
+  while (!pq.isEmpty()) {
+    // get minimum weight node from pq
+    // currentVertex, currentWeight has value of our pq.top.nodem pq.top.priority
+    let { node: currentVertex, priority: currentWeight } = pq.dequeue();
+
+    // if visited already, go to next iteration
+    if (vis.has(currentVertex)) {
+      continue;
+    }
+
+    // if not visited, store weight in answer
+    ans += currentWeight;
+    // mark it visited
+    vis.add(currentVertex);
+
+    // go to its neighbours
+    for (let neighbor in graph1[currentVertex]) {
+      if (!vis.has(neighbor)) {
+        // if any neighbour not visited, store it in pq
+        pq.enqueue(neighbor, graph1[currentVertex][neighbor]);
+      }
+    }
+  }
+
+  // at the end, return answer
+  return ans;
+}
+
+console.log(Prim(graph1)); // Output: 4 (Minimum Spanning Tree weight)
+
+// Check Cycle in directed Graph
+class Graph {
+  constructor() {
+    this.adjacencyList = {};
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList[vertex]) {
+      this.adjacencyList[vertex] = [];
+    }
+  }
+
+  addEdge(vertex1, vertex2) {
+    if (!this.adjacencyList[vertex1] || !this.adjacencyList[vertex2]) {
+      throw new Error("Vertex not found in the graph");
+    }
+
+    this.adjacencyList[vertex1].push(vertex2);
+    this.adjacencyList[vertex2].push(vertex1);
+  }
+
+  // Check Cycle in Undirected Graph
+  // We have a graph where there is a cycle or loop present, we have to detect if there is a any cycle or loop present in the graph
+  // We will use DFS technique for that where we will traverse all nodes from a node and mark them visited as we travel but if any node we encounter and is already visited means there is a cycle
+  // Mistake: if there is a node which has its parent marked visited, during DFS of that node, we encounter its parent as visited already and say there is a loop whereas there was not any
+  // So we need to store the parent also, if there is a node already visited during DFS and its not a parent means there is a cycle otherwise not
+  // So we start from first node with parent as null
+  hasCycleUndirected() {
+    // Make visited map
+    const visited = {};
+    let hasCycle = false;
+
+    // dfs function where we pass vertex to store dfs from and its parent
+    const dfs = (vertex, parent) => {
+      // Firts of all mark it visited
+      visited[vertex] = true;
+
+      // Go to its neighbours
+      for (const neighbor of this.adjacencyList[vertex]) {
+        // if neoghbour not visited
+        if (!visited[neighbor]) {
+          // perform dfs in neighbour considering current vertex as parent
+          if (dfs(neighbor, vertex)) {
+            // if gives true means cycle present
+            return true; // Cycle detected
+          }
+        } else if (neighbor !== parent) {
+          // if its already visited and neighbour is not a parent means there is a cycle
+          hasCycle = true;
+          return true; // Cycle detected
+        }
+      }
+
+      // else we traverse all neighbour and we do not find a cycle means no cycle found
+      return false;
+    };
+
+    // we start traversing first node of adj list and we do it for all nodes of adj list
+    // It also covers dis-connected components of graph
+    for (const vertex in this.adjacencyList) {
+      if (!visited[vertex]) {
+        // first node has parent as null
+        if (dfs(vertex, null)) {
+          return true; // Cycle detected
+        }
+      }
+    }
+
+    return hasCycle;
+  }
+
+  // Detect Cycle in a Directed Graph
+  // We cannot follow approach where we were storing the parents like in undirected case
+  // We will follow DFS but now with visited map, we also keep track of recursive node
+  // if we make a dfs call for an node, we mark all nodes connected to it as visited and recursionVisited also
+  // Now in directed graph, we have edges directing from one node to another so if at any point we see any node is already visited and its also already recursivelyVisited means we are coming to it for second time so there is a cycle
+  // If cycle not present, mark it recursive map as false
+  hasCycleDirected() {
+    // for visited
+    const visited = {};
+    // To track recursively visited or not
+    const recursionStack = {};
+
+    const dfs = (vertex) => {
+      // mark it visited
+      visited[vertex] = true;
+      // mark it recursively visited
+      recursionStack[vertex] = true;
+
+      // go to its neighbours
+      for (const neighbor of this.adjacencyList[vertex]) {
+        if (!visited[neighbor]) {
+          // if not visited, perform its dfs and if its dfs gives true, there is cycle
+          if (dfs(neighbor)) {
+            return true; // Cycle detected
+          }
+        } else if (recursionStack[neighbor]) {
+          // if already visited and recursively also visited so there is a cycle
+          return true; // Cycle detected
+        }
+      }
+
+      // If cycle not found, mark its recusive map as false but keep it in visited
+      recursionStack[vertex] = false; // Backtrack
+      return false;
+    };
+
+    // cover all nodes of adj list, it also includes disconnected components
+    for (const vertex in this.adjacencyList) {
+      if (!visited[vertex]) {
+        if (dfs(vertex)) {
+          return true; // Cycle detected
+        }
+      }
+    }
+
+    return false; // No cycle found
+  }
+
+  // Topological Sort
+  // This is only applicable for Directed Acyclic Graph
+  // This is a sequence of nodes such that if there is an edge between u and v then in our topo sort, our u should always come before v in the sequence
+  // We will do DFS Traversal and use a stack in which our stack store the element with most dependency at the bottom
+  // We traverse from node 0 and do dfs to all elements we can
+  // when we reach end of the call, we store the element on stack while coming back
+  // At the end, we pop all element from stack and store them in array which is our topo sort sequence
+  topologicalSort() {
+    const visited = {};
+    const stack = [];
+
+    const dfs = (vertex) => {
+      // Mark it visited at first
+      visited[vertex] = true;
+
+      // Go to its neighbours
+      for (const neighbor of this.adjacencyList[vertex]) {
+        if (!visited[neighbor]) {
+          dfs(neighbor);
+        }
+      }
+
+      // On coming back from end of call, push it in stack
+      stack.unshift(vertex); // Push to stack after all neighbors are visited
+    };
+
+    // Below code also covers disconnected components
+    for (const vertex in this.adjacencyList) {
+      if (!visited[vertex]) {
+        dfs(vertex);
+      }
+    }
+
+    // return stack which has our order
+    return stack;
+  }
+
+  // Topological Sort using BFS (Kahn Algorithm)
+  // This algo helps us in finding Topo order of DAG using BFS
+  // We will use an In-degree array which means number of edges coming towards any node is its in-degree where we have marked 0 for all nodes initially
+  // Now, we make the in-degree of all elements using adj list
+  // Now we make an queue, push elements having in-degree as 0 to queue
+  // Now our BFS starts, pick top of queue, push it in result array, decrease its neighbours indegree by -1
+  // if any neighbour's in-degree becomes 0, store it in queue
+  // This goes on till queue is not empty
+  // At the end, our result contains our answer
+  topologicalSortUsingBFS() {
+    const inDegree = {}; // Keeps track of incoming edges for each vertex
+    const queue = []; // Queue for BFS
+    const result = []; // Resulting topological order
+
+    // Initialize in-degree for each vertex
+    for (const vertex in this.adjacencyList) {
+      inDegree[vertex] = 0;
+    }
+
+    // Calculate in-degree for each vertex
+    for (const vertex in this.adjacencyList) {
+      for (const neighbor of this.adjacencyList[vertex]) {
+        inDegree[neighbor]++;
+      }
+    }
+
+    // Enqueue vertices with in-degree 0
+    for (const vertex in inDegree) {
+      if (inDegree[vertex] === 0) {
+        queue.push(vertex);
+      }
+    }
+
+    // Perform BFS
+    while (queue.length > 0) {
+      const currentVertex = queue.shift();
+      result.push(currentVertex);
+
+      for (const neighbor of this.adjacencyList[currentVertex]) {
+        inDegree[neighbor]--;
+
+        if (inDegree[neighbor] === 0) {
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    // Check for cycle (if result length != total vertices)
+    if (result.length !== Object.keys(this.adjacencyList).length) {
+      throw new Error("Graph contains a cycle, topological sort not possible.");
+    }
+
+    return result;
+  }
+}
