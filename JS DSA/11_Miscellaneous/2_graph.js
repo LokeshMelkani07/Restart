@@ -289,6 +289,9 @@ function Prim(graph1) {
 console.log(Prim(graph1)); // Output: 4 (Minimum Spanning Tree weight)
 
 // Check Cycle in directed Graph
+// Check Cycle in undirected Graph
+// Topological Sort in DAG using DFS
+// Topological Sort in DAG using BFS (Kahn algo)
 class Graph {
   constructor() {
     this.adjacencyList = {};
@@ -497,5 +500,80 @@ class Graph {
     }
 
     return result;
+  }
+}
+
+// Bellman Ford Algorithm
+// This algorithm is used to find shortest path from a source to destination in a graph considering there can be negative weight present in the graph also
+// When there are negative weight present in the graph then Dikshtra's algo (O(VlogE)) also fails so here bellman ford comes handy which does the work in O(VE)
+// It works in such a way that we have a distance array where we have stored INFINITY initially. if we have 4 vertices, we run the algo for V-1 times and everytime.
+// We mark distance[startIndex] = 0 as distance between a node to itself is 0 always, In every iteration we have shortest path from source to destination node, we do it for V-1 times where we check
+/*
+ for (let i = 0; i < this.vertices.length - 1; i++) {
+      for (const { source, destination, weight } of this.edges) {
+        if (distances[source] + weight < distances[destination]) {
+          distances[destination] = distances[source] + weight;
+          predecessors[destination] = source;
+        }
+      }
+    }
+  }
+*/
+// We do this for all edges given to us and do it for V-1 times
+// At the end, distance array has shortest path in it.
+// Now this algo does not work if negative weighted cycle is present in the graph means if there is a cycle such that sum of all weights in it adds upto negative number then this algo does not work
+// For negative weighted cycle, there can never be a shortest path because everytime we try to find shortest path, values keeps on changing in it.
+// How to check for negative weighted cycle present or not?
+// We have done the algo for V-1 times and In V-1 times we should have shortest distance in our array
+// We try to run same algo for one more time and if our distance array is updating means there is more answers present and it means there is a negative weighted cycle present there so shortest distance not possible.
+class Graph {
+  // Initialise vertices Array and edges array which is array of object
+  constructor(vertices) {
+    this.vertices = vertices;
+    this.edges = [];
+  }
+
+  // its an directed graph
+  addEdge(source, destination, weight) {
+    this.edges.push({ source, destination, weight });
+  }
+
+  // This is our algo, we have starting index and now we want to find shortest distance from startIndex to all nodes
+  bellmanFord(startVertex) {
+    // distance map
+    const distances = {};
+    const MAX_VALUE = Number.MAX_SAFE_INTEGER;
+
+    // Step 1: Initialize distances
+    for (const vertex of this.vertices) {
+      // Mark all distance as infinity initially
+      distances[vertex] = MAX_VALUE;
+    }
+
+    // Mark distance array for source as 0
+    distances[startVertex] = 0;
+
+    // Step 2: Relax edges repeatedly
+    for (let i = 0; i < this.vertices.length - 1; i++) {
+      // Run loop for V-1 times
+      for (const { source, destination, weight } of this.edges) {
+        // keep below condition in mind because distance[source] + weight can break the code otherwise
+        if (distances[source] == Infinity) continue;
+        // for all the edges, update distance array
+        if (distances[source] + weight < distances[destination]) {
+          distances[destination] = distances[source] + weight;
+        }
+      }
+    }
+
+    // Step 3: Check for negative-weight cycles
+    for (const { source, destination, weight } of this.edges) {
+      if (distances[source] + weight < distances[destination]) {
+        // if distance changes means negative weighted cycle present
+        throw new Error("Graph contains a negative-weight cycle");
+      }
+    }
+
+    return distances;
   }
 }
