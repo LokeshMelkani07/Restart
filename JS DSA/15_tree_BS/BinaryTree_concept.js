@@ -831,25 +831,54 @@ var sumOfLeftLeaves = function (root, left = false) {
   return sumOfLeftLeaves(root.left, true) + sumOfLeftLeaves(root.right);
 };
 
-// Valid Binary Search Tree?
-// A valid binary search tree (BST) has ALL left children with values less than the parent node, and ALL right children with values greater than the parent node.
-// Everything on the right of a Node should be greater than it
-// Everything on the left of a Node should be lesser than it
-// Algo
-// What we will do is, we have root, We make a range for every node i.e for root its [-Infinity, +Infinity]
-// We check if root.val is between range, if yes, go to left
-// Now range becomes [-Infinity, root.val] and for right node range becomes [root.val, +Infinity]
-// We keep on Traversing the tree like that and if both left && right return true at the end, means its a valid BST
-var isValidBST = function (root) {
-  return helper(root, Math.max, Math.min);
+// Vertical Order Traversal of a Binary Tree
+// Given the root of a binary tree, calculate the vertical order traversal of the binary tree.
+// For each node at position (row, col), its left and right children will be at positions (row + 1, col - 1) and (row + 1, col + 1) respectively. The root of the tree is at (0, 0).
+// The vertical order traversal of a binary tree is a list of top-to-bottom orderings for each column index starting from the leftmost column and ending on the rightmost column. There may be multiple nodes in the same row and same column. In such a case, sort these nodes by their values.
+// Return the vertical order traversal of the binary tree.
+var verticalTraversal = function (root) {
+  // We will do a Level order traversal where we will store elements on a map based on their horizontal distance
+  // we store root as hd: 0, its left as -1 and right as +1 and so on
+  // Once we fill the map this way
+  // We will sort the map based on hd and corresponding values will be stored in the result array which gives us the vertical order
+  if (!root) return [];
+
+  const columnMap = new Map(); // Map to store nodes based on column index
+  const queue = [{ node: root, col: 0 }]; // Initialize queue with root and its column index
+  // we do not have a sorted map so we use max and min level to loop into each one of them and store in answer
+  let minCol = 0; // Track the minimum column index
+  let maxCol = 0; // Track the maximum column index
+
+  while (queue.length > 0) {
+    const { node, col } = queue.shift();
+
+    // Update minCol and maxCol
+    minCol = Math.min(minCol, col);
+    maxCol = Math.max(maxCol, col);
+
+    // Add the node to the column map based on its column index
+    // if any level is not there, create that level and store that element in it
+    if (!columnMap.has(col)) {
+      columnMap.set(col, []);
+    }
+    columnMap.get(col).push(node.val);
+
+    // Enqueue left child with col - 1 and right child with col + 1
+    if (node.left) {
+      queue.push({ node: node.left, col: col - 1 });
+    }
+    if (node.right) {
+      queue.push({ node: node.right, col: col + 1 });
+    }
+  }
+
+  // Extract nodes from column map in vertical order
+  const verticalOrder = [];
+  for (let col = minCol; col <= maxCol; col++) {
+    if (columnMap.has(col)) {
+      verticalOrder.push(columnMap.get(col));
+    }
+  }
+
+  return verticalOrder;
 };
-
-function helper(root, maxi, mini) {
-  if (root == null) return true;
-
-  if (root.val >= maxi || root.val <= mini) return false;
-
-  return (
-    helper(root.left, root.val, mini) && helper(root.right, maxi, root.val)
-  );
-}
