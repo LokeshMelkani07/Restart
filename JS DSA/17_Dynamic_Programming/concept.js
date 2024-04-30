@@ -257,3 +257,182 @@ var longestCommonSubsequence = function (text1, text2) {
   // The result is stored at dp[m][n] i.e last block
   return dp[m][n];
 };
+
+// Edit Distance
+/*
+Given two strings word1 and word2, return the minimum number of operations required to convert word1 to word2.
+You have the following three operations permitted on a word:
+Insert a character
+Delete a character
+Replace a character
+
+
+Example 1:
+Input: word1 = "horse", word2 = "ros"
+Output: 3
+Explanation:
+horse -> rorse (replace 'h' with 'r')
+rorse -> rose (remove 'r')
+rose -> ros (remove 'e')
+*/
+var minDistance = function (word1, word2) {
+  // Solving using Top Down Approach
+  // What we will do is, we will start traversing both strings from the end index
+  // We keep on comparing them one by one
+  // if both character are same, we skip that index so call for i-1,j-1
+  // if both character not same means we need to do any one operation from Insertion, Deletion, Replacement
+  // We will perform the operation which is minimum of all
+  // For Deletion, we do i-1,j
+  // For Insertion, we do j-1 because if we insert into word1, it makes i and j same when we skip them so simply we can swrite it as j-1 means we are skiping that index of word2
+  // For replacement, we do i-1,j-1 because we are just skipping that character of both word1 and word2
+  // get 1+min(insertion,deletion,replacement) and store in dp array
+  const m = word1.length;
+  const n = word2.length;
+
+  // Initialize memoization table with dimensions (m+1) x (n+1)
+  const memo = Array.from({ length: m + 1 }, () => Array(n + 1).fill(-1));
+
+  // Helper function for recursive memoized approach
+  const helper = (i, j) => {
+    // Base case: If either string is empty, return the length of the other string
+    if (i === 0) return j;
+    if (j === 0) return i;
+
+    // Check if result is already memoized
+    if (memo[i][j] !== -1) return memo[i][j];
+
+    // Case 1: Characters match, no operation needed
+    if (word1[i - 1] === word2[j - 1]) {
+      memo[i][j] = helper(i - 1, j - 1);
+    } else {
+      // Case 2: Try deletion, insertion, and replacement operations
+      // We are doing 1 + min() because +1 means current decision + decision we took for further calls
+      memo[i][j] =
+        1 +
+        Math.min(
+          helper(i - 1, j), // Deletion
+          helper(i, j - 1), // Insertion
+          helper(i - 1, j - 1) // Replacement
+        );
+    }
+
+    return memo[i][j];
+  };
+
+  return helper(m, n); // Call helper function with full lengths of word1 and word2
+};
+
+var minDistance = function (word1, word2) {
+  // Bottom Up Approach / Tabulation
+  // We will make a matrix in which we store say word1 = ABCAB, word2 = EACB
+  // We will make a matrix of word2.length+1 rows and word2.length+1 cols
+  // Where 0,0 block represent ' ' for both
+  // row numbering are as follows: ' ', E, A, C, B
+  // col numbering are as follows: ' ', A, B, C, A, B
+  // for any block in Eth row Cth col, it represents minimum operation required to make "ABC" to "E"
+  // So while traversing whole matrix we check everytime, if elements match, we just copy diagnol answer, if they do not match, take 1 + min(up,left,diagnol) because they represent Insertion,deletion,replacement
+  // We start traversing from index = 1 because for index = 0, its empty string
+  // 0th row means min operation needed to make ' ' from that column element which is same as column number
+  // 0th col means min operation needed to make ' ' from that row element which will be row number
+  const m = word1.length;
+  const n = word2.length;
+
+  // Initialize dp array with dimensions (m+1) x (n+1)
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  // Initialize first row and column of dp array
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i; // Operations needed to convert word1 to empty string
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j; // Operations needed to convert empty string to word2
+  }
+
+  // Build dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (word1[i - 1] === word2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1]; // Characters match, no operation needed
+      } else {
+        //
+        dp[i][j] =
+          1 +
+          Math.min(
+            dp[i - 1][j], // Deletion (left)
+            dp[i][j - 1], // Insertion (Up)
+            dp[i - 1][j - 1] // Replacement (Diagnol)
+          );
+      }
+    }
+  }
+
+  return dp[m][n]; // Minimum operations required to convert word1 to word2
+};
+
+// Rod Cutting
+/*
+Given a rod of length N inches and an array of prices, price[]. price[i] denotes the value of a piece of length i. Determine the maximum value obtainable by cutting up the rod and selling the pieces.
+Note: Consider 1-based indexing.
+
+Example 1:
+
+Input:
+N = 8
+Price[] = {1, 5, 8, 9, 10, 17, 17, 20}
+Output:
+22
+Explanation:
+The maximum obtainable value is 22 by
+cutting in two pieces of lengths 2 and
+6, i.e., 5+17=22.
+*/
+//Function to find the maximum possible value of the function.
+function cutRod(price, n) {
+  // We are taking each length and subtacing that piece from total length and at the same time we are adding its price in the answer
+  // This way we try to get the maximum answer we can get
+  // Top Down Approach
+  let dp = Array(n + 1).fill(-1);
+  let ans = helper(n);
+  dp[0] = 0;
+
+  function helper(length) {
+    // base case will be when total length become 0 or negative means no more rod to cut
+    if (length <= 0) return 0;
+    if (dp[length] != -1) return dp[length];
+    let maxVal = -Infinity;
+
+    for (let i = 1; i <= length; i++) {
+      // store max Value of price
+      maxVal = Math.max(maxVal, price[i - 1] + helper(length - i));
+    }
+
+    dp[length] = maxVal;
+    return maxVal;
+  }
+
+  return ans;
+}
+
+function cutRod(price, n) {
+  // Tabulation Method
+  // We will make a dp array of length n+1 in which we store -1 initially and dp[0] = 0
+  // dp[0] says maximum profit in cutting rod of length 0
+  // dp[1] says maximum profit in cutting rod of length 1
+  // say we need to find dp[5] so for that we need to have information about
+  // dp[0],dp[1]...dp[4] say we pick
+  // price[1] + dp[5-1=4] = gives value for dp[5] or another option
+  // price[2] + dp[5-2=3] or
+  // price[3] + dp[2] or
+  // price[4] + dp[1] or
+  // we need maximum of all these options so dp[i] = max(dp[i],price[j] + dp[i-i-1]) becomes our formula
+  let dp = Array(n + 1).fill(-1);
+  dp[0] = 0;
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 0; j < i; j++) {
+      dp[i] = Math.max(dp[i], price[j] + dp[i - j - 1]);
+    }
+  }
+
+  return dp[n];
+}
