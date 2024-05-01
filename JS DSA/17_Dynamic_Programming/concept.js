@@ -481,6 +481,7 @@ class Solution {
 }
 
 // Matrix Chain Multiplication (Partition DP starts)
+// Notes: https://drive.google.com/file/d/1RCEMkN0r9pMrSHDyWkSrSXWCleKNtStQ/view?usp=sharing
 /*
 Given a sequence of matrices, find the most efficient way to multiply these matrices together. The efficient way is the one that involves the least number of multiplications.
 The dimensions of the matrices are given in an array arr[] of size N (such that N = number of matrices + 1) where the ith matrix has the dimensions (arr[i-1] x arr[i]).
@@ -548,6 +549,7 @@ class Solution {
 }
 
 // Minimum Cost to Cut a Stick
+// Notes: https://drive.google.com/file/d/1RCEMkN0r9pMrSHDyWkSrSXWCleKNtStQ/view?usp=sharing
 /*
 Given a wooden stick of length n units. The stick is labelled from 0 to n. For example, a stick of length 6 is labelled as follows:
 Given an integer array cuts where cuts[i] denotes a position you should perform a cut at.
@@ -591,6 +593,7 @@ function helper(cuts, i, j, memo) {
 }
 
 // Burst Balloons
+// Notes: https://drive.google.com/file/d/1RCEMkN0r9pMrSHDyWkSrSXWCleKNtStQ/view?usp=sharing
 /*
 You are given n balloons, indexed from 0 to n - 1. Each balloon is painted with a number on it represented by an array nums. You are asked to burst all the balloons.
 If you burst the ith balloon, you will get nums[i - 1] * nums[i] * nums[i + 1] coins. If i - 1 or i + 1 goes out of bounds of the array, then treat it as if there is a balloon with a 1 painted on it.
