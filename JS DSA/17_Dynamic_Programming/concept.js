@@ -658,3 +658,138 @@ var maxCoinsTabulation = function (nums) {
 
   return dp[1][n];
 };
+
+// Palindrome Partitioning II
+// Notes: https://drive.google.com/file/d/1ILQHkEle3KxhnlWGM9_kRjJi94fuwCwH/view?usp=sharing
+/*
+Given a string s, partition s such that every substring of the partition is a palindrome.Return the minimum cuts needed for a palindrome partitioning of s.
+
+Example 1:
+Input: s = "aab"
+Output: 1
+Explanation: The palindrome partitioning ["aa","b"] could be produced using 1 cut.
+*/
+var minCut = function (s) {
+  // Top Down Approach
+  // TC: O(N) * O(N) = O(N^2), SC: O(N) + O(N) aux space
+  let n = s.length;
+  let dp = Array(n).fill(-1);
+  let ans = helper(0, n, s, dp);
+  // we do ans -1 because our code makes extra partition at the end of string which is not needed then it calls for base case
+  return ans - 1;
+};
+
+function helper(i, n, s, dp) {
+  if (i == n) return 0;
+  if (dp[i] != -1) return dp[i];
+  let minCost = +Infinity;
+
+  for (let j = i; j < n; j++) {
+    if (isPalindrome(i, j, s)) {
+      let cost = 1 + helper(j + 1, n, s, dp);
+      minCost = Math.min(minCost, cost);
+    }
+  }
+
+  return (dp[i] = minCost);
+}
+
+function isPalindrome(i, j, s) {
+  while (i < j) {
+    if (s[i] != s[j]) return false;
+    i++;
+    j--;
+  }
+
+  return true;
+}
+
+// Tabulation approach
+var minCut = function (s) {
+  // Top Down Approach
+  let n = s.length;
+  let dp = Array(n + 1).fill(0);
+  dp[n] = 0;
+  // i goes from 0 to n in top down approach so it goes form n to 0 in bottom up approach
+  // j goes from i to n in top down so its goes from n to i in bottom up
+  for (let i = n - 1; i >= 0; i--) {
+    let minCost = +Infinity;
+    for (let j = i; j < n; j++) {
+      if (isPalindrome(i, j, s)) {
+        let cost = 1 + dp[j + 1];
+        minCost = Math.min(minCost, cost);
+      }
+    }
+    dp[i] = minCost;
+  }
+
+  return dp[0] - 1;
+};
+
+function isPalindrome(i, j, s) {
+  while (i < j) {
+    if (s[i] != s[j]) return false;
+    i++;
+    j--;
+  }
+
+  return true;
+}
+
+// Partition Array for Maximum Sum
+// Notes: https://drive.google.com/file/d/1ILQHkEle3KxhnlWGM9_kRjJi94fuwCwH/view?usp=sharing
+/*
+Given an integer array arr, partition the array into (contiguous) subarrays of length at most k. After partitioning, each subarray has their values changed to become the maximum value of that subarray. Return the largest sum of the given array after partitioning. Test cases are generated so that the answer fits in a 32-bit integer.
+
+Example 1:
+Input: arr = [1,15,7,9,2,5,10], k = 3
+Output: 84
+Explanation: arr becomes [15,15,15,9,10,10,10]
+*/
+var maxSumAfterPartitioning = function (arr, k) {
+  // Top Down Approach
+  let n = arr.length;
+  let dp = Array(n + 1).fill(-1);
+  let ans = helper(0, n, k, arr, dp);
+  return ans;
+};
+
+function helper(i, n, k, arr, dp) {
+  if (i == n) return 0;
+  if (dp[i] != -1) return dp[i];
+  let maxAns = -Infinity;
+  let maxi = -Infinity;
+  let len = 0;
+  for (let j = i; j < Math.min(i + k, n); j++) {
+    len++;
+    maxi = Math.max(maxi, arr[j]);
+    let sum = len * maxi + helper(j + 1, n, k, arr, dp);
+    maxAns = Math.max(maxAns, sum);
+  }
+
+  return (dp[i] = maxAns);
+}
+
+// Tabulation Code
+var maxSumAfterPartitioning = function (arr, k) {
+  // Bottom Up Approach
+  let n = arr.length;
+  let dp = Array(n + 1).fill(0);
+  dp[n] = 0;
+
+  for (let i = n - 1; i >= 0; i--) {
+    let maxAns = -Infinity;
+    let maxi = -Infinity;
+    let len = 0;
+    for (let j = i; j < Math.min(i + k, n); j++) {
+      len++;
+      maxi = Math.max(maxi, arr[j]);
+      let sum = len * maxi + dp[j + 1];
+      maxAns = Math.max(maxAns, sum);
+    }
+
+    dp[i] = maxAns;
+  }
+
+  return dp[0];
+};
