@@ -429,3 +429,512 @@ MyStack.prototype.empty = function () {
   // check if q1 is empty or not
   return this.q1.isEmpty();
 };
+
+// Smallest number on left
+/*
+Given an array a of integers of length n, find the nearest smaller number for every element such that the smaller element is on left side.If no small element present on the left print -1.
+
+Example 1:
+Input: n = 3
+a = {1, 6, 2}
+Output: -1 1 1
+Explaination: There is no number at the
+left of 1. Smaller number than 6 and 2 is 1.
+*/
+class Solution {
+  leftSmaller(arr, n) {
+    // We want strictly lesser element on the left
+    // Brute Force approach can be that we will traverse to all elements and for each element we will run a loop in backward direction, As soon as we get a element smaller than current element we break the loop and store that in result array
+    // This will take O(n^2) which can be further optimsied to O(n) using stack
+    // We make a stack which is empty currently so for first element push -1
+    // We will push first element in stack
+    // Now we go to next element and check if st.top is lesser than curr, if yes, store it in result and push curr in stack
+    // if no, then pop out that stack element till we get lesser element at stack top, if in doing so, stack becomes empty we store -1 in result array for that curr
+    // Now we go to next element, and keep on doing it till we traverse whole array
+    // Sameway we can do "previous greater element" just check for greater element instead of smaller element and pop accordingly
+
+    // Initialize an array to store the result
+    const result = [];
+
+    // Create an empty stack to store indices of elements
+    const stack = [];
+
+    // Iterate through the array from left to right
+    for (let i = 0; i < n; i++) {
+      // Keep popping elements from the stack while the current element is smaller than the element at the top of the stack
+      while (stack.length > 0 && arr[i] <= arr[stack[stack.length - 1]]) {
+        stack.pop();
+      }
+
+      // If the stack is empty, there is no smaller element on the left
+      if (stack.length === 0) {
+        result.push(-1); // Push -1 to the result array
+      } else {
+        result.push(arr[stack[stack.length - 1]]); // Push the smaller element to the result array
+      }
+
+      // Push the current index onto the stack
+      stack.push(i);
+    }
+
+    // Return the result array
+    return result;
+  }
+}
+
+// Help Classmates || Next Smaller Element
+/*
+Professor X wants his students to help each other in the chemistry lab. He suggests that every student should help out a classmate who scored less marks than him in chemistry and whose roll number appears after him. But the students are lazy and they don't want to search too far. They each pick the first roll number after them that fits the criteria. Find the marks of the classmate that each student picks.
+Note: one student may be selected by multiple classmates.
+
+Example 1:
+Input: N = 5, arr[] = {3, 8, 5, 2, 25}
+Output: 2 5 2 -1 -1
+Explanation:
+1. Roll number 1 has 3 marks. The first person
+who has less marks than him is roll number 4,
+who has 2 marks.
+2. Roll number 2 has 8 marks, he helps student
+with 5 marks.
+3. Roll number 3 has 5 marks, he helps student
+with 2 marks.
+4. Roll number 4 and 5 can not pick anyone as
+no student with higher roll number has lesser
+marks than them. This is denoted by -1.
+Output shows the marks of the weaker student that
+each roll number helps in order. ie- 2,5,2,-1,-1
+*/
+class Solution {
+  help_classmate(arr, n) {
+    // This problem is same as Next smaller element
+    // We will use a stack but this time we will start traversing from back of array
+    const result = [];
+    const stack = [];
+
+    for (let i = n - 1; i >= 0; i--) {
+      while (stack.length > 0 && stack[stack.length - 1] >= arr[i]) {
+        stack.pop();
+      }
+
+      if (stack.length === 0) {
+        result.unshift(-1);
+      } else {
+        result.unshift(stack[stack.length - 1]);
+      }
+
+      stack.push(arr[i]);
+    }
+
+    return result;
+  }
+}
+
+// Largest Rectangle in Histogram
+/*
+Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
+
+Example 1:
+Input: heights = [2,1,5,6,2,3]
+Output: 10
+Explanation: The above is a histogram where width of each bar is 1.
+The largest rectangle is shown in the red area, which has an area = 10 units.
+*/
+var largestRectangleArea = function (heights) {
+  // Brute force way O(n^2)
+  // We will pick one element and go to its left and its right till we have arr[left] >= arr[i] and arr[right] >= arr[i]
+  // At the end we take area = (right-left-1)*arr[i];
+  // get mexArea such a way
+  let maxArea = -Infinity;
+  for (let i = 0; i < heights.length; i++) {
+    let left = i;
+    let right = i;
+
+    while (left >= 0 && heights[left] >= heights[i]) {
+      left--;
+    }
+
+    while (right < heights.length && heights[right] >= heights[i]) {
+      right++;
+    }
+
+    let area = (right - left - 1) * heights[i];
+    maxArea = Math.max(maxArea, area);
+  }
+
+  return maxArea;
+};
+
+var largestRectangleArea = function (heights) {
+  // Optimised Approach
+  // We will make use of Previous smaller and Next smaller element array
+  // This time instead of elements, we will push indexes
+  // Once we have PSE, NSE array
+  // In NSE array if we do not find any nextsmaller element, we will handle it by pushing n (next index to last element) in the result array which will be handled automatically later
+  // We will again traverse the loop and for each element area will be (NSE[i] - NLE[i] -1)*arr[i]
+  // This way we store the maximum area and return it
+  let n = heights.length;
+  let PSE = previousSmallerElement(heights, n);
+  let NSE = nextSmallerElement(heights, n);
+  let maxArea = 0;
+
+  for (let i = 0; i < n; i++) {
+    let area = (NSE[i] - PSE[i] - 1) * heights[i];
+    maxArea = Math.max(maxArea, area);
+  }
+
+  return maxArea;
+};
+
+function previousSmallerElement(arr, n) {
+  let result = [];
+  let stack = [];
+
+  for (let i = 0; i < n; i++) {
+    while (stack.length > 0 && arr[stack[stack.length - 1]] >= arr[i]) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      result.push(-1);
+    } else {
+      result.push(stack[stack.length - 1]);
+    }
+
+    stack.push(i);
+  }
+
+  return result;
+}
+
+function nextSmallerElement(arr, n) {
+  let result = [];
+  let stack = [];
+
+  for (let i = n - 1; i >= 0; i--) {
+    while (stack.length > 0 && arr[stack[stack.length - 1]] >= arr[i]) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      // if we push -1 then it will be difficult for us in calculation so if we do not find any next smaller element, we push n which is next element to last element of array and consider that there is next smaller element at some index n
+      // this case will be automatically handled at the end
+      result.push(n);
+    } else {
+      result.push(stack[stack.length - 1]);
+    }
+
+    stack.push(i);
+  }
+
+  return result.reverse(); // Reverse the result to get correct order
+}
+
+// Maximal Rectangle
+// Given a rows x cols binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.
+// Input: matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+// Output: 6
+var maximalRectangle = function (matrix) {
+  // We will use the logic of Maximum area in a historgram
+  // Here we will pick each row and send it as a array to maxHistogram function and get the result area array for that row
+  // As we move to next row, we keep on adding value to each block if arr[i]==1 then do curr[i] += 1 and if arr[i]=0 then make cur[i]=0
+  // and again send curr array to maxhistogram
+  // Everytime store the max value of area
+  if (matrix.length === 0 || matrix[0].length === 0) return 0;
+
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  let maxArea = 0;
+
+  // Calculate the histogram heights for each row
+  const heights = new Array(cols).fill(0);
+
+  for (let i = 0; i < rows; i++) {
+    // Update heights array based on current row
+    for (let j = 0; j < cols; j++) {
+      heights[j] = matrix[i][j] === "1" ? heights[j] + 1 : 0;
+    }
+
+    // Calculate the largest rectangle area for the current row
+    maxArea = Math.max(maxArea, largestRectangleArea(heights));
+  }
+
+  return maxArea;
+};
+
+// Helper function to calculate the largest rectangle area in a histogram
+// This function find maxArea in a histogram for that array
+function largestRectangleArea(heights) {
+  const stack = [];
+  let maxArea = 0;
+
+  for (let i = 0; i <= heights.length; i++) {
+    while (
+      stack.length > 0 &&
+      (i === heights.length || heights[i] < heights[stack[stack.length - 1]])
+    ) {
+      const height = heights[stack.pop()];
+      const width = stack.length === 0 ? i : i - stack[stack.length - 1] - 1;
+      maxArea = Math.max(maxArea, height * width);
+    }
+    stack.push(i);
+  }
+
+  return maxArea;
+}
+
+// Infix, PreFix, PostFix Expressions
+// We have a BODMAS rule while solving expressions where we have to take care of Precedence and Associvity while solving any expression
+// We have (Bracket -> Order (2^3) -> Divide -> Multiply -> Addition -> Subtraction) as Order
+// Associvity of Multiply and divide are same so if both are present simultaneously in an expression, we solve what is occuring first
+// Associvity of Addition and Subtraction are same so if both are present simultaneously in an expression, we solve what is occuring first
+// Infix means Operand Operator Operand
+// Prefix means Operator Operand Operand
+// Postfix means Operand Operand Operator
+// For any compiler it is easy to solve expression in postfix instead of infix because postfix does not have any brackets or do not have to care about precedence or associvity
+// It uses a stack where it starts traversing the expression and pushes operands in the stack and when it encounters any operand, it pops out first 2 element from stack top and perform that operation on them and push the result in the stack
+// This way it returns the result in the stack top at the end
+/*
+Infix Expression
+A + B
+A + B * C
+
+Prefix Expression
++ A B
++ A * B C
+
+Postfix Expression
+A B +
+A B C * +
+*/
+
+// Convert Infix Expression to Postfix Expression
+/*
+We will use a stack and we will traverse all elements in infix expression and do following operation
+if infix[i] is a operand or number, simply print it in result array
+
+if its a operator check,
+if stack is empty, push it directly
+if stack is not empty, check if precedence of stack.top is lower than infix[i]. if yes, push infix[i] in stack or else keep popping out the element from stack and push in result till lower precedence element is found in the stack.
+
+if its a opening bracket, push directly in the stack
+if its a closing bracket, pop out from stack and push in result array till opening bracket is encountered. now pop that opening bracket also out of stack and push in result
+
+keep on doing these operations till infix[i] reaches end of array
+*/
+// Function to check if a character is an operator (+, -, *, /, ^)
+function isOperator(char) {
+  return ["+", "-", "*", "/", "^"].includes(char);
+}
+
+// Function to get the precedence of an operator
+function precedence(operator) {
+  switch (operator) {
+    case "+":
+    case "-":
+      return 1;
+    case "*":
+    case "/":
+      return 2;
+    case "^":
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+// Function to convert infix expression to postfix expression
+function infixToPostfix(infix) {
+  const result = []; // Array to store the postfix expression
+  const stack = []; // Stack to hold operators and parentheses
+
+  for (let i = 0; i < infix.length; i++) {
+    const token = infix[i];
+
+    // If token is an operand (letter or digit), add it to the result
+    if ((token >= "a" && token <= "z") || (token >= "0" && token <= "9")) {
+      result.push(token);
+    } else if (token === "(") {
+      // If token is a left parenthesis, push it onto the stack
+      stack.push(token);
+    } else if (token === ")") {
+      // If token is a right parenthesis, pop operators from the stack until we find a left parenthesis
+      while (stack.length > 0 && stack[stack.length - 1] !== "(") {
+        result.push(stack.pop());
+      }
+      // Discard the left parenthesis from the stack
+      stack.pop();
+    } else if (isOperator(token)) {
+      // If token is an operator
+      // Pop operators with higher or equal precedence from the stack and add them to the result
+      while (
+        stack.length > 0 &&
+        precedence(stack[stack.length - 1]) >= precedence(token)
+      ) {
+        result.push(stack.pop());
+      }
+      // Push the current operator onto the stack
+      stack.push(token);
+    }
+  }
+
+  // Pop remaining operators from the stack and add them to the result
+  while (stack.length > 0) {
+    result.push(stack.pop());
+  }
+
+  // Join the elements of the result array to form the postfix expression
+  return result.join("");
+}
+
+// Evaluating Postfix Expression
+// Function to evaluate a postfix expression
+function evaluatePostfix(postfix) {
+  const stack = []; // Stack to store operands
+
+  // Helper function to perform arithmetic operations
+  const performOperation = (operand1, operand2, operator) => {
+    switch (operator) {
+      case "+":
+        return operand1 + operand2;
+      case "-":
+        return operand1 - operand2;
+      case "*":
+        return operand1 * operand2;
+      case "/":
+        return operand1 / operand2;
+      case "^":
+        return Math.pow(operand1, operand2);
+      default:
+        throw new Error("Invalid operator");
+    }
+  };
+
+  // Loop through each token in the postfix expression
+  for (let token of postfix) {
+    // If token is an operand, push it onto the stack
+    if (!isNaN(token)) {
+      stack.push(parseFloat(token)); // Convert token to number
+    } else {
+      // If token is an operator, perform operation
+      const operand2 = stack.pop(); // Pop the top operand
+      const operand1 = stack.pop(); // Pop the second top operand
+      const result = performOperation(operand1, operand2, token); // Perform operation
+      stack.push(result); // Push the result back onto the stack
+    }
+  }
+
+  // The final result will be at the top of the stack
+  return stack.pop();
+}
+
+// Infix to Prefix, same as Infix to Postfix just that during conversion and evaluation we reverse the string before processing so that operators can occue before operand and we can process them easily.
+// Function to check if a character is an operator (+, -, *, /, ^)
+function isOperator(char) {
+  return ["+", "-", "*", "/", "^"].includes(char);
+}
+
+// Function to get the precedence of an operator
+function precedence(operator) {
+  switch (operator) {
+    case "+":
+    case "-":
+      return 1;
+    case "*":
+    case "/":
+      return 2;
+    case "^":
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+// Function to reverse a string
+function reverseString(str) {
+  return str.split("").reverse().join("");
+}
+
+// Function to convert infix expression to prefix expression
+function infixToPrefix(infix) {
+  const stack = []; // Stack to hold operators and parentheses
+  const result = []; // Array to store the prefix expression
+
+  // Reverse the infix expression to facilitate prefix conversion
+  infix = reverseString(infix);
+
+  for (let i = 0; i < infix.length; i++) {
+    const token = infix[i];
+
+    if (token === "(") {
+      // Reverse parentheses
+      stack.push(")");
+    } else if (token === ")") {
+      stack.push("(");
+    } else if (
+      (token >= "a" && token <= "z") ||
+      (token >= "0" && token <= "9")
+    ) {
+      // Operands
+      result.push(token);
+    } else if (isOperator(token)) {
+      // Operators
+      while (
+        stack.length > 0 &&
+        isOperator(stack[stack.length - 1]) &&
+        precedence(stack[stack.length - 1]) >= precedence(token)
+      ) {
+        result.push(stack.pop());
+      }
+      stack.push(token);
+    }
+  }
+
+  while (stack.length > 0) {
+    result.push(stack.pop());
+  }
+
+  // Reverse the result to get the prefix expression
+  return reverseString(result.join(""));
+}
+
+// Function to evaluate a prefix expression
+function evaluatePrefix(prefix) {
+  const stack = [];
+
+  // Helper function to perform arithmetic operations
+  const performOperation = (operand1, operand2, operator) => {
+    switch (operator) {
+      case "+":
+        return operand1 + operand2;
+      case "-":
+        return operand1 - operand2;
+      case "*":
+        return operand1 * operand2;
+      case "/":
+        return operand1 / operand2;
+      case "^":
+        return Math.pow(operand1, operand2);
+      default:
+        throw new Error("Invalid operator");
+    }
+  };
+
+  // Reverse the prefix expression to facilitate evaluation
+  prefix = reverseString(prefix);
+
+  for (let token of prefix) {
+    if (!isNaN(token)) {
+      // Operands
+      stack.push(parseFloat(token));
+    } else if (isOperator(token)) {
+      // Operators
+      const operand1 = stack.pop();
+      const operand2 = stack.pop();
+      const result = performOperation(operand1, operand2, token);
+      stack.push(result);
+    }
+  }
+
+  // The final result will be at the top of the stack
+  return stack.pop();
+}
