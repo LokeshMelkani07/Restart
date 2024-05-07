@@ -183,3 +183,110 @@ var findMaxConsecutiveOnes = function (nums) {
   maxLength = Math.max(maxLength, maxConsOnes);
   return maxLength;
 };
+
+// Trapping Rain Water
+// Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+// Example 1:
+// Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+// Output: 6
+// Explanation: The above elevation map (black section) is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
+var trap = function (height) {
+  // We just have to do little array pre-processing where for each element we will find its leftMax i.e element greater than itself in its left including itself
+  // rightMax means element greater than itself on right including itself
+  // now we have rightMax and leftMax for each element of array
+  // Water in a block will only be filled if there is any building greater than itself in its left or right
+  // How much water will be store? depends on min(leftMax,rightMax) and we have to subtract height of current block also because that much height is occupied by the building so at that point no water will be filled
+  // So our formula becomes, waterFilled = min(leftMax, rightMax) - height[curr]
+  // we will calculate the rightMax by traversing array from back
+  // We will calculate the leftMax by traversing array from front
+  let leftMax = [];
+  let rightMax = [];
+  // push first element in leftMax because there is no leftMax for first element except itself
+  leftMax[0] = height[0];
+  for (let i = 1; i < height.length; i++) {
+    leftMax[i] = Math.max(leftMax[i - 1], height[i]);
+  }
+
+  // Store last element in last index of rightMax because for last element there is no rightMax
+  rightMax[height.length - 1] = height[height.length - 1];
+  for (let i = height.length - 2; i >= 0; i--) {
+    rightMax[i] = Math.max(rightMax[i + 1], height[i]);
+  }
+
+  // Compute the water stored
+  let waterStored = 0;
+  for (let i = 0; i < height.length; i++) {
+    waterStored += Math.min(leftMax[i], rightMax[i]) - height[i];
+  }
+
+  return waterStored;
+};
+
+// Another approach using 2 pointers
+var trap = function (height) {
+  // Another approach using 2 pointers
+  // Instead of using 2 seperate arrays to store leftMax and rightMax
+  // We can use 2 pointers and 2 variables which will store leftMax and rightMax
+  // Because at the time of calculating waterStored, we are just using min(leftMax, rightMax) so we need only one of them at a time
+  // Leftmax always contains the maxHeight in the left and same for rightMax
+  // We will get the answer from one which is smaller than left or right
+  let leftMax = 0,
+    rightMax = 0,
+    waterStored = 0,
+    n = height.length;
+  let left = 0,
+    right = n - 1;
+
+  while (left < right) {
+    if (height[left] <= height[right]) {
+      if (height[left] >= leftMax) {
+        leftMax = height[left];
+      } else {
+        waterStored += leftMax - height[left];
+      }
+      left++;
+    } else {
+      if (height[right] >= rightMax) {
+        rightMax = height[right];
+      } else {
+        waterStored += rightMax - height[right];
+      }
+
+      right--;
+    }
+  }
+
+  return waterStored;
+};
+
+// Maximum Subarray
+// Given an integer array nums, find the subarray with the largest sum, and return its sum.
+// Example 1:
+// Input: nums = [-2,1,-3,4,-1,2,1,-5,4]
+// Output: 6
+// Explanation: The subarray [4,-1,2,1] has the largest sum 6.
+var maxSubArray = function (nums) {
+  // Kadane's Algorithm
+  // We will use this algo which states that to get maximum sum in a subarray
+  // We need to consider only positive elements because if we consider negative elements then its difficult to get the maximum sum
+  // The intuition of the algorithm is not to consider the subarray as a part of the answer if its sum is less than 0. A subarray with a sum less than 0 will always reduce our answer and so this type of subarray cannot be a part of the subarray with maximum sum.
+  let currSum = 0;
+  let maxSum = -Infinity;
+
+  for (let i = 0; i < nums.length; i++) {
+    // keep on adding element to the sum
+    currSum += nums[i];
+
+    // if we get any maximum sum, update it
+    if (currSum > maxSum) {
+      maxSum = currSum;
+    }
+
+    // if current sum becomes negative, make it 0 as negative will not help us in getting maximum sum
+    if (currSum < 0) {
+      currSum = 0;
+    }
+  }
+
+  return maxSum;
+};
