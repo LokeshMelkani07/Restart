@@ -364,3 +364,231 @@ MyCircularDeque.prototype.isEmpty = function () {
 MyCircularDeque.prototype.isFull = function () {
   return this.length === this.size;
 };
+
+// Flatten a multilevel linked list
+// Given a linked list where in addition to the next pointer, each node has a child pointer, which may or may not point to a separate list. These child lists may have one or more children of their own, and so on, to produce a multilevel data structure, as shown in below figure. You are given the head of the first level of the list. Flatten the list so that all the nodes appear in a single-level linked list. You need to flatten the list in way that all nodes at the first level should come first, then nodes of second level, and so on.
+class Node {
+  // Every node has a data, next pointer, child pointer
+  constructor() {
+    this.next = null;
+    this.child = null;
+    this.data = 0;
+  }
+}
+
+function flattenLinkedList(head) {
+  // What we will do is, we will have a head pointer and a tail pointer
+  // Head pointer will point to head of LL, tail pointer points to last node of LL
+  // We start traversing from head of LL, if any node has child, we will append tail.next to curr.child and traverse tail to last node of that child
+  // now do curr = curr.next and again if any curr has a child, move it to tail.next and move tail to end of that list
+  // do this till curr reaches the tail itself
+  // This way we get whole LL flattened
+  if (!head) return;
+
+  let curr = head;
+  let tail = head;
+  let temp = head;
+
+  while (tail.next != null) {
+    // move tail to the end
+    tail = tail.next;
+  }
+
+  while (curr != tail) {
+    // if curr has child, append it to the tail
+    if (curr.child) {
+      tail.next = curr.child;
+      temp = curr.child;
+      while (temp.next != null) {
+        temp = temp.next;
+      }
+      tail = temp;
+    }
+
+    curr = curr.next;
+  }
+
+  return head;
+}
+
+// Solution Using Queue with space O(n)
+function flattenUsingQueue(head) {
+  // In this solution we will make use of queue
+  // We will have a curr which starts from the head pointer
+  // We will traverse till curr.next != null and print but while doing this, if amy curr has child, we will push it in the queue
+  // Once we reach curr.next == null, we check the queue
+  // if its not empty, we will get the top element of queue (FIFO) and we point curr to it and start traversing from that node until curr.next != null and print it and sameway if we get any curr has child, we push it in the queue
+  // We keep on doing this till curr.next === null and queue is empty
+  if (!head) return null;
+
+  const queue = []; // Queue to store nodes with child pointers
+  let curr = head;
+
+  while (curr) {
+    if (curr.child) {
+      queue.push(curr.child); // Push the child node to the queue
+      curr.child = null; // Set child to null to flatten the list
+    }
+
+    if (!curr.next && queue.length > 0) {
+      let nextNode = queue.shift(); // Dequeue the next node from the queue
+      curr.next = nextNode; // Connect the next node
+      nextNode.prev = curr; // Set the prev pointer of the next node
+    }
+
+    curr = curr.next; // Move to the next node
+  }
+
+  return head;
+}
+
+// Flatten a Multilevel Doubly Linked List
+// You are given a doubly linked list, which contains nodes that have a next pointer, a previous pointer, and an additional child pointer. This child pointer may or may not point to a separate doubly linked list, also containing these special nodes. These child lists may have one or more children of their own, and so on, to produce a multilevel data structure as shown in the example below. Given the head of the first level of the list, flatten the list so that all the nodes appear in a single-level, doubly linked list. Let curr be a node with a child list. The nodes in the child list should appear after curr and before curr.next in the flattened list. Return the head of the flattened list. The nodes in the list must have all of their child pointers set to null.
+// Input: head = [1,2,3,4,5,6,null,null,null,7,8,9,10,null,null,11,12], these are given level by level i.e 3 has child 7 which has (8,9,10) and 8 has child (11,12) so print output in such a way that children are printed first
+// Output: [1,2,3,7,8,11,12,9,10,4,5,6]
+function Node(val, prev, next, child) {
+  this.val = val;
+  this.prev = prev;
+  this.next = next;
+  this.child = child;
+}
+
+var flatten = function (head) {
+  // Here the way of printing is different
+  // If we see a node has a child, we will print the child first
+  // means print whole child LL first then move to next curr node
+  // So we need to maintain a stack where we will push the next node of any curr and its child
+  // and we pick the child first using LIFO property and print the child first then curr.next
+  // We will make a dummyNode which points to one node previous to head
+  // when stack becomes empty, stop
+  // at the end we will return dummyNode.next
+  if (!head) return;
+  let dummy = new Node(0, null, head, null);
+
+  let current = dummy;
+  let stack = [head];
+  let previous = null; // to append
+
+  while (stack.length != 0) {
+    current = stack.pop();
+
+    if (previous) {
+      // if there is any prev node, append current to its next
+      current.prev = previous;
+      previous.next = current;
+    }
+
+    // we will push current.next first in stack then we push current.child because during printing we want current.child first then current.next and we know stack works in LIFO fashion
+    if (current.next != null) {
+      stack.push(current.next);
+    }
+
+    if (current.child != null) {
+      stack.push(current.child);
+      current.child = null;
+    }
+
+    previous = current; // point previous to current
+  }
+
+  return dummy.next;
+};
+
+// Sliding Window Maximum
+/*
+You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position. Return the max sliding window.
+Example 1:
+Input: nums = [1,3,-1,-3,5,3,6,7], k = 3
+Output: [3,3,5,5,6,7]
+Explanation:
+Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+*/
+var maxSlidingWindow = function (nums, k) {
+  // Brute Force Approach
+  // We will traverse from index 0 to n-k index, we conside max = arr[i]
+  // Where we run another loop from 1 to k-1 size
+  // we check arr[i+j] > max then update max, else store that sliding window maximum element
+  let maxi = -Infinity;
+  let result = [];
+  for (let i = 0; i <= nums.length - k; i++) {
+    maxi = nums[i];
+    // we run below loop from 1 to <k because first element of window has already been considered in the above statement
+    for (let j = 1; j < k; j++) {
+      if (nums[i + j] > maxi) {
+        maxi = nums[i + j];
+      }
+    }
+    result.push(maxi);
+  }
+
+  return result;
+};
+
+// Optimised approach using heap
+var maxSlidingWindow = function (nums, k) {
+  // Little Optimised Approach
+  // We will use max-heap here
+  // We will push k elements in the heap at a time and everytime we push top element of max-heap in result array
+  // then we remove it and process further
+  const maxHeap = [];
+  const result = [];
+  let i = 0;
+  for (; i < k; i++) {
+    maxHeap.push(nums[i]);
+  }
+
+  maxHeap.sort((a, b) => b - a);
+  result.push(maxHeap[0]);
+  maxHeap.unshift();
+  for (; i < nums.length; i++) {
+    maxHeap.push(nums[i]);
+    maxHeap.sort((a, b) => b - a);
+
+    result.push(maxHeap[0]);
+
+    maxHeap.unshift();
+  }
+
+  return result;
+};
+
+// Most Optimised Approach using Deque
+var maxSlidingWindow = function (nums, k) {
+  // Most Optimised Approach
+  // We will maintain a Doubly ended queue (Deque)
+  // In which we store index of elements in such a way that before pushing any element arr[i], we check if the last element added in our deque was greater than arr[i] or smaller than arr[i]
+  // if its greater than arr[i] then just push arr[i] simply
+  // but if its smaller than arr[i] then pop that one out first till we get greater number than arr[i] and then push arr[i]
+  // this way, everytime our deque contains greater element of that window everytime so we just print it and move further
+  // Do this till we reach end of array
+  const result = [];
+  const deque = []; // Deque to store indices, not actual elements
+
+  for (let i = 0; i < nums.length; i++) {
+    // Remove elements from the front of the deque if they are out of the window range
+    while (deque.length > 0 && deque[0] <= i - k) {
+      deque.shift();
+    }
+
+    // Remove elements from the back of the deque that are smaller than the current element
+    while (deque.length > 0 && nums[deque[deque.length - 1]] < nums[i]) {
+      deque.pop();
+    }
+
+    deque.push(i); // Push the current index to the deque
+
+    // Start adding max elements to the result array once the window size is reached
+    if (i >= k - 1) {
+      result.push(nums[deque[0]]); // The front of the deque stores the max element's index
+    }
+  }
+
+  return result;
+};
