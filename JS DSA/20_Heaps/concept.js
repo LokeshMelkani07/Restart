@@ -363,3 +363,69 @@ MedianFinder.prototype.findMedian = function () {
     return this.maxHeap.front();
   }
 };
+
+// Relative Ranks
+/*
+You are given an integer array score of size n, where score[i] is the score of the ith athlete in a competition. All the scores are guaranteed to be unique.
+
+The athletes are placed based on their scores, where the 1st place athlete has the highest score, the 2nd place athlete has the 2nd highest score, and so on. The placement of each athlete determines their rank:
+
+The 1st place athlete's rank is "Gold Medal".
+The 2nd place athlete's rank is "Silver Medal".
+The 3rd place athlete's rank is "Bronze Medal".
+For the 4th place to the nth place athlete, their rank is their placement number (i.e., the xth place athlete's rank is "x").
+Return an array answer of size n where answer[i] is the rank of the ith athlete.
+
+Example 1:
+Input: score = [5,4,3,2,1]
+Output: ["Gold Medal","Silver Medal","Bronze Medal","4","5"]
+Explanation: The placements are [1st, 2nd, 3rd, 4th, 5th].
+*/
+var findRelativeRanks = function (score) {
+  // We will use max-heap to store ith athelete and his score
+  // This way we always get max-Score at the top
+  // We assign ranks based on the top score which we fetch from priority queue
+  /*
+    for example: score = [5,4,3,2,1]
+    Our maxHeap looks like
+    { priority: 5, element: 0 }
+    { priority: 4, element: 1 }
+    { priority: 3, element: 2 }
+    { priority: 2, element: 3 }
+    { priority: 1, element: 4 }
+    */
+  let maxHeap = new MaxPriorityQueue();
+  for (let i = 0; i < score.length; i++) {
+    // put i as node based on priority of score[i] so top score always at top
+    // we are pushing element based on {element,priority}
+    maxHeap.enqueue(i, score[i]);
+  }
+
+  let ans = [];
+  for (let i = 0; i < score.length; i++) {
+    let item = maxHeap.dequeue();
+    let rank;
+    console.log(item);
+
+    switch (i) {
+      case 0:
+        rank = "Gold Medal";
+        break;
+      case 1:
+        rank = "Silver Medal";
+        break;
+      case 2:
+        rank = "Bronze Medal";
+        break;
+      // (i+1) because we start our loop from index 0 whereas rank are starting from index 1 in score array
+      default:
+        rank = (i + 1).toString();
+        break;
+    }
+
+    // item.element means ith athlete which is put in maxHeap based on priority of their score[i]
+    ans[item.element] = rank;
+  }
+
+  return ans;
+};

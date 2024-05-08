@@ -30,6 +30,75 @@ var majorityElement = function (nums) {
   }
 };
 
+// Moore's Volting Algorithm Approach
+var majorityElement = function (nums) {
+  // Moore's Voting algorithm
+  // We will consider first element nums[0] as majority element say curr and store its count = 1
+  // Now we start traversing from element index 1 to end of array
+  // if our nums[i] is same as curr we do count++ for that element
+  // if our nums[i] is not same as curr we do count-- for that element and if in doing soo, our count reaches 0, we will say maybe curr is not the majority element.
+  // Let us take current index as curr so curr = i and make its count = 1
+  // this way we keep on traversing the array. at the end whatever the curr we have, this can be our majority element so to confirm it, we again traverse whole array and check the number of occurence of curr in the array if its > n/2 times means curr is majority element so return curr
+  // TC: O(n) and SC: O(1)
+  let currIndex = 0;
+  let countCurr = 1;
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] === nums[currIndex]) {
+      countCurr++;
+    } else {
+      countCurr--;
+    }
+
+    if (countCurr == 0) {
+      currIndex = i;
+      countCurr = 1;
+    }
+  }
+
+  // check if nums[currIndex] is the answer or not
+  let count = 0;
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] == nums[currIndex]) {
+      count++;
+    }
+  }
+
+  return count > nums.length / 2 ? nums[currIndex] : -1;
+};
+
+// Most Frequent Even Element
+// Given an integer array nums, return the most frequent even element.If there is a tie, return the smallest one. If there is no such element, return -1.
+
+// Example 1:
+// Input: nums = [0,1,2,2,4,4,1]
+// Output: 2
+// Explanation: The even elements are 0, 2, and 4. Of these, 2 and 4 appear the most. We return the smallest one, which is 2.
+var mostFrequentEven = function (nums) {
+  // We will store all even elements and their frequencies inside a map
+  // We will also store the maximum frequency count inside our map in a variable
+  // Because this will help us in finding the max frequent even number in our array
+  // Now, we traverse whole map and check if count of any number is greater than or equal to maxCount. this can be a possible answer
+  // but if there are 2 numbers of same count, we will store the smaller than always so we add another condition for that
+  // and we return the answer
+  let mpp = new Map();
+  let maxCountOfMap = 0;
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] % 2 == 0) {
+      mpp.set(nums[i], (mpp.get(nums[i]) || 0) + 1);
+      maxCountOfMap = Math.max(maxCountOfMap, mpp.get(nums[i]));
+    }
+  }
+
+  let ans = Infinity;
+  for (let [value, count] of mpp) {
+    if (count >= maxCountOfMap && value < ans) {
+      ans = value;
+    }
+  }
+
+  return ans === Infinity ? -1 : ans;
+};
+
 // Remove Duplicates from Sorted Array
 // Given an integer array nums sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same. Then return the number of unique elements in nums.
 var removeDuplicates = function (nums) {
@@ -289,4 +358,102 @@ var maxSubArray = function (nums) {
   }
 
   return maxSum;
+};
+
+// Best Time to Buy and Sell Stock
+/*
+You are given an array prices where prices[i] is the price of a given stock on the ith day.
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
+
+Example 1:
+Input: prices = [7,1,5,3,6,4]
+Output: 5
+Explanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.
+Note that buying on day 2 and selling on day 1 is not allowed because you must buy before you sell.
+*/
+var maxProfit = function (prices) {
+  // We know we can gather maximum profit, if we buy at the lowest price and sell at the highest price
+  // But, the catch here is that we need to buy first then sell it
+  // Brute force approach can be where we will pick one stock means buy it so we run one outer loop where we pick each index
+  // Now there is another inner loop which we use to sell that stock and we keep on storing the profit by doing prices[j]-prices[i]
+  // This way we can proceed
+  let maxProfit = 0;
+  for (let buy = 0; buy < prices.length; buy++) {
+    for (let sell = buy + 1; sell < prices.length; sell++) {
+      maxProfit = Math.max(maxProfit, prices[sell] - prices[buy]);
+    }
+  }
+
+  return maxProfit;
+};
+
+// Little Optimised Approach, TC: O(n), SC: O(n)
+var maxProfit = function (prices) {
+  // Little Optimised Approach
+  // We know we can gather maximum profit, if we buy at the lowest price and sell at the highest price
+  // But, the catch here is that we need to buy first then sell it
+  // We will maintain a auxilliary array in which we will store the rightMax to each element, we will start filling that array from the end
+  // Once we have this aux array, we will subtract current - aux and store maxProfit
+  let n = prices.length;
+  let rightMax = [];
+  rightMax[n - 1] = prices[n - 1];
+  for (let i = n - 2; i >= 0; i--) {
+    rightMax[i] = Math.max(prices[i], rightMax[i + 1]);
+  }
+
+  let maxProfit = 0;
+  for (let i = 0; i < n; i++) {
+    maxProfit = Math.max(maxProfit, rightMax[i] - prices[i]);
+  }
+
+  return maxProfit;
+};
+
+// Most Optimised Approach, TC: O(n), SC: O(1)
+var maxProfit = function (prices) {
+  // We will think of selling on each day and before that we compare it with its least value before it
+  // Basically, we will maintain a variable minSoFar where we store minimum value we have encountered till now
+  // We traverse in the loop and update minSoFar if we feel so and for every index we try to sell and check maxProfit using a variable and return it in the end
+  let maxProfit = 0;
+  let minSoFar = prices[0];
+  for (let i = 0; i < prices.length; i++) {
+    maxProfit = Math.max(maxProfit, prices[i] - minSoFar);
+    minSoFar = Math.min(minSoFar, prices[i]);
+  }
+
+  return maxProfit;
+};
+
+// Best Time to Buy and Sell Stock II
+/*
+You are given an integer array prices where prices[i] is the price of a given stock on the ith day.
+On each day, you may decide to buy and/or sell the stock. You can only hold at most one share of the stock at any time. However, you can buy it then immediately sell it on the same day.
+Find and return the maximum profit you can achieve.
+
+Example 1:
+Input: prices = [7,1,5,3,6,4]
+Output: 7
+Explanation: Buy on day 2 (price = 1) and sell on day 3 (price = 5), profit = 5-1 = 4.
+Then buy on day 4 (price = 3) and sell on day 5 (price = 6), profit = 6-3 = 3.
+Total profit is 4 + 3 = 7.
+*/
+var maxProfit = function (prices) {
+  // We can have atmost (max) one stock at a time
+  // Means if we buy a stock, we need to sell it before buying another stock
+  // We will buy when we encounter a local minima, we will sell when we encounter a local maxima
+  // What is a local minima? An element whose left and right both are greater than itself then that element is a local minima
+  // What is a local maxima? An element whose left and right both are smaller than itself then that element is a local maxima
+  // Or Instead of finding local maxima or local minima, we can directly compare one value with its previous value
+  // if curr > prev, subtract them and add it to the profit
+  // Because there is no limit on number of transactions we can make
+  // Let us take [1,4,7] now 4-1 = 3 + 7-4 = 6 and by local max/min approach 7-1 = 6. So its one or the same thing
+  let profit = 0;
+  for (let i = 1; i < prices.length; i++) {
+    if (prices[i] > prices[i - 1]) {
+      profit += prices[i] - prices[i - 1];
+    }
+  }
+
+  return profit;
 };
