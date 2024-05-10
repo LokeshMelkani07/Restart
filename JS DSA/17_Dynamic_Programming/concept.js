@@ -89,6 +89,8 @@ function knapSack(W, wt, val, n) {
   return ans;
 }
 
+// DP on strings
+
 // Longest Common Subsequence
 // Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0. A subsequence of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters. For example, "ace" is a subsequence of "abcde". A common subsequence of two strings is a subsequence that is common to both strings.
 // Example 1:
@@ -235,6 +237,198 @@ var minDistance = function (word1, word2) {
 
 var longestCommonSubsequence = function (text1, text2) {
   // Bottom Up / Tabulation approach
+  const m = text1.length;
+  const n = text2.length;
+
+  // Initialize dp array
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  // Build the dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        // if the value matches we take diagnol + 1
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        // else we take max(up, left)
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // The result is stored at dp[m][n] i.e last block
+  return dp[m][n];
+};
+
+// DP on Strings
+
+// Print all LCS sequences
+/*
+You are given two strings s and t. Now your task is to print all longest common sub-sequences in lexicographical order.
+
+Example 1:
+Input: s = abaaa, t = baabaca
+Output: aaaa abaa baaa
+
+Example 2:
+Input: s = aaa, t = a
+Output: a
+*/
+var PrintinglongestCommonSubsequence = function (text1, text2) {
+  // Bottom Up / Tabulation approach
+  const m = text1.length;
+  const n = text2.length;
+
+  // Initialize dp array
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  // Build the dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        // if the value matches we take diagnol + 1
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        // else we take max(up, left)
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // Now we have the tabulation table
+  let len = dp[m][n];
+  let str = "";
+
+  for (let i = 0; i < len; i++) {
+    str[i] = "$";
+  }
+
+  let index = len - 1;
+  let i = m,
+    j = n;
+  // we start from last node of table and then we backtrack
+  while (i > 0 || j > 0) {
+    if (text1[i - 1] === text2[j - 1]) {
+      str[index] = str[i - 1];
+      i--, j--, index--;
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  return str;
+};
+
+// Longest Common Substring
+/*
+Given two strings. The task is to find the length of the longest common substring.
+
+Example 1:
+Input: S1 = "ABCDGH", S2 = "ACDGHR", n = 6, m = 6
+Output: 4
+Explanation: The longest common substring
+is "CDGH" which has length 4.
+
+Example 2:
+Input: S1 = "ABC", S2 "ACB", n = 3, m = 3
+Output: 1
+Explanation: The longest common substrings
+are "A", "B", "C" all having length 1.
+*/
+function longestCommonSubstr(text1, text2, m, n) {
+  // Initialize dp array
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  let ans = 0;
+  // Build the dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+        ans = Math.max(ans, dp[i][j]);
+      } else {
+        dp[i][j] = 0;
+      }
+    }
+  }
+
+  return ans;
+}
+
+// Here we are only dealing with i-1 and j at a time so instead of making whole dp array mXn we can use 2 arrays only and do little space optimisation
+function longestCommonSubstrSpaceOptimised(text1, text2, m, n) {
+  // Initialize dp array
+  let prev = Array(n + 1).fill(0);
+  let curr = Array(n + 1).fill(0);
+  let ans = 0;
+  // Build the dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        curr[j] = 1 + prev[j - 1];
+        ans = Math.max(ans, curr[j]);
+      } else {
+        curr[j] = 0;
+      }
+    }
+    prev = curr;
+  }
+
+  return ans;
+}
+
+// Minimum Insertion Steps to Make a String Palindrome
+/*
+Given a string s. In one step you can insert any character at any index of the string. Return the minimum number of steps to make s palindrome.
+A Palindrome String is one that reads the same backward as well as forward.
+
+Example 1:
+Input: s = "zzazz"
+Output: 0
+Explanation: The string "zzazz" is already palindrome we do not need any insertions.
+
+Example 2:
+Input: s = "mbadm"
+Output: 2
+Explanation: String can be "mbdadbm" or "mdbabdm".
+
+Example 3:
+Input: s = "leetcode"
+Output: 5
+Explanation: Inserting 5 characters the string becomes "leetcodocteel".
+*/
+var minInsertions = function (s) {
+  // We will keep the already palindromic part of the string intact
+  // We will just disturb the non-palindromic part
+  // What we do is just write the non palindromic part in reverse order in the order side thats it
+  // So min number of insertions to make whole string palincdrome becomes, total length of string - length of longest palindromic subsequence
+  return s.length - longestPalindromeSubseq(s);
+};
+
+var longestPalindromeSubseq = function (s) {
+  // we will just use LCS method only where we make one more string P which is reverse of string s
+  // Now we find LCS of s and p which will be our Longest Palindromic subsequence
+  let p = reverseString(s);
+
+  function reverseString(str) {
+    var newString = "";
+    for (var i = str.length - 1; i >= 0; i--) {
+      newString += str[i];
+    }
+    return newString;
+  }
+
+  return longestCommonSubsequence(s, p);
+};
+
+var longestCommonSubsequence = function (text1, text2) {
+  // Bottom Up / Tabulation approach
+  // We will make a matrix of m+1 and n+1 size where we have 0th col and 0th row as 0 because it repesents empty string
+  // row and col represents that character of text1 and text2
+  // each cell represents longest common subsequence for a string, say we have text1 = ABCDE, text2 = ABSDC then col[4] represents max lcs that can be formed for ABSD
+  // this way we check if our rowth and colth element matches we add (diagnol value + 1)
+  // if they do not match, we take max(up value,left value)
   const m = text1.length;
   const n = text2.length;
 
