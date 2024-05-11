@@ -452,6 +452,177 @@ var longestCommonSubsequence = function (text1, text2) {
   return dp[m][n];
 };
 
+// Shortest Common Supersequence
+/*
+Given two strings str1 and str2, return the shortest string that has both str1 and str2 as subsequences. If there are multiple valid strings, return any of them.
+A string s is a subsequence of string t if deleting some number of characters from t (possibly 0) results in the string s.
+
+Example 1:
+Input: str1 = "abac", str2 = "cab"
+Output: "cabac"
+Explanation:
+str1 = "abac" is a subsequence of "cabac" because we can delete the first "c".
+str2 = "cab" is a subsequence of "cabac" because we can delete the last "ac".
+The answer provided is the shortest such string that satisfies these properties.
+
+Example 2:
+Input: str1 = "aaaaaaaa", str2 = "aaaaaaaa"
+Output: "aaaaaaaa"
+*/
+var shortestCommonSupersequence = function (text1, text2) {
+  // Bottom Up / Tabulation approach
+  const m = text1.length;
+  const n = text2.length;
+
+  // Initialize dp array
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  // Build the dp array bottom-up
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (text1[i - 1] === text2[j - 1]) {
+        // if the value matches we take diagnol + 1
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        // else we take max(up, left)
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // LCS code ends here,
+  // Now we preprocess for the supersequence
+  let i = m,
+    j = n;
+  let ans = "";
+
+  while (i > 0 && j > 0) {
+    if (text1[i - 1] === text2[j - 1]) {
+      // if both characters are same, add it once in the answer string
+      ans += text1[i - 1];
+      i--, j--;
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      // if max is up, add current ith element and move up
+      ans += text1[i - 1];
+      i--;
+    } else {
+      ans += text2[j - 1];
+      j--;
+    }
+  }
+
+  // check which string is still left, add that also in the answer
+  while (i > 0) {
+    ans += text1[i - 1];
+    i--;
+  }
+
+  while (j > 0) {
+    ans += text2[j - 1];
+    j--;
+  }
+
+  // reverse the resultant string and return
+  return reverseString(ans);
+};
+
+function reverseString(str) {
+  // Step 1. Use the split() method to return a new array
+  var splitString = str.split(""); // var splitString = "hello".split("");
+  // ["h", "e", "l", "l", "o"]
+
+  // Step 2. Use the reverse() method to reverse the new created array
+  var reverseArray = splitString.reverse(); // var reverseArray = ["h", "e", "l", "l", "o"].reverse();
+  // ["o", "l", "l", "e", "h"]
+
+  // Step 3. Use the join() method to join all elements of the array into a string
+  var joinArray = reverseArray.join(""); // var joinArray = ["o", "l", "l", "e", "h"].join("");
+  // "olleh"
+
+  //Step 4. Return the reversed string
+  return joinArray; // "olleh"
+}
+
+// Distinct Subsequences
+/*
+Given two strings s and t, return the number of distinct subsequences of s which equals t.
+The test cases are generated so that the answer fits on a 32-bit signed integer.
+
+Example 1:
+Input: s = "rabbbit", t = "rabbit"
+Output: 3
+Explanation:
+As shown below, there are 3 ways you can generate "rabbit" from s.
+rabbbit
+rabbbit
+rabbbit
+
+Example 2:
+Input: s = "babgbag", t = "bag"
+Output: 5
+Explanation:
+As shown below, there are 5 ways you can generate "bag" from s.
+babgbag
+babgbag
+babgbag
+babgbag
+babgbag
+*/
+var numDistinct = function (s, t) {
+  // Top Down Approach
+  let n = s.length;
+  let m = t.length;
+  let dp = Array.from({ length: n }, () => Array(m).fill(-1));
+  let ans = helper(s, t, n - 1, m - 1, dp);
+  return ans;
+};
+
+function helper(s, t, i, j, dp) {
+  // Base case
+  if (j < 0) return 1;
+  if (i < 0) return 0;
+  if (dp[i][j] != -1) return dp[i][j];
+
+  // if matching
+  if (s[i] == t[j]) {
+    return (dp[i][j] =
+      helper(s, t, i - 1, j - 1, dp) + helper(s, t, i - 1, j, dp));
+  } else {
+    return (dp[i][j] = helper(s, t, i - 1, j, dp));
+  }
+}
+
+var numDistinctTabulation = function (s, t) {
+  // bottom up Approach
+  let n = s.length;
+  let m = t.length;
+  let dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+
+  // Write base cases
+  // if str2 is finished
+  for (let i = 0; i <= n; i++) {
+    dp[i][0] = 1;
+  }
+
+  // if str1 is finished
+  // We do not start from j = 0 as its been already covered in above loop
+  for (let j = 1; j <= m; j++) {
+    dp[0][j] = 0;
+  }
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (s[i - 1] == t[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+      } else {
+        dp[i][j] = dp[i - 1][j];
+      }
+    }
+  }
+
+  return dp[n][m];
+};
+
 // Edit Distance
 /*
 Given two strings word1 and word2, return the minimum number of operations required to convert word1 to word2.
@@ -561,6 +732,143 @@ var minDistance = function (word1, word2) {
   }
 
   return dp[m][n]; // Minimum operations required to convert word1 to word2
+};
+
+// Wildcard Matching
+/*
+Given an input string (s) and a pattern (p), implement wildcard pattern matching with support for '?' and '*' where:
+
+'?' Matches any single character.
+'*' Matches any sequence of characters (including the empty sequence).
+The matching should cover the entire input string (not partial).
+
+Example 1:
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+
+Example 2:
+Input: s = "aa", p = "*"
+Output: true
+Explanation: '*' matches any sequence.
+
+Example 3:
+Input: s = "cb", p = "?a"
+Output: false
+Explanation: '?' matches 'c', but the second letter is 'a', which does not match 'b'.
+*/
+// Wildcard Matching
+/*
+Given an input string (s) and a pattern (p), implement wildcard pattern matching with support for '?' and '*' where:
+'?' Matches any single character.
+'*' Matches any sequence of characters (including the empty sequence).
+The matching should cover the entire input string (not partial).
+
+Example 1:
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+
+Example 2:
+Input: s = "aa", p = "*"
+Output: true
+Explanation: '*' matches any sequence.
+
+Example 3:
+Input: s = "cb", p = "?a"
+Output: false
+Explanation: '?' matches 'c', but the second letter is 'a', which does not match 'b'.
+*/
+var isMatch = function (s, p) {
+  // Top Down Approach
+  let n = s.length;
+  let m = p.length;
+  let dp = Array.from({ length: n }, () => Array(m).fill(-1));
+  let ans = helper(n - 1, m - 1, s, p, dp);
+  return ans;
+};
+
+function helper(i, j, s, p, dp) {
+  // base cases
+  // 1. if both are exhausted, success
+  if (i < 0 && j < 0) return true;
+  // 2. if i is exhausted, j still left, unsuccessful
+  if (i < 0 && j >= 0) return false;
+  // 3. if j is exhausted(empty) but i still has "*" in it
+  if (j < 0 && i >= 0) {
+    for (let k = 0; k <= i; k++) {
+      // if anyone is not '*' means unsuccessful comparison
+      if (s[k] != "*") {
+        return false;
+      }
+    }
+
+    // if all "*", success as given '*' Matches any sequence of characters (including the empty sequence).
+    return true;
+  }
+
+  if (dp[i][j] != -1) return dp[i][j];
+
+  // recurrence
+  if (s[i] == p[j] || s[i] == "?") {
+    // both match
+    return (dp[i][j] = helper(i - 1, j - 1, s, p, dp));
+  }
+
+  if (s[i] == "*") {
+    // either take one at a time or take sequence at a time
+    return (dp[i][j] = helper(i - 1, j, s, p, dp) | helper(i, j - 1, s, p, dp));
+  }
+
+  // if not matched
+  // simply
+  return (dp[i][j] = false);
+}
+
+// Bottom Up
+var isMatch = function (s, p) {
+  // Bottom Up
+  let n = s.length;
+  let m = p.length;
+  let dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(false));
+  dp[0][0] = true; // Empty string matches empty pattern
+
+  // for i<0 && j>=0, return false
+  // So for all i==0, all j should have false
+  for (let j = 1; j <= m; j++) {
+    dp[0][j] = false;
+  }
+
+  // for j<0 && i>=0
+  // for any i greater than 0
+  for (let i = 1; i <= n; i++) {
+    let flag = true;
+    for (let k = 1; k <= i; k++) {
+      // if anyone is not '*' means unsuccessful comparison
+      if (s[k - 1] != "*") {
+        flag = false;
+        break;
+      }
+    }
+
+    dp[i][0] = flag;
+  }
+
+  // changing parameters
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (s[i - 1] == p[j - 1] || s[i - 1] == "?") {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else if (s[i - 1] == "*") {
+        // Consider '*' as empty sequence or take one character at a time
+        dp[i][j] = dp[i - 1][j] | dp[i][j - 1];
+      } else {
+        dp[i][j] = false;
+      }
+    }
+  }
+
+  return dp[n][m];
 };
 
 // Rod Cutting
