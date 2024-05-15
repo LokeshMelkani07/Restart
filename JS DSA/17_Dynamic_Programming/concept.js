@@ -2115,3 +2115,169 @@ var largestDivisibleSubset = function (nums) {
   ans.reverse();
   return ans;
 };
+
+// Longest String Chain
+/*
+You are given an array of words where each word consists of lowercase English letters.
+
+wordA is a predecessor of wordB if and only if we can insert exactly one letter anywhere in wordA without changing the order of the other characters to make it equal to wordB.
+
+For example, "abc" is a predecessor of "abac", while "cba" is not a predecessor of "bcad".
+A word chain is a sequence of words [word1, word2, ..., wordk] with k >= 1, where word1 is a predecessor of word2, word2 is a predecessor of word3, and so on. A single word is trivially a word chain with k == 1.
+
+Return the length of the longest possible word chain with words chosen from the given list of words.
+
+Example 1:
+Input: words = ["a","b","ba","bca","bda","bdca"]
+Output: 4
+Explanation: One of the longest word chains is ["a","ba","bda","bdca"].
+
+Example 2:
+Input: words = ["xbc","pcxbcf","xb","cxbc","pcxbc"]
+Output: 5
+Explanation: All the words can be put in a word chain ["xb", "xbc", "cxbc", "pcxbc", "pcxbcf"].
+
+Example 3:
+Input: words = ["abcd","dbqca"]
+Output: 1
+Explanation: The trivial word chain ["abcd"] is one of the longest word chains.
+["abcd","dbqca"] is not a valid word chain because the ordering of the letters is changed.
+*/
+var longestStrChain = function (nums) {
+  // here we deal with " sequence of words" so we can choose words in any fashion from nums array
+  // words = ["xbc","pcxbcf","xb","cxbc","pcxbc"] has output 5 as All the words can be put in a word chain ["xb", "xbc", "cxbc", "pcxbc", "pcxbcf"]. so we can choose words in any fashion
+  // So instead of subsequence, this question becomes that of subset nums[i] means string ith so we need to sort the nums first based on length of all i strings
+  nums.sort((a, b) => a.length - b.length);
+  let n = nums.length;
+  // dp[i] means length of LIS till index i
+  let dp = Array(n).fill(1);
+
+  let maxi = 1;
+  for (let ind = 0; ind < n; ind++) {
+    for (let prev = 0; prev < ind; prev++) {
+      if (comparePossiblity(nums[ind], nums[prev]) && dp[ind] < 1 + dp[prev]) {
+        dp[ind] = 1 + dp[prev];
+      }
+    }
+
+    maxi = Math.max(maxi, dp[ind]);
+  }
+
+  return maxi;
+};
+
+function comparePossiblity(s1, s2) {
+  // s1 is the bigger string and s2 is smaller one because s1 is ind, s2 denotes prev
+  let n1 = s1.length;
+  let n2 = s2.length;
+  if (n1 != n2 + 1) {
+    return false;
+  }
+  let first = 0;
+  let second = 0;
+
+  while (first < n1) {
+    if (second < n2 && s1[first] == s2[second]) {
+      first++;
+      second++;
+    } else {
+      first++;
+    }
+  }
+
+  if (first == n1 && second == n2) {
+    return true;
+  }
+}
+
+// Longest Bitonic subsequence
+/*
+Given an array of positive integers. Find the maximum length of Bitonic subsequence.
+A subsequence of array is called Bitonic if it is first strictly increasing, then strictly decreasing.
+
+Example 1:
+Input:
+n = 5
+nums = [1, 2, 5, 3, 2]
+Output:
+5
+Explanation:
+The sequence {1, 2, 5} is
+increasing and the sequence {3, 2} is
+decreasing so merging both we will get
+length 5.
+*/
+function LongestBitonicSequence(n, nums) {
+  // For strictly increasing sequence
+  // dp[i] means length of LIS till index i
+  let dp1 = Array(n).fill(1);
+  for (let ind = 0; ind < n; ind++) {
+    for (let prev = 0; prev < ind; prev++) {
+      if (nums[prev] < nums[ind] && dp1[ind] < 1 + dp1[prev]) {
+        dp1[ind] = 1 + dp1[prev];
+      }
+    }
+  }
+
+  // for stricly decreasing or reverse of nums
+  let dp2 = Array(n).fill(1);
+  for (let ind = n - 1; ind >= 0; ind--) {
+    for (let prev = n - 1; prev > ind; prev--) {
+      if (nums[prev] < nums[ind] && dp2[ind] < 1 + dp2[prev]) {
+        dp2[ind] = 1 + dp2[prev];
+      }
+    }
+  }
+
+  let maxi = 0;
+  for (let i = 0; i < n; i++) {
+    maxi = Math.max(maxi, dp1[i] + dp2[i] - 1);
+  }
+
+  return maxi;
+}
+
+// Number of Longest Increasing Subsequence
+/*
+Given an integer array nums, return the number of longest increasing subsequences.
+
+Notice that the sequence has to be strictly increasing.
+
+
+Example 1:
+Input: nums = [1,3,5,4,7]
+Output: 2
+Explanation: The two longest increasing subsequences are [1, 3, 4, 7] and [1, 3, 5, 7].
+*/
+var findNumberOfLIS = function (nums) {
+  let n = nums.length;
+  // dp[i] means length of LIS till index i
+  let dp = Array(n).fill(1);
+  // count[i] means number of LIS till that index i
+  let count = Array(n).fill(1);
+
+  let maxi = 1;
+  for (let ind = 0; ind < n; ind++) {
+    for (let prev = 0; prev < ind; prev++) {
+      if (nums[prev] < nums[ind] && dp[prev] + 1 > dp[ind]) {
+        // means an LIS can be formed with a element
+        dp[ind] = 1 + dp[prev];
+        count[ind] = count[prev];
+      } else if (nums[prev] < nums[ind] && dp[prev] + 1 == dp[ind]) {
+        // means an LIS of same length which is already calculated can be formed from another element means count++
+        count[ind] += count[prev];
+      }
+    }
+
+    // store maximum length LIS possible in nums
+    maxi = Math.max(maxi, dp[ind]);
+  }
+
+  let nos = 0;
+  // find all element with longest LIS, store the count of such LIS
+  for (let i = 0; i < n; i++) {
+    if (dp[i] == maxi) nos += count[i];
+  }
+
+  return nos;
+};
