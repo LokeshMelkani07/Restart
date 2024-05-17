@@ -2281,3 +2281,138 @@ var findNumberOfLIS = function (nums) {
 
   return nos;
 };
+
+// DP on Subsequences
+
+// Subset Sum Problem
+/*
+You are given an array/list ‘ARR’ of ‘N’ positive integers and an integer ‘K’. Your task is to check if there exists a subset in ‘ARR’ with a sum equal to ‘K’.
+
+Note: Return true if there exists a subset with sum equal to ‘K’. Otherwise, return false.
+
+For Example :
+If ‘ARR’ is {1,2,3,4} and ‘K’ = 4, then there exists 2 subsets with sum = 4. These are {1,3} and {4}. Hence, return true.
+Returns true if there exists a subsequence of `A[0…n]` with the given sum
+*/
+function subsetSumToK(arr, n, k) {
+  let dp = Array.from({ length: n }, () => Array(k + 1).fill(-1));
+
+  function helper(n, k, dp) {
+    if (k === 0) return true;
+    if (n === 0) return arr[0] == k;
+
+    if (dp[n][k] !== -1) return dp[n][k];
+
+    let notPick = helper(n - 1, k, dp);
+    let pick = false;
+    if (arr[ind] >= k) {
+      // then only we can pick
+      pick = helper(n - 1, k - arr[n], dp);
+    }
+
+    return (dp[n][k] = pick | notPick);
+  }
+
+  return helper(n, k);
+}
+
+// bottom up
+function tabulationSubsetSumToK(arr, sum) {
+  let dp = Array.from({ length: n + 1 }, () => Array(k + 1).fill(0));
+
+  for (let i = 0; i < arr.length; i++) {
+    dp[i][sum] = true;
+  }
+
+  dp[0][arr[0]] = true;
+
+  for (let ind = 1; i <= n - 1; i++) {
+    for (let k = 1; k <= sum; k++) {
+      let notPick = dp[n - 1][k];
+      let pick = false;
+      if (arr[ind] >= k) {
+        // then only we can pick
+        pick = dp[n - 1][k - arr[ind]];
+      }
+
+      dp[n][k] = pick | notPick;
+    }
+  }
+  return dp[n - 1][sum];
+}
+
+// Space Optimisation
+function spaceOptimisationSubsetSumToK(arr, sum) {
+  let prev = Array(sum + 1).fill(0);
+  let curr = Array(sum + 1).fill(0);
+
+  // make sure to cover this, as in the base case it is covered
+  prev[0] = true;
+  curr[0] = true;
+
+  prev[arr[0]] = true;
+
+  for (let ind = 1; i <= n - 1; i++) {
+    for (let k = 1; k <= sum; k++) {
+      let notPick = prev[k];
+      let pick = false;
+      if (arr[ind] >= k) {
+        // then only we can pick
+        pick = prev[k - arr[ind]];
+      }
+
+      curr[k] = pick | notPick;
+    }
+
+    prev = curr;
+  }
+  return prev[sum];
+}
+
+// Partition Equal Subset Sum
+/*
+Given an integer array nums, return true if you can partition the array into two subsets such that the sum of the elements in both subsets is equal or false otherwise.
+
+Example 1:
+Input: nums = [1,5,11,5]
+Output: true
+Explanation: The array can be partitioned as [1, 5, 5] and [11].
+*/
+var canPartition = function (nums) {
+  // find total sum
+  let total = 0;
+  for (let i = 0; i < nums.length; i++) {
+    total += nums[i];
+  }
+
+  // if total sum is odd, return false
+  if (total % 2) return false;
+
+  let targetSum = total / 2;
+  // otherwise if we can find any subset with sum = total/2 in nums, then we can do partition
+
+  //Initialising DP matrix
+  var dp = new Array(nums.length + 1)
+    .fill(-1)
+    .map(() => new Array(targetSum + 1).fill(-1));
+
+  //Calling helper function
+  return helper(targetSum, nums, dp, nums.length);
+};
+
+//Helper function for finding a particular subset sum
+//(in this case sum = sum of array/2)
+var helper = function (sum, nums, dp, n) {
+  //we reached end of array but sum didn't get zero, so false
+  if (n == 0 && sum != 0) return false;
+
+  //if sum became zero, then true
+  if (sum == 0) return true;
+
+  //Memoization check
+  if (dp[n][sum] != -1) return dp[n][sum];
+
+  //Either select the number and decrease sum, or don't select the number and continue, if any recursive call gives true it's true.
+  return (dp[n][sum] =
+    helper(sum - nums[n - 1], nums, dp, n - 1) || helper(sum, nums, dp, n - 1));
+};
