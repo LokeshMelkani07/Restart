@@ -2317,56 +2317,69 @@ function subsetSumToK(arr, n, k) {
 }
 
 // bottom up
-function tabulationSubsetSumToK(arr, sum) {
-  let dp = Array.from({ length: n + 1 }, () => Array(k + 1).fill(0));
 
-  for (let i = 0; i < arr.length; i++) {
-    dp[i][sum] = true;
+// Function to check if a subset of an array can sum up to a target value
+function subsetSumToKTabulation(n, k, arr) {
+  // Create a 2D array 'dp' to memoize subproblem results
+  const dp = new Array(n);
+  for (let i = 0; i < n; i++) {
+    dp[i] = new Array(k + 1).fill(false);
   }
 
-  dp[0][arr[0]] = true;
+  // Base case: If the target is 0, an empty subset is always a valid solution
+  for (let i = 0; i < n; i++) {
+    dp[i][0] = true;
+  }
 
-  for (let ind = 1; i <= n - 1; i++) {
-    for (let k = 1; k <= sum; k++) {
-      let notPick = dp[n - 1][k];
-      let pick = false;
-      if (arr[ind] >= k) {
-        // then only we can pick
-        pick = dp[n - 1][k - arr[ind]];
-      }
-
-      dp[n][k] = pick | notPick;
+  // Fill the dp array using dynamic programming
+  for (let i = 1; i < n; i++) {
+    for (let j = 1; j <= k; j++) {
+      // Check if the current element can be included in the subset
+      const notTaken = dp[i - 1][j];
+      const taken = arr[i] <= j ? dp[i - 1][j - arr[i]] : false;
+      dp[i][j] = notTaken || taken;
     }
   }
-  return dp[n - 1][sum];
+
+  // The final result is stored in dp[n-1][k]
+  return dp[n - 1][k];
 }
 
 // Space Optimisation
-function spaceOptimisationSubsetSumToK(arr, sum) {
-  let prev = Array(sum + 1).fill(0);
-  let curr = Array(sum + 1).fill(0);
 
-  // make sure to cover this, as in the base case it is covered
+function subsetSumToK(n, k, arr) {
+  // Initialize a boolean array 'prev' to store the previous row of the DP table
+  const prev = new Array(k + 1).fill(false);
+
+  // Base case: If the target is 0, an empty subset is always a valid solution
   prev[0] = true;
-  curr[0] = true;
 
-  prev[arr[0]] = true;
+  // Initialize the first element of 'prev' based on the value of the first element in 'arr'
+  if (arr[0] <= k) {
+    prev[arr[0]] = true;
+  }
 
-  for (let ind = 1; i <= n - 1; i++) {
-    for (let k = 1; k <= sum; k++) {
-      let notPick = prev[k];
-      let pick = false;
-      if (arr[ind] >= k) {
-        // then only we can pick
-        pick = prev[k - arr[ind]];
-      }
+  // Loop through the elements of 'arr' and calculate the DP table row by row
+  for (let ind = 1; ind < n; ind++) {
+    // Initialize a new boolean array 'cur' for the current row
+    const cur = new Array(k + 1).fill(false);
 
-      curr[k] = pick | notPick;
+    // Base case: An empty subset is always a valid solution
+    cur[0] = true;
+
+    for (let target = 1; target <= k; target++) {
+      // Check if the current element can be included in the subset
+      const notTaken = prev[target];
+      const taken = arr[ind] <= target ? prev[target - arr[ind]] : false;
+      cur[target] = notTaken || taken;
     }
 
+    // Set 'cur' as the new 'prev' for the next iteration
     prev = curr;
   }
-  return prev[sum];
+
+  // The final result is stored in prev[k]
+  return prev[k];
 }
 
 // Partition Equal Subset Sum
@@ -2416,3 +2429,212 @@ var helper = function (sum, nums, dp, n) {
   return (dp[n][sum] =
     helper(sum - nums[n - 1], nums, dp, n - 1) || helper(sum, nums, dp, n - 1));
 };
+
+// Partition Array Into Two Arrays to Minimize Sum Difference
+/*
+You are given an integer array nums of 2 * n integers. You need to partition nums into two arrays of length n to minimize the absolute difference of the sums of the arrays. To partition nums, put each element of nums into one of the two arrays.
+
+Return the minimum possible absolute difference.
+
+Example 1:
+Input: nums = [3,9,7,3]
+Output: 2
+Explanation: One optimal partition is: [3,9] and [7,3].
+The absolute difference between the sums of the arrays is abs((3 + 9) - (7 + 3)) = 2.
+*/
+var minimumDifference = function (nums) {
+  let total = 0;
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    total += nums[i];
+  }
+
+  let dp = Array.from({ length: n }, () => Array(total + 1).fill(0));
+  let k = total;
+  for (let i = 0; i < n; i++) {
+    dp[i][0] = true;
+  }
+
+  if (nums[0] <= k) dp[0][nums[0]] = true;
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let target = 1; target <= k; target++) {
+      let notPick = dp[ind - 1][target];
+      let pick = false;
+      if (nums[ind] <= target) {
+        pick = dp[ind - 1][target - nums[ind]];
+      }
+
+      dp[ind][target] = pick | notPick;
+    }
+  }
+
+  // we have dp table filled
+  let mini = 1e9;
+  for (let i = 0; i <= total / 2; i++) {
+    if (dp[n - 1][i] == true) {
+      let s1 = i;
+      let s2 = total - s1;
+      mini = Math.min(mini, Math.abs(s1 - s2));
+    }
+  }
+
+  return mini;
+};
+
+// Perfect Sum Problem
+/*
+Given an array arr of non-negative integers and an integer sum, the task is to count all subsets of the given array with a sum equal to a given sum.
+
+Note: Answer can be very large, so, output answer modulo 109+7.
+
+Example 1:
+Input:
+N = 6
+arr = [5, 2, 3, 10, 6, 8]
+sum = 10
+Output:
+3
+Explanation:
+{5, 2, 3}, {2, 8}, {10} are possible subsets.
+*/
+class Solution {
+  perfectSum(arr, n, sum) {
+    let dp = Array.from({ length: n }, () => Array(sum + 1).fill(-1));
+    return this.helper(n - 1, arr, n, sum, dp);
+  }
+
+  helper(ind, arr, n, sum, dp) {
+    // Top Down Approach
+    if (sum == 0) {
+      return 1;
+    }
+
+    if (ind == 0) {
+      return arr[0] == sum;
+    }
+
+    if (dp[ind][sum] != -1) {
+      return dp[ind][sum];
+    }
+
+    // pick not pick
+    let notPick = this.helper(ind - 1, arr, n, sum, dp);
+    let pick = 0;
+    if (arr[ind] <= sum) {
+      pick = this.helper(ind - 1, arr, n, sum - arr[ind], dp);
+    }
+
+    return (dp[ind][sum] = pick + notPick);
+  }
+}
+
+// Bottom Up
+function perfectSum(arr, n, s) {
+  // Bottom up
+  let dp = Array.from({ length: n }, () => Array(s + 1).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    dp[i][0] = 1;
+  }
+
+  if (arr[0] <= s) {
+    dp[0][arr[0]] = 1;
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let sum = 1; sum <= s; sum++) {
+      // pick not pick
+      let notPick = dp[ind - 1][sum];
+      let pick = 0;
+      if (arr[ind] <= sum) {
+        pick = dp[ind - 1][sum - arr[ind]];
+      }
+
+      dp[ind][sum] = pick + notPick;
+    }
+  }
+
+  return dp[n - 1][s];
+}
+
+// Space Optimisation
+function perfectSumSpaceOptimised(arr, n, s) {
+  // Space Optimisation
+  let prev = Array(s + 1).fill(0),
+    curr = Array(s + 1);
+  prev[0] = curr[0] = 1;
+  if (arr[0] <= s) {
+    prev[arr[0]] = 1;
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let sum = 1; sum <= s; sum++) {
+      // pick not pick
+      let notPick = prev[sum];
+      let pick = 0;
+      if (arr[ind] <= sum) {
+        pick = prev[sum - arr[ind]];
+      }
+
+      curr[sum] = pick + notPick;
+    }
+
+    prev = curr;
+  }
+
+  return prev[s];
+}
+
+// Partitions with Given Difference
+/*
+Given an array arr, partition it into two subsets(possibly empty) such that each element must belong to only one subset. Let the sum of the elements of these two subsets be S1 and S2.
+Given a difference d, count the number of partitions in which S1 is greater than or equal to S2 and the difference between S1 and S2 is equal to d. Since the answer may be large return it modulo 109 + 7.
+
+Example 1:
+Input:
+n = 4
+d = 3
+arr[] =  { 5, 2, 6, 4}
+Output: 1
+Explanation:
+There is only one possible partition of this array. Partition : {6, 4}, {5, 2}. The subset difference between subset sum is: (6 + 4) - (5 + 2) = 3.
+*/
+class Solution {
+  perfectSum(arr, n, sum) {
+    let dp = Array.from({ length: n }, () => Array(sum + 1).fill(-1));
+    return this.helper(n - 1, arr, n, sum, dp);
+  }
+
+  helper(ind, arr, n, sum, dp) {
+    // handling the {0,0,1} case
+    if (ind == 0) {
+      if (sum == 0 && arr[0] == 0) return 2;
+      if (sum == 0 || arr[ind] == sum) return 1;
+      return 0;
+    }
+
+    if (dp[ind][sum] != -1) {
+      return dp[ind][sum];
+    }
+
+    // pick not pick
+    let notPick = this.helper(ind - 1, arr, n, sum, dp);
+    let pick = 0;
+    if (arr[ind] <= sum) {
+      pick = this.helper(ind - 1, arr, n, sum - arr[ind], dp);
+    }
+
+    return (dp[ind][sum] = pick + notPick);
+  }
+
+  countPartitions(n, d, arr) {
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      total += arr[i];
+    }
+
+    if (total - d < 0 || (total - d) % 2 == 1) return 0;
+    return this.perfectSum(arr, n, (total - d) / 2);
+  }
+}
