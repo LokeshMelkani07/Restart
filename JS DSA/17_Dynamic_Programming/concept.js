@@ -1,94 +1,3 @@
-// Coin Change
-// You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1. You may assume that you have an infinite number of each kind of coin.
-// Example 1:
-// Input: coins = [1,2,5], amount = 11
-// Output: 3
-// Explanation: 11 = 5 + 5 + 1
-var coinChange = function (coins, amount) {
-  let dp = Array(amount + 1).fill(Infinity); // Initialize with Infinity instead of -1
-  dp[0] = 0;
-
-  let ans = helper(coins, amount, dp);
-  return ans === Infinity ? -1 : ans; // Return -1 if no combination is possible
-};
-
-function helper(coins, amount, dp) {
-  // Base case: amount becomes zero
-  if (amount === 0) return 0;
-
-  if (dp[amount] !== Infinity) return dp[amount]; // Check if already computed
-
-  let ans = Infinity;
-
-  for (let i = 0; i < coins.length; i++) {
-    if (amount - coins[i] >= 0) {
-      let subAns = helper(coins, amount - coins[i], dp);
-      if (subAns !== -1 && subAns + 1 < ans) {
-        ans = subAns + 1;
-      }
-    }
-  }
-
-  dp[amount] = ans !== Infinity ? ans : -1; // Update dp table
-  return dp[amount];
-}
-
-// 0 - 1 Knapsack Problem
-// You are given weights and values of N items, put these items in a knapsack of capacity W to get the maximum total value in the knapsack. Note that we have only one quantity of each item. In other words, given two integer arrays val[0..N-1] and wt[0..N-1] which represent values and weights associated with N items respectively. Also given an integer W which represents knapsack capacity, find out the maximum value subset of val[] such that sum of the weights of this subset is smaller than or equal to W. You cannot break an item, either pick the complete item or dont pick it (0-1 property).
-// Example 1:
-// Input: N = 3, W = 4, values[] = {1,2,3}, weight[] = {4,5,1}
-// Output: 3
-// Explanation: Choose the last item that weighs 1 unit and holds a value of 3.
-//Function to return max value that can be put in knapsack of capacity W.
-function knapSack(W, wt, val, n) {
-  // To understand this Matrix method, follow this blog: https://medium.com/@fabianterh/how-to-solve-the-knapsack-problem-with-dynamic-programming-eb88c706d3cf or watch this video: https://www.youtube.com/watch?v=y6kpGJBI7t0&list=PLUcsbZa0qzu1oHa_o1-U-ZMR_DgzWvFql&index=2&ab_channel=AnujBhaiya
-
-  // Approach
-  // Fill we will make a 2D array of n+1 rows and W+1 cols
-  // Where each col represent the target weight we have to make
-  // Each row represent, access of wt[n] we have to make that W weight based on that col
-  // We fill whose matrix as 0 first
-  // Start traversing from index 1 as 0th is already filled
-  // We will either take a row item to make col weight or not take it
-  // When we no take it, we just copy paste [item-1][col] value directly
-  // if we take it, we reduce current wt from col_target and we get the remaining value from above row
-  // At the end, we fill a value in a particular block based on max(take, not take)
-
-  // Let us first make an 2D array and fill all with 0
-  let arr = Array.from(Array(n + 1), () => Array(W + 1).fill(0));
-  let ans = helper(W, wt, val, n, arr);
-
-  function helper(W, wt, val, n, arr) {
-    // Start traversing from index = 1
-    for (let item = 1; item <= n; item++) {
-      for (let cap = 1; cap <= W; cap++) {
-        // withoutInclude means copy above value only, this is the value without including current element
-        let withoutInclude = arr[item - 1][cap];
-        let withInclude = 0;
-
-        // if we have capacity of including current element, then only include it
-        // we have used wt[item-1] because index in wt array start from 0 and we are here iterating from index 1
-        if (cap >= wt[item - 1]) {
-          // if capacity permits, inlcude it
-          withInclude = val[item - 1];
-          // include its value, check if any capacity still remaining
-          let remaining = cap - wt[item - 1];
-          // if its remaining, include it from a row above current row
-          withInclude += arr[item - 1][remaining];
-        }
-
-        // At the end, compare (include/not-include) and store in the block
-        arr[item][cap] = Math.max(withoutInclude, withInclude);
-      }
-    }
-
-    // last row and last col contains answer for W weight target using n blocks
-    return arr[n][W];
-  }
-
-  return ans;
-}
-
 // DP on strings
 
 // Longest Common Subsequence
@@ -870,74 +779,6 @@ var isMatch = function (s, p) {
 
   return dp[n][m];
 };
-
-// Rod Cutting
-/*
-Given a rod of length N inches and an array of prices, price[]. price[i] denotes the value of a piece of length i. Determine the maximum value obtainable by cutting up the rod and selling the pieces.
-Note: Consider 1-based indexing.
-
-Example 1:
-
-Input:
-N = 8
-Price[] = {1, 5, 8, 9, 10, 17, 17, 20}
-Output:
-22
-Explanation:
-The maximum obtainable value is 22 by
-cutting in two pieces of lengths 2 and
-6, i.e., 5+17=22.
-*/
-//Function to find the maximum possible value of the function.
-function cutRod(price, n) {
-  // We are taking each length and subtacing that piece from total length and at the same time we are adding its price in the answer
-  // This way we try to get the maximum answer we can get
-  // Top Down Approach
-  let dp = Array(n + 1).fill(-1);
-  let ans = helper(n);
-  dp[0] = 0;
-
-  function helper(length) {
-    // base case will be when total length become 0 or negative means no more rod to cut
-    if (length <= 0) return 0;
-    if (dp[length] != -1) return dp[length];
-    let maxVal = -Infinity;
-
-    for (let i = 1; i <= length; i++) {
-      // store max Value of price
-      maxVal = Math.max(maxVal, price[i - 1] + helper(length - i));
-    }
-
-    dp[length] = maxVal;
-    return maxVal;
-  }
-
-  return ans;
-}
-
-function cutRod(price, n) {
-  // Tabulation Method
-  // We will make a dp array of length n+1 in which we store -1 initially and dp[0] = 0
-  // dp[0] says maximum profit in cutting rod of length 0
-  // dp[1] says maximum profit in cutting rod of length 1
-  // say we need to find dp[5] so for that we need to have information about
-  // dp[0],dp[1]...dp[4] say we pick
-  // price[1] + dp[5-1=4] = gives value for dp[5] or another option
-  // price[2] + dp[5-2=3] or
-  // price[3] + dp[2] or
-  // price[4] + dp[1] or
-  // we need maximum of all these options so dp[i] = max(dp[i],price[j] + dp[i-i-1]) becomes our formula
-  let dp = Array(n + 1).fill(-1);
-  dp[0] = 0;
-
-  for (let i = 1; i <= n; i++) {
-    for (let j = 0; j < i; j++) {
-      dp[i] = Math.max(dp[i], price[j] + dp[i - j - 1]);
-    }
-  }
-
-  return dp[n];
-}
 
 // Maximum sum Rectangle
 // Given a 2D matrix M of dimensions RxC. Find the maximum sum submatrix in it.
@@ -2637,4 +2478,557 @@ class Solution {
     if (total - d < 0 || (total - d) % 2 == 1) return 0;
     return this.perfectSum(arr, n, (total - d) / 2);
   }
+}
+
+// 0 - 1 Knapsack Problem
+/*
+You are given weights and values of N items, put these items in a knapsack of capacity W to get the maximum total value in the knapsack. Note that we have only one quantity of each item.
+In other words, given two integer arrays val[0..N-1] and wt[0..N-1] which represent values and weights associated with N items respectively. Also given an integer W which represents knapsack capacity, find out the maximum value subset of val[] such that sum of the weights of this subset is smaller than or equal to W. You cannot break an item, either pick the complete item or dont pick it (0-1 property).
+
+Example 1:
+Input:
+N = 3
+W = 4
+values[] = {1,2,3}
+weight[] = {4,5,1}
+Output: 3
+Explanation: Choose the last item that weighs 1 unit and holds a value of 3.
+*/
+
+// Top Down Approach
+class Solution {
+  //Function to return max value that can be put in knapsack of capacity W.
+  knapSack(W, wt, val, n) {
+    // Top down approach
+    let dp = Array.from({ length: n + 1 }, () => Array(W + 1).fill(-1));
+    return this.helper(n - 1, W, wt, val, n, dp);
+  }
+
+  helper(ind, W, wt, val, n, dp) {
+    // base case
+    if (ind == 0) {
+      if (wt[0] <= W) {
+        return val[0];
+      } else {
+        return 0;
+      }
+    }
+
+    if (dp[ind][W] != -1) {
+      return dp[ind][W];
+    }
+
+    // pick / not pick
+    let notPick = this.helper(ind - 1, W, wt, val, n, dp);
+    let pick = -Infinity;
+    if (wt[ind] <= W) {
+      pick = val[ind] + this.helper(ind - 1, W - wt[ind], wt, val, n, dp);
+    }
+
+    return (dp[ind][W] = Math.max(pick, notPick));
+  }
+}
+
+// Bottom Up Approach
+function knapSackTabulation(W, wt, val, n) {
+  // Bottom Up approach
+  let dp = Array.from({ length: n + 1 }, () => Array(W + 1).fill(0));
+
+  for (let i = wt[0]; i <= W; i++) {
+    dp[0][i] = val[0];
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let j = 0; j <= W; j++) {
+      // pick / not pick
+      let notPick = dp[ind - 1][j];
+      let pick = -Infinity;
+      if (wt[ind] <= j) {
+        pick = val[ind] + dp[ind - 1][j - wt[ind]];
+      }
+
+      dp[ind][j] = Math.max(pick, notPick);
+    }
+  }
+
+  return dp[n - 1][W];
+}
+
+// Space Optimisation
+function spaceOptimisedknapSack(W, wt, val, n) {
+  // Space Optimisation
+  let prev = Array(W + 1).fill(0);
+  let curr = Array(W + 1).fill(0);
+
+  for (let i = wt[0]; i <= W; i++) {
+    prev[i] = val[0];
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let j = 0; j <= W; j++) {
+      // pick / not pick
+      let notPick = 0 + prev[j];
+      let pick = -Infinity;
+      if (wt[ind] <= j) {
+        pick = val[ind] + prev[j - wt[ind]];
+      }
+
+      curr[j] = Math.max(pick, notPick);
+    }
+    prev = curr;
+  }
+
+  return prev[W];
+}
+
+// Coin Change
+/*
+You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
+
+Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+
+You may assume that you have an infinite number of each kind of coin.
+
+Example 1:
+Input: coins = [1,2,5], amount = 11
+Output: 3
+Explanation: 11 = 5 + 5 + 1
+*/
+var coinChange = function (coins, amount) {
+  let n = coins.length;
+  let dp = Array.from({ length: n + 1 }, () => Array(amount + 1).fill(-1));
+  let minCoins = helper(n - 1, coins, amount, dp);
+  return minCoins === 1e9 ? -1 : minCoins;
+};
+
+function helper(ind, coins, target, dp) {
+  // base case
+  if (ind == 0) {
+    if (target % coins[ind] == 0) {
+      return target / coins[ind];
+    } else {
+      return 1e9;
+    }
+  }
+
+  if (dp[ind][target] != -1) {
+    return dp[ind][target];
+  }
+
+  let res = -1;
+
+  // take or not take
+  let notTake = 0 + helper(ind - 1, coins, target, dp);
+  let take = +Infinity;
+  if (coins[ind] <= target) {
+    take = 1 + helper(ind, coins, target - coins[ind], dp);
+  }
+
+  res = Math.min(take, notTake);
+  return (dp[ind][target] = res);
+}
+
+// Bottom Up
+var coinChange = function (coins, amount) {
+  // Bottom Up approach
+  let n = coins.length;
+  let dp = Array.from({ length: n + 1 }, () => Array(amount + 1).fill(-1));
+
+  for (let T = 0; T <= amount; T++) {
+    if (T % coins[0] == 0) {
+      dp[0][T] = T / coins[0];
+    } else {
+      dp[0][T] = 1e9;
+    }
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let target = 0; target <= amount; target++) {
+      // take or not take
+      let notTake = 0 + dp[ind - 1][target];
+      let take = +Infinity;
+      if (coins[ind] <= target) {
+        take = 1 + dp[ind][target - coins[ind]];
+      }
+
+      res = Math.min(take, notTake);
+      dp[ind][target] = res;
+    }
+  }
+
+  if (dp[n - 1][amount] === 1e9) {
+    return -1;
+  } else {
+    return dp[n - 1][amount];
+  }
+};
+
+// Space Optimisation
+var coinChange = function (coins, amount) {
+  // Space Optimisation
+  let n = coins.length;
+  let prev = Array(amount + 1).fill(-1);
+  let curr = Array(amount + 1);
+  for (let T = 0; T <= amount; T++) {
+    if (T % coins[0] == 0) {
+      prev[T] = T / coins[0];
+    } else {
+      prev[T] = 1e9;
+    }
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let target = 0; target <= amount; target++) {
+      // take or not take
+      let notTake = 0 + prev[target];
+      let take = +Infinity;
+      if (coins[ind] <= target) {
+        take = 1 + curr[target - coins[ind]];
+      }
+
+      res = Math.min(take, notTake);
+      curr[target] = res;
+    }
+    prev = curr;
+  }
+
+  if (prev[amount] === 1e9) {
+    return -1;
+  } else {
+    return prev[amount];
+  }
+};
+
+// Target Sum
+/*
+You are given an integer array nums and an integer target.
+
+You want to build an expression out of nums by adding one of the symbols '+' and '-' before each integer in nums and then concatenate all the integers.
+
+For example, if nums = [2, 1], you can add a '+' before 2 and a '-' before 1 and concatenate them to build the expression "+2-1".
+Return the number of different expressions that you can build, which evaluates to target.
+
+Example 1:
+Input: nums = [1,1,1,1,1], target = 3
+Output: 5
+Explanation: There are 5 ways to assign symbols to make the sum of nums be target 3.
+-1 + 1 + 1 + 1 + 1 = 3
++1 - 1 + 1 + 1 + 1 = 3
++1 + 1 - 1 + 1 + 1 = 3
++1 + 1 + 1 - 1 + 1 = 3
++1 + 1 + 1 + 1 - 1 = 3
+*/
+var findTargetSumWays = function (nums, target) {
+  // below is the code for "Partitions with Given Difference" we just copy paste the code, thats it
+  return countPartitions(nums.length, target, nums);
+};
+
+function perfectSum(arr, n, sum) {
+  let dp = Array.from({ length: n }, () => Array(sum + 1).fill(-1));
+  return helper(n - 1, arr, n, sum, dp);
+}
+
+function helper(ind, arr, n, sum, dp) {
+  // handling the {0,0,1} case
+  if (ind == 0) {
+    if (sum == 0 && arr[0] == 0) return 2;
+    if (sum == 0 || arr[ind] == sum) return 1;
+    return 0;
+  }
+
+  if (dp[ind][sum] != -1) {
+    return dp[ind][sum];
+  }
+
+  // pick not pick
+  let notPick = helper(ind - 1, arr, n, sum, dp);
+  let pick = 0;
+  if (arr[ind] <= sum) {
+    pick = helper(ind - 1, arr, n, sum - arr[ind], dp);
+  }
+
+  return (dp[ind][sum] = pick + notPick);
+}
+
+function countPartitions(n, d, arr) {
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    total += arr[i];
+  }
+
+  if (total - d < 0 || (total - d) % 2 == 1) return 0;
+  return perfectSum(arr, n, (total - d) / 2);
+}
+
+// Coin Change II
+/*
+You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
+Return the number of combinations that make up that amount. If that amount of money cannot be made up by any combination of the coins, return 0.
+You may assume that you have an infinite number of each kind of coin.
+The answer is guaranteed to fit into a signed 32-bit integer.
+
+Example 1:
+Input: amount = 5, coins = [1,2,5]
+Output: 4
+Explanation: there are four ways to make up the amount:
+5=5
+5=2+2+1
+5=2+1+1+1
+5=1+1+1+1+1
+*/
+var change = function (amount, coins) {
+  let n = coins.length;
+  let memo = Array.from({ length: n }, () => Array(amount + 1).fill(-1));
+  return helper(n - 1, amount, coins, memo);
+};
+
+function helper(ind, target, coins, memo) {
+  // Base case: if the target is 0, there is one way to make the amount (by choosing no coins)
+  if (target == 0) return 1;
+
+  // Base case: if there are no coins left and the target is not 0, there is no way to make the amount
+  if (ind < 0) return 0;
+
+  // Check if the result is already computed
+  if (memo[ind][target] != -1) return memo[ind][target];
+
+  // Recurrence relation: exclude the current coin
+  let notPick = helper(ind - 1, target, coins, memo);
+
+  // Recurrence relation: include the current coin
+  let pick = 0;
+  if (coins[ind] <= target) {
+    pick = helper(ind, target - coins[ind], coins, memo);
+  }
+
+  // Store the result in memo table
+  memo[ind][target] = pick + notPick;
+
+  return memo[ind][target];
+}
+
+// Bottom Up
+var change = function (amount, coins) {
+  // Tabulation
+  let n = coins.length;
+  let dp = Array.from({ length: n }, () => Array(amount + 1).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    dp[i][0] = 1;
+  }
+
+  for (let T = 0; T <= amount; T++) {
+    dp[0][T] = T % coins[0] == 0;
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let target = 0; target <= amount; target++) {
+      // Recurrence relation: exclude the current coin
+      let notPick = dp[ind - 1][target];
+
+      // Recurrence relation: include the current coin
+      let pick = 0;
+      if (coins[ind] <= target) {
+        pick = dp[ind][target - coins[ind]];
+      }
+
+      // Store the result in memo table
+      dp[ind][target] = pick + notPick;
+    }
+  }
+
+  return dp[n - 1][amount];
+};
+
+// Knapsack with Duplicate Items
+/*
+Given a set of N items, each with a weight and a value, represented by the array w and val respectively. Also, a knapsack with weight limit W.
+The task is to fill the knapsack in such a way that we can get the maximum profit. Return the maximum profit.
+Note: Each item can be taken any number of times.
+
+Example 1:
+Input:
+N = 2
+W = 3
+val = {1, 1}
+wt = {2, 1}
+Output:
+3
+Explanation:
+1.Pick the 2nd element thrice.
+2.Total profit = 1 + 1 + 1 = 3. Also the total weight = 1 + 1 + 1  = 3 which is <= 3.
+*/
+class Solution {
+  // Top Down Approach
+  knapSack(N, W, val, wt) {
+    let dp = Array.from({ length: N }, () => Array(W + 1).fill(-1));
+    return this.helper(N - 1, W, val, wt, dp);
+  }
+
+  helper(ind, W, val, wt, dp) {
+    if (ind == 0) {
+      return parseInt(W / wt[0]) * val[0];
+    }
+
+    if (dp[ind][W] != -1) {
+      return dp[ind][W];
+    }
+
+    // pick or not pick
+    let notPick = 0 + this.helper(ind - 1, W, val, wt, dp);
+    let pick = -Infinity;
+    if (wt[ind] <= W) {
+      pick = val[ind] + this.helper(ind, W - wt[ind], val, wt, dp);
+    }
+
+    return (dp[ind][W] = Math.max(pick, notPick));
+  }
+}
+
+// Bottom Up
+function bottomUpknapSack(N, W, val, wt) {
+  let dp = Array.from({ length: N }, () => Array(W + 1).fill(0));
+
+  // base case
+  for (let w = 0; w <= W; w++) {
+    dp[0][w] = parseInt(w / wt[0]) * val[0];
+  }
+
+  for (let ind = 1; ind < N; ind++) {
+    for (let target = 0; target <= W; target++) {
+      // pick or not pick
+      let notPick = 0 + dp[ind - 1][target];
+      let pick = -Infinity;
+      if (wt[ind] <= target) {
+        pick = val[ind] + dp[ind][target - wt[ind]];
+      }
+
+      dp[ind][target] = Math.max(pick, notPick);
+    }
+  }
+
+  return dp[N - 1][W];
+}
+
+// Space Optimisation
+function spaceOptimisedknapSack(N, W, val, wt) {
+  let prev = Array(W + 1).fill(0),
+    curr = Array(W + 1);
+  // base case
+  for (let w = 0; w <= W; w++) {
+    prev[w] = parseInt(w / wt[0]) * val[0];
+  }
+
+  for (let ind = 1; ind < N; ind++) {
+    for (let target = 0; target <= W; target++) {
+      // pick or not pick
+      let notPick = 0 + prev[target];
+      let pick = -Infinity;
+      if (wt[ind] <= target) {
+        pick = val[ind] + curr[target - wt[ind]];
+      }
+
+      curr[target] = Math.max(pick, notPick);
+    }
+
+    prev = curr;
+  }
+
+  return prev[W];
+}
+
+// Rod Cutting
+/*
+Given a rod of length N inches and an array of prices, price[]. price[i] denotes the value of a piece of length i. Determine the maximum value obtainable by cutting up the rod and selling the pieces.
+Note: Consider 1-based indexing.
+
+Example 1:
+Input:
+N = 8
+Price[] = {1, 5, 8, 9, 10, 17, 17, 20}
+Output:
+22
+Explanation:
+The maximum obtainable value is 22 by
+cutting in two pieces of lengths 2 and
+6, i.e., 5+17=22.
+*/
+// Top Down
+class Solution {
+  cutRod(price, n) {
+    let dp = Array.from({ length: n + 1 }, () => Array(n + 1).fill(-1));
+    return this.helper(n - 1, price, n, dp);
+  }
+
+  helper(ind, price, N, dp) {
+    if (ind == 0) {
+      return N * price[0];
+    }
+
+    if (dp[ind][N] != -1) {
+      return dp[ind][N];
+    }
+
+    // pick, not pick
+    let notPick = 0 + this.helper(ind - 1, price, N, dp);
+    let pick = -Infinity;
+    let rodLength = ind + 1;
+    if (rodLength <= N) {
+      pick = price[ind] + this.helper(ind, price, N - rodLength, dp);
+    }
+
+    return (dp[ind][N] = Math.max(pick, notPick));
+  }
+}
+
+// Bottom Up
+function tabulationcutRod(price, n) {
+  let dp = Array.from({ length: n + 1 }, () => Array(n + 1).fill(-1));
+
+  for (let i = 0; i <= n; i++) {
+    dp[0][i] = i * price[0];
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let N = 0; N <= n; N++) {
+      // pick, not pick
+      let notPick = 0 + dp[ind - 1][N];
+      let pick = -Infinity;
+      let rodLength = ind + 1;
+      if (rodLength <= N) {
+        pick = price[ind] + dp[ind][N - rodLength];
+      }
+
+      dp[ind][N] = Math.max(pick, notPick);
+    }
+  }
+
+  return dp[n - 1][n];
+}
+
+// Space Optimisation
+function spaceOptimisedcutRod(price, n) {
+  let prev = Array(n + 1).fill(0);
+  let curr = Array(n + 1);
+  for (let i = 0; i <= n; i++) {
+    prev[i] = i * price[0];
+  }
+
+  for (let ind = 1; ind < n; ind++) {
+    for (let N = 0; N <= n; N++) {
+      // pick, not pick
+      let notPick = 0 + prev[N];
+      let pick = -Infinity;
+      let rodLength = ind + 1;
+      if (rodLength <= N) {
+        pick = price[ind] + curr[N - rodLength];
+      }
+
+      curr[N] = Math.max(pick, notPick);
+    }
+
+    prev = curr;
+  }
+
+  return prev[n];
 }
