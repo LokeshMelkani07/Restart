@@ -420,3 +420,274 @@ var jump = function (nums) {
 
   return jumps;
 };
+
+// Fractional Knapsack
+/*
+Given weights and values of n items, we need to put these items in a knapsack of capacity w to get the maximum total value in the knapsack.
+Note: Unlike 0/1 knapsack, you are allowed to break the item here.
+
+Example 1:
+Input:
+n = 3
+w = 50
+value[] = {60,100,120}
+weight[] = {10,20,30}
+Output:
+240.000000
+Explanation:
+Take the item with value 60 and weight 10, value 100 and weight 20 and split the third item with value 120 and weight 30, to fit it into weight 20. so it becomes (120/30)*20=80, so the total value becomes 60+100+80.0=240.0
+Thus, total maximum value of item we can have is 240.00 from the given capacity of sack.
+*/
+/*
+class Item{
+    constructor(value, weight){
+        this.value = value;
+        this.weight = weight;
+    }
+}
+*/
+
+class Solution {
+  fractionalKnapsack(w, arr, n) {
+    // We will try to pick that element first whose value/weight is greater
+    // means if weight = 10 and value = 60, value/weight = 6 so it will be beneficial to put this element in the knapsack
+    // Here we can take portion of any element also like we can take 1/3rd of value = 120, weight = 30 if we need to make w weight
+    // Approach
+    // We will think greedily and sort the array based on decreasing values of value/weight such that value/weight is greatest for first elemene
+    // We start traversing the array and pick the element if our weight permits
+    // otherwise we take porion of it and as soon as we take that portion, we break out as our w weight is full
+    // we return the maxValue
+    // TC: O(nlogn) + O(n), SC: O(1)
+    arr.sort((a, b) => {
+      let r1 = a.value / a.weight;
+      let r2 = b.value / b.weight;
+      return r2 - r1;
+    });
+
+    let currWeight = 0,
+      currValue = 0;
+    for (let i = 0; i < n; i++) {
+      if (currWeight + arr[i].weight <= w) {
+        // we can add whole weight as we have the capacity
+        currWeight += arr[i].weight;
+        currValue += arr[i].value;
+      } else {
+        // we need to take portion of it
+        let remaining = w - currWeight;
+        // taking the portion of it, (value of 1 unit weight) * remaining weight
+        currValue += (arr[i].value / arr[i].weight) * remaining;
+        break;
+      }
+    }
+
+    return currValue;
+  }
+}
+
+// Number of Coins
+/*
+Given a value V and array coins[] of size M, the task is to make the change for V cents, given that you have an infinite supply of each of coins{coins1, coins2, ..., coinsm} valued coins. Find the minimum number of coins to make the change. If not possible to make change then return -1.
+
+Example 1:
+Input: V = 30, M = 3, coins[] = {25, 10, 5}
+Output: 2
+Explanation: Use one 25 cent coin
+and one 5 cent coin
+*/
+function minCoins(coins, V, M) {
+  // We are given 'V', we need to make V amount using all denominations given in the coins array
+  // We are can use a particular coin any number of times
+  // We will think greedily and take largest coin possible as many times as possible
+  // For that we will sort the array first and then we will start traversing from end of array
+  // if we can take that coin we will take it, otherwise leave it
+  // go till 0th index and return the resulting array
+  // One observation is all denominations > V are discarded automatically
+  let arr = [];
+  coins.sort((a, b) => a - b);
+  for (let i = M - 1; i >= 0; i--) {
+    while (V >= coins[i]) {
+      V = V - coins[i];
+      arr.push(coins[i]);
+    }
+  }
+
+  return arr;
+}
+
+// N meetings in one room
+/*
+There is one meeting room in a firm. There are N meetings in the form of (start[i], end[i]) where start[i] is start time of meeting i and end[i] is finish time of meeting i.
+What is the maximum number of meetings that can be accommodated in the meeting room when only one meeting can be held in the meeting room at a particular time?
+
+Note: Start time of one chosen meeting can't be equal to the end time of the other chosen meeting.
+
+Example 1:
+Input:
+N = 6
+start[] = {1,3,0,5,8,5}
+end[] =  {2,4,6,7,9,9}
+Output:
+4
+Explanation:
+Maximum four meetings can be held with
+given start and end timings.
+The meetings are - (1, 2),(3, 4), (5,7) and (8,9)
+*/
+function maxMeetings(start, end, n) {
+  // We have been given starting and finishing time of the meeting
+  // We need to do maximum number of meetings possible so for that we need to do those meetings first whose finishing time is lesser so that they finish faster and we can accomodate as many meetings as we can
+  // So we will make a data structure which we will sort based on increasing finishing time
+  // if any 2 meetings has same finishing time, we keep the one first who occur first
+  // Once we have sorted meetings
+  // we will store the ending time of current meeting and compare it with starting time of next meeting and based on it, we choose whether we can keep that meeting or not
+  let arr = [];
+  for (let i = 0; i < n; i++) {
+    arr.push([start[i], end[i]]);
+  }
+
+  arr.sort((a, b) => {
+    if (a[1] < b[1]) {
+      // if a is smaller than b, do nothing
+      return -1;
+    } else if (a[1] > b[1]) {
+      // if a is greater than b, sort it
+      return 1;
+    } else {
+      // if both same, do nothing
+      return 0;
+    }
+  });
+
+  let currMeetingEndTime = arr[0][1];
+  let count = 1;
+
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i][0] > currMeetingEndTime) {
+      count++;
+      currMeetingEndTime = arr[i][1];
+    }
+  }
+
+  return count;
+}
+
+// Job Sequencing Problem
+/*
+Given a set of N jobs where each jobi has a deadline and profit associated with it.
+
+Each job takes 1 unit of time to complete and only one job can be scheduled at a time. We earn the profit associated with job if and only if the job is completed by its deadline.
+
+Find the number of jobs done and the maximum profit.
+
+Note: Jobs will be given in the form (Jobid, Deadline, Profit) associated with that Job. Deadline of the job is the time before which job needs to be completed to earn the profit.
+
+Example 1:
+Input:
+N = 4
+Jobs = {(1,4,20),(2,1,10),(3,1,40),(4,1,30)}
+Output:
+2 60
+Explanation:
+Job1 and Job3 can be done with
+maximum profit of 60 (20+40).
+*/
+function JobScheduling(arr, n) {
+  // We are given with (id, deadline, profit) of each job
+  // We need to return maximum number of jobs count, maximum profit we can make
+  // We can think greedily and first approach that comes to our mind is, take the job will maximum profit first so for that we need to sort the array based on descending order of profit
+  // Now we see whats the highest deadline we have, max the deadline more the time we have to perform maximum jobs
+  // let say a job has deadline  =6, so we will prefer to do that job at 6th second and we will use 1,2,3,4,5th second to perform other jobs as it is given that each job takes 1 unit to finish
+  // This way we can accomodate maximum jobs
+  // We will store the maximum deadline we have in a variable
+  // we will declare an array of size maxDeadline initialised with -1 say res
+  // We will start tarversing array from first element and store res[i] = jobID to say that current ith unit of time is already allocated
+  // we check if res[deadline] is already filled or not, if not filled, fill res[deadline] = jobId[i] or else, we check previous res[deadline-1] block if its available and we keep on checking until we can store that job in our res array
+  // once our res array is completely filled, these are max job we can accomodate
+  arr.sort((a, b) => {
+    return b.profit - a.profit;
+  });
+
+  let maxDeadline = arr[0].dead;
+  for (let i = 1; i < n; i++) {
+    maxDeadline = Math.max(maxDeadline, arr[i].dead);
+  }
+
+  // deadlines start from 1 so we make n+1 size
+  let res = Array(maxDeadline + 1).fill(-1);
+
+  res[arr[0].dead] = arr[0].id;
+  let maxProfit = arr[0].profit;
+  let count = 1;
+
+  for (let i = 1; i < n; i++) {
+    // we keep j>0 because we do not need to fill 0th index of res as deadline start from 1
+    for (let j = arr[i].dead; j > 0; j--) {
+      if (res[j] == -1) {
+        res[j] = arr[i].id;
+        maxProfit += arr[i].profit;
+        count++;
+        break;
+      }
+    }
+  }
+
+  return [count, maxProfit];
+}
+
+// Merge Intervals
+/*
+Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+Example 1:
+Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+
+Example 2:
+Input: intervals = [[1,4],[4,5]]
+Output: [[1,5]]
+Explanation: Intervals [1,4] and [4,5] are considered overlapping.
+*/
+var merge = function (intervals) {
+  // We are given the intervals, we need to combine all overlapping intervals into one interval and return all non-overlapping intervals
+  // we will find overlapping intervals like, if ending of current is greater than starting of next interval means they can be merged
+  // Approach
+  // We will sort the array first, we know sorting will be done on ascending order of first element of intervals and if first element for 2 are same then sorting will be done based on ascending order of second element
+  // Once we have sorted, we start traversing from first element of array
+  // we keep a start variable = intervals[i][0], end variable = intervals[i][1]
+  // we will make a ans array to store resultant non-overlapping intervals, we will see if our ans last element ka end contains ending of current intervals[i]
+  // if yes, means our last element of res already contains current intervals[i] so continue
+  // if not, then we check for j = i+1 till end index, if start of interval[j] comes before ending of intervals[i] means they are overlapping so update ending to intervals[j][1]
+  // At last if we do not found any overlapping, means one pair is found break out
+  intervals.sort((a, b) => {
+    if (a[0] === b[0]) {
+      return a[1] - b[1]; // If first elements are the same, sort by the second element
+    }
+    return a[0] - b[0]; // Otherwise, sort by the first element
+  });
+
+  let n = intervals.length;
+  let res = [];
+  for (let i = 0; i < n; i++) {
+    let start = intervals[i][0];
+    let end = intervals[i][1];
+
+    if (res.length != 0 && res[res.length - 1][1] >= end) {
+      continue;
+    }
+
+    for (let j = i + 1; j < n; j++) {
+      if (intervals[j][0] <= end) {
+        // merge them so our end pointer updates
+        end = Math.max(end, intervals[j][1]);
+      } else {
+        // no need of merging, its already overlapping
+        break;
+      }
+    }
+    // this is start,end of a non-overlapping interval so store it
+    res.push([start, end]);
+  }
+
+  return res;
+};
