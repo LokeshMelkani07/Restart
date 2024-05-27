@@ -922,3 +922,41 @@ Example 1:
 Input: intervals = [[1,3],[6,9]], newInterval = [2,5]
 Output: [[1,5],[6,9]]
 */
+var insert = function (intervals, newInterval) {
+  // It is given that the intervals is sorted in ascending order
+  // array of non-overlapping intervals intervals
+  // means intervals is non-overlapping initially so this breaks out our problem into 3 parts
+  // where we have non-overlapping part
+  // overlapping part with newInterval on which we will work upon
+  // again a non-overlapping part which remains as it is
+  // We pick the overlapping part starting ka first element and ending ka last element and merge them all into one interval and insert it
+  // if there do not overlap, we insert them keeping the order sorted as it is
+  let res = [];
+  let i = 0;
+  let n = intervals.length;
+
+  // there is non-overlapping part on left, then add it as it is
+  while (i < n && intervals[i][1] < newInterval[0]) {
+    // if ending of current is happening before starting of newInterval means its non over-lapping
+    res.push(intervals[i]);
+    i++;
+  }
+
+  // overlapping part if any
+  while (i < n && intervals[i][0] <= newInterval[1]) {
+    // if starting of new interval is smaller than ending of current interval means they overlap so
+    newInterval[0] = Math.min(intervals[i][0], newInterval[0]);
+    newInterval[1] = Math.max(intervals[i][1], newInterval[1]);
+    i++;
+  }
+
+  res.push(newInterval);
+
+  // there is non-overlapping part on right, then add it as it is
+  while (i < n) {
+    res.push(intervals[i]);
+    i++;
+  }
+
+  return res;
+};
