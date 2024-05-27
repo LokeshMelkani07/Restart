@@ -691,3 +691,234 @@ var merge = function (intervals) {
 
   return res;
 };
+
+// Valid Parenthesis String
+/*
+Given a string s containing only three types of characters: '(', ')' and '*', return true if s is valid.
+
+The following rules define a valid string:
+
+Any left parenthesis '(' must have a corresponding right parenthesis ')'.
+Any right parenthesis ')' must have a corresponding left parenthesis '('.
+Left parenthesis '(' must go before the corresponding right parenthesis ')'.
+'*' could be treated as a single right parenthesis ')' or a single left parenthesis '(' or an empty string "".
+
+Example 1:
+Input: s = "()"
+Output: true
+*/
+var checkValidString = function (s) {
+  // Brute force: Recursion, trying all possible ways
+  // Problem statement is very simple
+  // For every ( there should be a ) which appears before it
+  // We can modify * to be a ( or ) or ' ' and check which way it makes the string valid
+  // let say we forget about * and we have s = ((())), how do we solve it?
+  // We take a count = 0, we start from 0th index and for each '(' we do count++, for each ')' we do count-- and at the end. if our count = 0, means we have equal number of ( and )
+  // but if anytime our count < 0 means we have an extra ( or ) so return false at that very moment.
+  // Let us now analyze what will be our approach if * is also present there
+  // Let say we start from ind = 0, count = 0 initially
+  // We start recursively, if s[ind] == '(' we do count++
+  // if s[ind] == ')' we do count--
+  // if s[ind] == '*', we try out all possible ways, we first try '(' in place of * and do count++ then we try ')' and do count-- and then we try ' ' empty string and do count as it is (no change) and whatever gives us true, we return true and do not check for further combinations.
+  // if we reach the end of string this way and count==0 means return true else return false, if we reach anytime count<0 return false simply
+  // TC: 3^n as 3 branches forming in each case, SC: O(n) as we go till last index and make n number of calls
+  // After applying DP, TC: O(N^2), SC: O(N^2)
+  let dp = Array.from({ length: s.length }, () => Array(s.length).fill(-1));
+  return helper(0, 0, s, dp);
+};
+
+function helper(ind, count, s, dp) {
+  // base case
+  if (count < 0) {
+    return false;
+  }
+
+  if (ind == s.length) {
+    return count == 0;
+  }
+
+  if (dp[ind][count] != -1) {
+    return dp[ind][count];
+  }
+
+  if (s[ind] == "(") {
+    return (dp[ind][count] = helper(ind + 1, count + 1, s, dp));
+  }
+
+  if (s[ind] == ")") {
+    return (dp[ind][count] = helper(ind + 1, count - 1, s, dp));
+  }
+
+  // else its a * so consider all three cases
+  return (dp[ind][count] =
+    helper(ind + 1, count + 1, s, dp) ||
+    helper(ind + 1, count - 1, s, dp) ||
+    helper(ind + 1, count, s, dp));
+}
+
+// Optimised
+var checkValidString = function (s) {
+  // Optimised Approach
+  // Till now, we were maintaining a count variable and we do count++ for ( and count-- for )
+  // In the recursion, as soon as we encounter *, we draw 3 posssible scenerios, where we do count++ or count-- or count stays the same
+  // Now instead of maintaining count, we will maintain a range using 2 variables min and max which are 0 initially
+  // if we encounter ( we do min++, max++
+  // if we encounter ) we do min--, max--
+  // At any time, we do not consider min<0 values so if anytime min becomes < 0 we make min = 0
+  // if we encounter *, we know either count goes -1, 0 or +1 based on if we choose ( or ) or ' '
+  // We are ignoring -1 values so min = min--, max = max++ and make a check if min<0, make min = 0 which say the range of value of count which can go till now
+  // edge case, if our s starts from ')' then our min<0 and max<0 at that case straight away return false as we cannot have a valid string if first index contains ')' because to make a string valid, we need '(' before ')'
+  // At the end of array if our range contains 0 in min means yes, there is a valid string
+  // TC: O(n), SC:O(1)
+  let min = 0,
+    max = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] == "(") {
+      // if its ( then simply ++ both
+      min = min + 1;
+      max = max + 1;
+    } else if (s[i] == ")") {
+      // if its ) then simply -- both
+      min = min - 1;
+      max = max - 1;
+    } else {
+      // * can give us count+1, count-1 or count means -1,0,+1
+      // we are ignoring -1 values, so min = -1 if its ), max = +1 if its ( and check min<0 then make min=0
+      min = min - 1;
+      max = max + 1;
+    }
+
+    if (min < 0) {
+      min = 0;
+    }
+
+    if (max < 0) {
+      return false;
+    }
+  }
+
+  return min == 0;
+};
+
+// Candy
+/*
+There are n children standing in a line. Each child is assigned a rating value given in the integer array ratings.
+
+You are giving candies to these children subjected to the following requirements:
+
+Each child must have at least one candy.
+Children with a higher rating get more candies than their neighbors.
+Return the minimum number of candies you need to have to distribute the candies to the children.
+
+Example 1:
+Input: ratings = [1,0,2]
+Output: 5
+Explanation: You can allocate to the first, second and third child with 2, 1, 2 candies respectively.
+*/
+var candy = function (ratings) {
+  // We need to distribute candies in such a way that if any element has greater rating than its neighbour, give him candies more than its neighbours
+  // In process of distributing candies in such a way, distribute minimum candies possible following the conditions
+  // each element should have atleast 1 candy
+  // What we can do is, we can maintain a left array where left[0] = 1 already and we start from index 1 to n and if only check left neightbour of each element
+  // if neighbour < current, candy = candy[i-1]+1
+  // if neighbour > current, candy = 1 (because we need to distribute minimum candies in such a way keeping all conditions in mind)
+  // Now we maintain a right array where we fill right[n-1] = 1
+  // we start traversing from n-2th index to 0th index
+  // we check only the right neighbour and if right_neighbour > current, candy = 1
+  // else candy = candy[i+1] + 1
+  // Now we need to take maximum candies so that all condition satisfies so we take a sum = 0, run a loop and add max(left[i],right[i]) in sum and return it
+  // TC: O(3N), SC: O(2N)
+  let n = ratings.length;
+  let left = Array(n),
+    right = Array(n);
+  (left[0] = 1), (right[n - 1] = 1);
+  for (let i = 1; i < n; i++) {
+    if (ratings[i] > ratings[i - 1]) {
+      left[i] = left[i - 1] + 1;
+    } else {
+      left[i] = 1;
+    }
+  }
+
+  for (let i = n - 2; i >= 0; i--) {
+    if (ratings[i] > ratings[i + 1]) {
+      right[i] = right[i + 1] + 1;
+    } else {
+      right[i] = 1;
+    }
+  }
+
+  let sum = 0;
+  for (let i = 0; i < n; i++) {
+    sum += Math.max(left[i], right[i]);
+  }
+
+  return sum;
+};
+
+// Optimised, Slope Method
+var candy = function (ratings) {
+  // Optimised approach
+  // We can try the slope method where we draw a slope of the array
+  // Now slope can be of 3 types, increasing, decreasing, flat
+  // On increasing slope we see rating[i] > rating[i-1] so each time we give one more candy than previous one and we take a variable peak which tells the peak of that increasing slope we just encountered
+  // it might happen that after an increasing slope, we encounter decreasing slope or flat slope so
+  // for flat slope we do nothing means rating[i]==rating[i-1] so just give one one candy to each guy
+  // for decreasing slope, we again start distributing candies +1 everytime we reach end of decreasing slope, order does not matter to us because we just need summation, we maintain a variable down which stores the least element of that decreasing slope
+  // Now one element will be there which will be considered in both increasing and decreasing slope and its candy value should be such that the candy distribution should satisfy both its neighbours so
+  // if peak > down, we do not do anything, means we have already considered maximum value for that element but if down > peak, we need to consider the maximum value of that element so sum += down-peak
+  // We will add that extra value in it to make it satisfy the condition
+  // This way we reach the end of array
+  // TC: O(n), SC: O(1)
+  let sum = 1; // considering we start from index = 1 as 0th index will always get one candy
+  let i = 1;
+  let n = ratings.length;
+  while (i < n) {
+    if (ratings[i] == ratings[i - 1]) {
+      sum += 1;
+      i++;
+      continue;
+    }
+
+    // this initialises to 1 for every new increasing slope
+    let peak = 1;
+    while (i < n && ratings[i] > ratings[i - 1]) {
+      // increasing slope
+      // we need to distribute one candy more than previous so peak++ then sum += peak
+      peak++;
+      sum += peak;
+      i++;
+    }
+
+    // this initialises to 1 for every new decreasing slope
+    let down = 1;
+    while (i < n && ratings[i] < ratings[i - 1]) {
+      // decreasing slope
+      // again we start distributing from 1 candy and do ++ till we reach end of this decreasing slope, order does not matter because we need summation at the end
+      sum += down;
+      down++;
+      i++;
+    }
+
+    if (down > peak) {
+      sum += down - peak;
+    }
+  }
+
+  return sum;
+};
+
+// Insert Interval
+/*
+You are given an array of non-overlapping intervals intervals where intervals[i] = [starti, endi] represent the start and the end of the ith interval and intervals is sorted in ascending order by starti. You are also given an interval newInterval = [start, end] that represents the start and end of another interval.
+
+Insert newInterval into intervals such that intervals is still sorted in ascending order by starti and intervals still does not have any overlapping intervals (merge overlapping intervals if necessary).
+
+Return intervals after the insertion.
+
+Note that you don't need to modify intervals in-place. You can make a new array and return it.
+
+Example 1:
+Input: intervals = [[1,3],[6,9]], newInterval = [2,5]
+Output: [[1,5],[6,9]]
+*/
