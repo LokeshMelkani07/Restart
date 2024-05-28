@@ -269,3 +269,283 @@ var search = function (arr, target) {
   }
   return -1;
 };
+
+// Find Nth root of M
+/*
+You are given 2 numbers (n , m); the task is to find n√m (nth root of m).
+
+Example 1:
+Input: n = 2, m = 9
+Output: 3
+Explanation: 32 = 9
+*/
+class Solution {
+  NthRoot(n, m) {
+    // Brute force solution can be
+    // n = 3, m = 27 means find cube root of 27 which will be = 3 as 3*3*3 = 37
+    // n = 4, m = 64 means find 4th root of 64 which will be = 4 as 4*4*4*4 = 64
+    // We can run a for loop from 1 to m as max we can go is number itself
+    // we run a function which multiples i (n times) and check if its == m, return i
+    // if anytime value > m, break out and return -1
+    for (let i = 1; i <= m; i++) {
+      if (this.func(i, n) == m) {
+        return i;
+      } else if (this.func(i, n) > m) {
+        break;
+      }
+    }
+
+    return -1;
+  }
+
+  func(ind, n) {
+    let product = 1;
+    for (let i = 1; i <= n; i++) {
+      product = product * ind;
+    }
+
+    return product;
+  }
+}
+
+// Optimised
+class Solution {
+  NthRoot(n, m) {
+    // In the previous approach we were starting a loop from index = 1 till m
+    // We were checking pow(i,n) everytime and if its == m we return i as answer
+    // if its > m, we say its not our answer so move to next index
+    // 1,2,3,4,5,6.............m are sorted sequence
+    // we can think of something like binary search here where low = 1, high = m at max
+    // we run loop till low<=high and check pow(mid,n) == m return mid;
+    // if pow(mid,n) > m, high = mid-1;
+    // at the end, if we come out of loop means no root possible so return -1
+    let low = 1,
+      high = m;
+    while (low <= high) {
+      let mid = (low + high) / 2;
+      let ans = this.func(mid, n, m);
+      if (ans == 1) {
+        return mid;
+      } else if (ans == 0) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return -1;
+  }
+
+  func(ind, n, m) {
+    let ans = 1;
+    for (let i = 1; i <= n; i++) {
+      ans = ans * ind;
+      if (ans > m) {
+        return 2;
+      }
+    }
+
+    if (ans == m) {
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+// Pow(x, n)
+/*
+Implement pow(x, n), which calculates x raised to the power n (i.e., xn).
+
+Example 1:
+Input: x = 2.00000, n = 10
+Output: 1024.00000
+*/
+var myPow = function (x, n) {
+  // Optimised way
+  // Binary Exponentiation
+  // 2^10 = (2*2)^9 = 4^9 (even power -> num = num*num krke power/2 krdia)
+  // 4^9 = 4 * 4^8 (odd power -> ek power bahaar nikalke answer mai leli and power-1 krdia)
+  // 4^8 = (4*4)^4
+  // odd power = take x out  * x^pow-1
+  // even power = do (x*x)^pow/2
+  // till power != 0
+  let m = n;
+  n = Math.abs(n);
+  let ans = 1;
+  while (n > 0) {
+    if (n % 2 === 1) {
+      ans = ans * x;
+      n = n - 1;
+    } else {
+      x = x * x;
+      n = n / 2;
+    }
+  }
+
+  // if number is negative 2^-3 = 1/2^3
+  return m < 0 ? 1 / ans : ans;
+};
+
+// Median in a row-wise sorted Matrix
+/*
+Given a row wise sorted matrix of size R*C where R and C are always odd, find the median of the matrix.
+
+Example 1:
+Input:
+R = 3, C = 3
+M = [[1, 3, 5],
+     [2, 6, 9],
+     [3, 6, 9]]
+Output: 5
+Explanation: Sorting matrix elements gives
+us {1,2,3,3,5,6,6,9,9}. Hence, 5 is median.
+*/
+
+function median(matrix, R, C) {
+  // R and C are odd, odd*odd = always odd
+  // median is middle value of sorted sequence
+  // As out total number of elements are odd (given) so our median will always be arr[n*m/2]th element
+  // Brute force, make an empty array, store all elements on matrix in it, sort that matrix and return arr[n*m/2] element
+  // TC: O(n*m) + O(n*m log(n*m)) for sorting
+  // SC: O(n*m) for storing whole matrix
+  let arr = [];
+  for (let i = 0; i < R; i++) {
+    for (let j = 0; j < C; j++) {
+      arr.push(matrix[i][j]);
+    }
+  }
+
+  arr.sort((a, b) => a - b);
+  return arr[parseInt((R * C) / 2)];
+}
+
+// Optimised
+class Solution {
+  median(matrix, R, C) {
+    // Optimised Approach
+    // We can see that we have sorted elements given row-wise
+    // We observe there are equal number of element on left and right of median element
+    // Max answer can go between lowest element of matrix and highest element of matrix
+    // So our search space can be between first element and last element of matrix
+    // Median is arr[r*c/2]th element and as array indexing starts from 0
+    // So let say R = 3, C = 5 then total R*C becomes 15
+    // arr[15/2] = arr[7] is our median means 8th element (0-based indexing)
+    // 8th element in the sorted sequence is my median
+    // low = minimum element of 0th column, high = maximum element of C-1th column
+    // We need to have data of each element which tells how many element <= current element in the matrix
+    // if anytime we find it to be <= 7 we need more so low = mid+1
+    // else high = mid-1
+    // at the end of loop, return low as it stands upon the median
+    // How to find how many elements are smaller than equal to element mid?
+    // upper bound means elements greater than x, lower bound means elements lower than equal to x
+    // We have row-wise sorted in matrix so we can use binary search in every row and try to find upper bound of mid in each row
+    // say mid = 8, in first row upper_bound(8) = 3 index means 0,1,2 element are smaller than equal to 8, count += 3
+    // in 1st row, upper_bound(8) = 5 means 0,1,2,3,4 are smaller than equal to 8 so count += 4
+    // and so on for each row
+    let low = +Infinity,
+      high = -Infinity;
+
+    for (let i = 0; i < R; i++) {
+      low = Math.min(low, matrix[i][0]);
+      high = Math.max(high, matrix[i][C - 1]);
+    }
+
+    let required = (R * C) / 2;
+    while (low <= high) {
+      let mid = parseInt((low + high) / 2);
+      let smallerThanEquals = this.func(mid, matrix, R, C);
+      if (smallerThanEquals <= required) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return low;
+  }
+
+  func(x, matrix, n, m) {
+    let count = 0;
+    for (let i = 0; i < n; i++) {
+      // go for every row
+      count += this.upperBound(matrix[i], x, n);
+    }
+
+    return count;
+  }
+
+  upperBound(arr, x, n) {
+    let low = 0;
+    let high = n - 1;
+    let ans = n;
+    while (low <= high) {
+      let mid = parseInt((low + high) / 2);
+      if (arr[mid] > x) {
+        // can be a possible answer
+        ans = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return ans;
+  }
+}
+
+// Median of Two Sorted Arrays
+/*
+Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
+The overall run time complexity should be O(log (m+n)).
+
+Example 1:
+Input: nums1 = [1,3], nums2 = [2]
+Output: 2.00000
+Explanation: merged array = [1,2,3] and median is 2.
+*/
+var findMedianSortedArrays = function (nums1, nums2) {
+  // median is the middle element of an sorted sequence
+  // if size of the sequence is odd, median is middle element
+  // if size of the sequence is even, media is (middle + (middle+1))/2th element
+  // Brute force
+  // We will merge both arrays into one and then find size of merged array and return median based on whether size is odd or even
+  // As both arrays are sorted so we can use approach of "Merge 2 sorted arrays" to merge them
+  let ans = mergeTwoSortedArrays(nums1, nums2);
+  let n = ans.length;
+
+  // Calculate median
+  if (n % 2 === 1) {
+    // Odd length, median is the middle element
+    return ans[Math.floor(n / 2)];
+  } else {
+    // Even length, median is the average of the two middle elements
+    return (ans[Math.floor(n / 2) - 1] + ans[Math.floor(n / 2)]) / 2;
+  }
+};
+
+function mergeTwoSortedArrays(nums1, nums2) {
+  let i = 0,
+    j = 0,
+    k = 0;
+  let m = nums1.length,
+    n = nums2.length;
+  let nums3 = [];
+  while (i < m && j < n) {
+    if (nums1[i] <= nums2[j]) {
+      nums3[k++] = nums1[i++];
+    } else {
+      nums3[k++] = nums2[j++];
+    }
+  }
+
+  while (i < m) {
+    nums3[k++] = nums1[i++];
+  }
+
+  while (j < n) {
+    nums3[k++] = nums2[j++];
+  }
+
+  return nums3;
+}
