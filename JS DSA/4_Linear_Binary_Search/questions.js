@@ -703,3 +703,201 @@ Output: 5
 Explanation: We can get a sum to 17 (1+2+5+9) if the divisor is 1.
 If the divisor is 4 we can get a sum of 7 (1+1+2+3) and if the divisor is 5 the sum will be 5 (1+1+1+2).
 */
+var smallestDivisor = function (nums, threshold) {
+  // We have a nums array containing some elements
+  // We have a value threshold which tells minimum sum we should have
+  // We need to find smallest divisor which upon dividing with all elements of nums and then taking sum of its ceil value <= threshold, take minimum such value
+  // We can start taking smallestDivisor value from 1 and go on till we do not find our answer so we can think of something as BS as 1,2,3,4......sorted values
+  // Minimum value can be 1 which can divide all elements
+  // Max value can be max(array)
+  let low = 1,
+    high = -Infinity;
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    high = Math.max(high, nums[i]);
+  }
+
+  let ans = -1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let sum = required(nums, mid);
+    if (sum <= threshold) {
+      // if we have an answer, store it and go towards minimum
+      ans = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  // return ans also possible
+  return low;
+};
+
+function required(nums, limit) {
+  let sum = 0;
+  // as it is given in the question, return the ceil value of divisor
+  for (let i = 0; i < nums.length; i++) {
+    sum += Math.ceil(nums[i] / limit);
+  }
+
+  return sum;
+}
+
+// Capacity To Ship Packages Within D Days
+/*
+A conveyor belt has packages that must be shipped from one port to another within days days.
+
+The ith package on the conveyor belt has a weight of weights[i]. Each day, we load the ship with packages on the conveyor belt (in the order given by weights). We may not load more weight than the maximum weight capacity of the ship.
+
+Return the least weight capacity of the ship that will result in all the packages on the conveyor belt being shipped within days days.
+
+Example 1:
+Input: weights = [1,2,3,4,5,6,7,8,9,10], days = 5
+Output: 15
+Explanation: A ship capacity of 15 is the minimum to ship all the packages in 5 days like this:
+1st day: 1, 2, 3, 4, 5
+2nd day: 6, 7
+3rd day: 8
+4th day: 9
+5th day: 10
+
+Note that the cargo must be shipped in the order given, so using a ship of capacity 14 and splitting the packages into parts like (2, 3, 4, 5), (1, 6, 7), (8), (9), (10) is not allowed.
+*/
+var shipWithinDays = function (weights, days) {
+  // we are given the weights array where weights[i] tells us weight of ith element
+  // days = maximum total number of days we have to ship all weights in belt
+  // we need to find minimum capacity of ship such that we can ship all weights within 'days' days
+  // minimum capacity of ship will be max(array) weight so that we can pick atleast something within 'days' days
+  // maximum capacity of ship will be sum of all elements which means we can take everything on one day
+  // Now we need to think of decreasing our search space everytime
+  let low = -Infinity,
+    high = 0;
+  let n = weights.length;
+  for (let i = 0; i < n; i++) {
+    low = Math.max(low, weights[i]);
+    high += weights[i];
+  }
+
+  let ans = -1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let day = required(weights, mid, n);
+    if (day <= days) {
+      ans = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return low;
+};
+
+function required(arr, capacity, n) {
+  let load = 0;
+  let day = 0;
+  for (let i = 0; i < n; i++) {
+    if (load + arr[i] <= capacity) {
+      load += arr[i];
+    } else {
+      day++;
+      load = arr[i];
+    }
+  }
+
+  // in case we do not reach the else part, we will not be able to add weights we put in the belt on last day so we need to do day++
+  // or we can directly start day = 1 during initialisation as days always start from 1,2,3,4.........
+  day++;
+
+  return day;
+}
+
+// Kth Missing Positive Number
+/*
+Given an array arr of positive integers sorted in a strictly increasing order, and an integer k.
+
+Return the kth positive integer that is missing from this array.
+
+Example 1:
+Input: arr = [2,3,4,7,11], k = 5
+Output: 9
+Explanation: The missing positive integers are [1,5,6,8,9,10,12,13,...]. The 5th missing positive integer is 9.
+*/
+var findKthPositive = function (arr, k) {
+  // We are given with an array arr which contains some number
+  // We are given an variable 'k'
+  // we need to return kth missing positive number
+  // arr = [2,3,4,7,11], k = 5, missing numbers = 1,5,6,8,9,10 so 5th missing number = 9 so return 9
+  // Brute force, we consider k = 5 means 5 is missing number (let us assume)
+  // we check arr[i] if its <= k means from 1,2,3,4,5,6,7,8,9,10,11.
+  // 2 is not missing so our sequence becomes 1,3,4,5,6,7,8,9,10,11 so we do k++
+  // we see 3, so 1,4,5,6,7,8,9,10,11 is our sequence now, k++
+  // we do this till arr[i] <= k, once arr[i] > k the value we have stored is our answer
+  // Initiution: we consider all numbers are missing intially from 1 to n
+  // so k = 5 means 5 is our missing number
+  // but as soon as we see number between 1 to k is there in array means its not missing so earlier k = 5 was 5 but now sequence mai se 2 has gone so k = 6 has become our 5th missing number
+  // again we check array and increase k
+  // once hum array mai aisa number dekhte h which is not between 1 to k, means we have found our kth missing positive number
+  let n = arr.length;
+  let m = k;
+  for (let i = 0; i < n; i++) {
+    if (arr[i] <= m) {
+      m++;
+    } else {
+      break;
+    }
+  }
+
+  // m is our kth missing number
+  return m;
+};
+
+// Optimised (Binary Search)
+var findKthPositive = function (arr, k) {
+  // Array is sorted (given)
+  // We can apply binary search but On what basis should we apply binary search?
+  // If somehow we can get a range in which our answer will lie, we can get the answer
+  // How to get that range?
+  // We will apply BS again, low = arr[0], high = arr[n-1] as array is sorted
+  // We will take help of k
+  // arr = [2,3,4,7,11], k = 5, if our arr was simply arr = [1,2,3,4,5]
+  // we can see at arr[0] ( 1 should have been there, but 2 is present so 2-1 = 1 element is missing till 0th index)
+  // we can see at arr[1] ( 2 should have been there, but 3 is present so 3-2 = 1 element is missing till 1st index)
+  // we can see at arr[2] ( 3 should have been there, but 4 is present so 4-3 = 1 element is missing till 2nd index)
+  // we can see at arr[3] ( 4 should have been there, but 7 is present so 7-4 = 3 element is missing till 3rd index)
+  // we can see at arr[4] ( 5 should have been there, but 7 is present so 7-4 = 3 element is missing till 4th index) and so on..
+  // we can see at arr[5] ( 5 should have been there, but 11 is present so 11-5 = 6 element are missing till 5th index)
+  // we have k = 5 so we need 5th missing number so now we know our answer lies between 4th and 5th index of arr
+  // So we will apply binary search on search space of missing numbers and our parameter to move low and high will be value of k
+  // At the end of BS, high points to someIndex, low points to someIndex+1
+  // arr[high] will be at 7 for above example, arr[low] = 11 as these are the range within which our k = 5 exists
+  // arr[high] = 7 has missing = 3 means before it 3 elements are missing
+  // we need 5ht missing number so 5-3 = 2
+  // arr[high] = 7 + 2 = 9 is our 5th missing number
+  let n = arr.length;
+  let low = 0,
+    high = n - 1,
+    missing = 0;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    // mid has 0 based indexing so mid+1
+    missing = arr[mid] - (mid + 1);
+    if (missing < k) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  // we are at our range ke starting
+  // we need to find how many numbers are missing till that index for which we use
+  // expected value = high+1 for highth index (considering 0-based indexing)
+  // actual value = arr[high]
+  // missing = actual - expected = arr[high] - (high+1)
+  // leftOver = k - missing = k - arr[high] + high - 1
+  // final result = arr[high] + leftOver = arr[high] + k - arr[high] + high - 1 = (k + high + 1)
+  // low = high+1 only so we can also return k - low
+  // We return either (k + high + 1) or (k + low) because if high becomes -ve then writing directly can give wrong result
+  return k + low;
+};
