@@ -901,3 +901,253 @@ var findKthPositive = function (arr, k) {
   // We return either (k + high + 1) or (k + low) because if high becomes -ve then writing directly can give wrong result
   return k + low;
 };
+
+// Aggressive Cows
+/*
+You are given an array consisting of n integers which denote the position of a stall. You are also given an integer k which denotes the number of aggressive cows. You are given the task of assigning stalls to k cows such that the minimum distance between any two of them is the maximum possible.
+The first line of input contains two space-separated integers n and k.
+The second line contains n space-separated integers denoting the position of the stalls.
+
+Example 1:
+Input:
+n=5
+k=3
+stalls = [1 2 4 8 9]
+Output:
+3
+Explanation:
+The first cow can be placed at stalls[0],
+the second cow can be placed at stalls[2] and
+the third cow can be placed at stalls[3].
+The minimum distance between cows, in this case, is 3,
+which also is the largest among all possible ways.
+*/
+class Solution {
+  solve(n, k, stalls) {
+    // This is a new type of pattern of Binary search in which we have to find max of some min or min of some max
+    // We are given stalls array which says stalls[i] = position of ith stall
+    // We have k cows, we need to assign stall to k cows such that minimum distance between any 2 cows is maximum
+    // means we place cows in a one way, we find minimum distance between any 2 cows in that way and store it in mini array
+    // we place cows in another way and again store minimum distance between any 2 cows in mini array
+    // we place in another way and similarly do the same thing
+    // Now we return the maximum element of mini array which we are asked to do, 'minimum distance between any two of them is the maximum possible'
+    // First of all we sort the array so that we do not need to find distance between all cows like C1,C3 or C1,C4 instead we can only find distance between adjacent cows and get the minimum of them
+    // We start placing cow from 0th index only so that we can successfully accomodate k cows
+    // We will start taking maxDistance = 1 and put cows and check if we can put all k cows in minimum distance of 1 between them
+    // if yes, we need to maximize the distance so let us now check for maxDistance = 2, we try to check if we can pur k cows for minimum distance of k cows?
+    // if yes, maximize it more, go for maxDistance = 3 and check
+    // if no, we try to go lesser on our search space so decrease our search space instead of checking for 5,6,7,... if its not possible for 4 so leave 5,6,7,8...
+    // Start from 1, max we can go till is (maxElementofArray - minElementofArray) considering we have only 2 cows, one will be put at 0th index and other at last index and as its a sorted array so we take (max-min) as last element
+    // We can also apply Linear search where we apply loop from i = 1 to (maxElement - minElement) and check if for that i, we can place k cows and if(true) {continue;} else {return i-1;} means case previous to what we have failed to place
+    // or we can do Binary search also
+
+    // Sort the array first
+    stalls.sort((a, b) => a - b);
+    let low = 0;
+    let high = 0;
+    let maxi = -Infinity,
+      mini = +Infinity;
+    for (let i = 0; i < n; i++) {
+      maxi = Math.max(maxi, stalls[i]);
+      mini = Math.min(mini, stalls[i]);
+    }
+
+    high = maxi - mini;
+    let ans = -1;
+    while (low <= high) {
+      let mid = Math.floor(low + (high - low) / 2);
+      let dist = this.required(mid, k, stalls);
+      if (dist) {
+        ans = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return ans;
+  }
+
+  required(dist, k, stalls) {
+    // We place the first cow at 0th index so count start from 1
+    let count = 1;
+    let lastCowPlacedAt = stalls[0];
+    // start loop from index = 1 as 1st cow already placed at 0th index
+    for (let i = 1; i < stalls.length; i++) {
+      if (stalls[i] - lastCowPlacedAt >= dist) {
+        count++;
+        lastCowPlacedAt = stalls[i];
+      }
+    }
+
+    if (count >= k) {
+      return true;
+    }
+
+    return false;
+  }
+}
+
+// Allocate minimum number of pages
+/*
+You have N books, each with A[i] number of pages. M students need to be allocated contiguous books, with each student getting at least one book.
+Out of all the permutations, the goal is to find the permutation where the sum of maximum number of pages in a book allotted to a student should be minimum, out of all possible permutations.
+
+Note: Return -1 if a valid assignment is not possible, and allotment should be in contiguous order (see the explanation for better understanding).
+*/
+class Solution {
+  findPages(a, n, m) {
+    // a[] is an array which contains number of pages of ith book
+    // m = number of students to which we need to allocate books
+    // conditions are, allocation should be contiguous, we cannot allocate to 1 then 2 then again 1
+    // all students should get atleast one book
+    // if its not possible to allocate books to m students, return -1
+    // In what case will it be immpossible??
+    // When number of students > number of books i.e m > n, return -1 where n = size of array
+    // We need to allocate such that the maximum number of pages in a book allocated to a student is minimum
+    // We allocate books in one way to say m = 4, we allocate books to 4 students. maximum number of pages comes x1
+    // We allocate books in another way to m = 4, and max pages = x2
+    // Similarly again we try another way and max pages = x3
+    // return min(x1, x2, x3)
+    // We need to start taking a value for maxPagesAnyStudentCanHold and keep on checking if we can allocate books keeping all coniditons in mind using this value
+    // if yes, we store it and go for higher value of maxPagesAnyStudentCanHold so that we can maximize it
+    // if no, we go for lesser values of maxPagesAnyStudentCanHold
+    // What is minimum value of maxPagesAnyStudentCanHold we should take?
+    // It should be such that we can allocate one book to each student successfully = max(element of array)
+    // What should be the maximum value of maxPagesAnyStudentCanHold?
+    // Let say we are given numberOfStudent = 1, then we need to allocate all books to that 1 student so maximum value of maxPagesAnyStudentCanHold = summation of array
+    // We can run a loop from i = low to high where low and high are as discussed above and check possiblity for each value of i
+    if (m > n) {
+      return -1;
+    }
+    let low = -Infinity,
+      high = 0;
+    for (let i = 0; i < n; i++) {
+      low = Math.max(low, a[i]);
+      high += a[i];
+    }
+
+    let ans = 0;
+    while (low <= high) {
+      let mid = Math.floor(low + (high - low) / 2);
+      let pages = this.required(mid, a, m);
+      if (pages) {
+        // if this is true means allocationDone <= noOfStudents so we need to reduce number of pages allocated to increase more students
+        ans = mid;
+        high = mid - 1;
+      } else {
+        // if more number of students are allocated, just increase the number of pages per student allowed so that we can maximize the value
+        low = mid + 1;
+      }
+    }
+
+    return ans;
+  }
+
+  required(maxPage, a, noOfStudents) {
+    let allocationDone = 1;
+    let lastAllocated = 0;
+    for (let i = 0; i < a.length; i++) {
+      if (lastAllocated + a[i] <= maxPage) {
+        lastAllocated += a[i];
+      } else {
+        allocationDone++;
+        lastAllocated = a[i];
+      }
+    }
+
+    if (allocationDone <= noOfStudents) {
+      return true;
+    }
+
+    return false;
+  }
+}
+
+// Split Array Largest Sum
+/*
+Given an integer array nums and an integer k, split nums into k non-empty subarrays such that the largest sum of any subarray is minimized.
+
+Return the minimized largest sum of the split.
+
+A subarray is a contiguous part of the array.
+
+
+Example 1:
+Input: nums = [7,2,5,10,8], k = 2
+Output: 18
+Explanation: There are four ways to split nums into two subarrays.
+The best way is to split it into [7,2,5] and [10,8], where the largest sum among the two subarrays is only 18.
+*/
+var splitArray = function (a, m) {
+  // Same as Painter's Partition Problem where
+  // We are given an array containing value, m = 2, where m = number of painters
+  // We need to allocate contigous part of array to both painters such that complete allocation happens to both and allocation is contiguous, return such that sum of max allocation is minimum
+  // It cannot happen that we allocate [] to any one, we need to allocate atleast one element to each painter
+  // Same as Book Allocation Problem
+  // a[] is an array which contains number of pages of ith book
+  // m = number of students to which we need to allocate books
+  // conditions are, allocation should be contiguous, we cannot allocate to 1 then 2 then again 1
+  // all students should get atleast one book
+  // if its not possible to allocate books to m students, return -1
+  // In what case will it be immpossible??
+  // When number of students > number of books i.e m > n, return -1 where n = size of array
+  // We need to allocate such that the maximum number of pages in a book allocated to a student is minimum
+  // We allocate books in one way to say m = 4, we allocate books to 4 students. maximum number of pages comes x1
+  // We allocate books in another way to m = 4, and max pages = x2
+  // Similarly again we try another way and max pages = x3
+  // return min(x1, x2, x3)
+  // We need to start taking a value for maxPagesAnyStudentCanHold and keep on checking if we can allocate books keeping all coniditons in mind using this value
+  // if yes, we store it and go for higher value of maxPagesAnyStudentCanHold so that we can maximize it
+  // if no, we go for lesser values of maxPagesAnyStudentCanHold
+  // What is minimum value of maxPagesAnyStudentCanHold we should take?
+  // It should be such that we can allocate one book to each student successfully = max(element of array)
+  // What should be the maximum value of maxPagesAnyStudentCanHold?
+  // Let say we are given numberOfStudent = 1, then we need to allocate all books to that 1 student so maximum value of maxPagesAnyStudentCanHold = summation of array
+  // We can run a loop from i = low to high where low and high are as discussed above and check possiblity for each value of i
+  let n = a.length;
+  if (m > n) {
+    return -1;
+  }
+  let low = -Infinity,
+    high = 0;
+  for (let i = 0; i < n; i++) {
+    low = Math.max(low, a[i]);
+    high += a[i];
+  }
+
+  let ans = 0;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let pages = required(mid, a, m);
+    if (pages) {
+      // if this is true means allocationDone <= noOfStudents so we need to reduce number of pages allocated to increase more students
+      ans = mid;
+      high = mid - 1;
+    } else {
+      // if more number of students are allocated, just increase the number of pages per student allowed so that we can maximize the value
+      low = mid + 1;
+    }
+  }
+
+  return ans;
+};
+
+function required(maxPage, a, noOfStudents) {
+  let allocationDone = 1;
+  let lastAllocated = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (lastAllocated + a[i] <= maxPage) {
+      lastAllocated += a[i];
+    } else {
+      allocationDone++;
+      lastAllocated = a[i];
+    }
+  }
+
+  if (allocationDone <= noOfStudents) {
+    return true;
+  }
+
+  return false;
+}
