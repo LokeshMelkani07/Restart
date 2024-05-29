@@ -549,3 +549,157 @@ function mergeTwoSortedArrays(nums1, nums2) {
 
   return nums3;
 }
+
+// Koko Eating Bananas
+/*
+Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.
+
+Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour.
+
+Koko likes to eat slowly but still wants to finish eating all the bananas before the guards return.
+
+Return the minimum integer k such that she can eat all the bananas within h hours.
+
+Example 1:
+Input: piles = [3,6,7,11], h = 8
+Output: 4
+*/
+var minEatingSpeed = function (piles, h) {
+  // piles[i] means number of bananas in that pile
+  // h is number of hours koko has to eat all bananas
+  // we have to find minimum integer k which signifies number of bananas/hour koko can eat, such that it can eat all bananas within h hours
+  // we can start taking value of k = 1 for piles = [3,6,7,11], h = 8
+  // for piles[0] = 3, it takes 3 hours
+  // 6 -> 6 hours, 7 -> 7 hours, 11 -> 11 hours in total 3+6+7+11 = 26 but h = 8 so we need to increase value of k
+  // if piles[i] = 11 and k = 3, it will take 3*4 = 12 hours, although it takes 11.5 but always take ceil value
+  // let us take k = 2, 3.....so on, we keep on increasing or decreasing value of k such that our condition of h = 8 is fulfilled
+  // Brute force, start from k = 1, calculate the time and keep on increasing until time = h condition meets
+  // 1,2,3,4....... is sorted value so we can think of binary search where our search space can go from k = 1 to (max number in array)
+  // TC: O(n) for requiredTime() + O(log(max element)) for BS
+  let low = 1,
+    high = -Infinity;
+  let n = piles.length;
+  for (let i = 0; i < n; i++) {
+    high = Math.max(high, piles[i]);
+  }
+
+  let k = 0;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let time = requiredTime(mid, piles);
+    if (time <= h) {
+      // if we have less time than h, make it more lesser as we need minimum value for k so store it and move towards more lesser
+      k = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  // we can return either low or k (both are possible answers)
+  return k;
+};
+
+function requiredTime(k, piles) {
+  let time = 0;
+  let n = piles.length;
+  for (let i = 0; i < n; i++) {
+    time += Math.ceil(piles[i] / k);
+  }
+
+  return time;
+}
+
+// Minimum Number of Days to Make m Bouquets
+/*
+You are given an integer array bloomDay, an integer m and an integer k.
+
+You want to make m bouquets. To make a bouquet, you need to use k adjacent flowers from the garden.
+
+The garden consists of n flowers, the ith flower will bloom in the bloomDay[i] and then can be used in exactly one bouquet.
+
+Return the minimum number of days you need to wait to be able to make m bouquets from the garden. If it is impossible to make m bouquets return -1.
+
+Example 1:
+Input: bloomDay = [1,10,3,10,2], m = 3, k = 1
+Output: 3
+Explanation: Let us see what happened in the first three days. x means flower bloomed and _ means flower did not bloom in the garden.
+We need 3 bouquets each should contain 1 flower.
+After day 1: [x, _, _, _, _]   // we can only make one bouquet.
+After day 2: [x, _, _, _, x]   // we can only make two bouquets.
+After day 3: [x, _, x, _, x]   // we can make 3 bouquets. The answer is 3.
+*/
+var minDays = function (bloomDay, m, k) {
+  // blooming means opening of a flower
+  // bloomDay[i] means number of days it takes for a flower to bloom, bloomDay[0] = 7 means it takes 7 days to 0th index flower to bloom
+  // m = number of bouquets we need to make
+  // k = number of adjacent (saath-saath) flowers needed to make 1 bouquet
+  // We need to return minimum number of days, jisme we can easily make m bouquets using k adjacent flowers from the array and if its not possible, we return -1
+  // minimum number of days can be min(array), maximum can be max(ele) of array when all flowers gets bloomed
+  // if m = 3, k = 2 and array size = 5, we cannot make m bouquets does not matter if we take max number of days or not so return -1
+  // if(m*k > bloomDay.size) return -1
+  // In all other cases, its always possible
+  let low = +Infinity,
+    high = -Infinity;
+  let n = bloomDay.length;
+
+  if (n < m * k) {
+    return -1;
+  }
+
+  for (let i = 0; i < n; i++) {
+    low = Math.min(low, bloomDay[i]);
+    high = Math.max(high, bloomDay[i]);
+  }
+
+  let ans = high;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let days = required(mid, bloomDay, n, k, m);
+
+    if (days) {
+      // if m or more bouquets can be made successfully using mid days, store it and try to search for lesser values
+      ans = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  // we can also return low
+  return ans;
+};
+
+function required(day, arr, n, numberofAdjacenFlower, numberOfBouquets) {
+  let count = 0;
+  let ans = 0;
+  for (let i = 0; i < n; i++) {
+    if (arr[i] <= day) {
+      count++;
+    } else {
+      // adding number of bouquet which can be made using k flowers fromm count number of flowers
+      ans += Math.floor(count / numberofAdjacenFlower);
+      count = 0;
+    }
+  }
+
+  // if last pair of flowers come under 'if(arr[i]>=day)' condition so they never go inside else part hence will never be part of ans so make them part of our answer by writing below statement
+  ans += Math.floor(count / numberofAdjacenFlower);
+
+  return ans >= numberOfBouquets;
+}
+
+// Find the Smallest Divisor Given a Threshold
+/*
+Given an array of integers nums and an integer threshold, we will choose a positive integer divisor, divide all the array by it, and sum the division's result. Find the smallest divisor such that the result mentioned above is less than or equal to threshold.
+
+Each result of the division is rounded to the nearest integer greater than or equal to that element. (For example: 7/3 = 3 and 10/2 = 5).
+
+The test cases are generated so that there will be an answer.
+
+Example 1:
+Input: nums = [1,2,5,9], threshold = 6
+Output: 5
+Explanation: We can get a sum to 17 (1+2+5+9) if the divisor is 1.
+If the divisor is 4 we can get a sum of 7 (1+1+2+3) and if the divisor is 5 the sum will be 5 (1+1+1+2).
+*/
