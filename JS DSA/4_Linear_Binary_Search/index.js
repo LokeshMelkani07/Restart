@@ -123,3 +123,91 @@ function floorAndCeil(arr, target) {
 
   return [floor, ceil];
 }
+
+// Lower Bound
+// Given a sorted array arr[] of size N without duplicates, and given a value x. Floor of x is defined as the largest element K in arr[] such that K is smaller than or equal to x. Find the index of K(0-based indexing).
+function findFloor(nums, n, target) {
+  // floor is value k such that k is greatest number smaller than or equal to target
+  // if equal value is found return it
+  // if smaller value is found, store it in the answer that can be our possible answer but search for as greatest value as possible which can be smaller than target
+  // if value is coming greater than target, reduce the search space so high = mid-1
+  let low = 0;
+  let high = n - 1;
+  let ans = -1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    if (nums[mid] == target) {
+      return mid;
+    } else if (nums[mid] < target) {
+      ans = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return ans;
+}
+
+// Number of occurrence
+/*
+Given a sorted array Arr of size N and a number X, you need to find the number of occurrences of X in Arr.
+
+Example 1:
+Input:
+N = 7, X = 2
+Arr[] = {1, 1, 2, 2, 2, 2, 3}
+Output: 4
+Explanation: 2 occurs 4 times in the
+given array.
+*/
+class Solution {
+  count(arr, n, x) {
+    // if any way we can find, first occurence and last occurence of x in array, we can do last - first + 1 (0-based indexing)  = number of x in array
+    let first = this.findFirstOccurence(arr, n, x);
+    let last = this.findLastOccurence(arr, n, x);
+    // if there is no occurence of element in array then its count = 0 so simply return 0
+    if (first == -1 || last == -1) {
+      return 0;
+    }
+    return last - first + 1;
+  }
+
+  findFirstOccurence(arr, n, x) {
+    let low = 0;
+    let high = n - 1;
+    let first = -1;
+    while (low <= high) {
+      let mid = Math.floor(low + (high - low) / 2);
+      if (arr[mid] == x) {
+        first = mid;
+        high = mid - 1;
+      } else if (arr[mid] < x) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return first;
+  }
+
+  findLastOccurence(arr, n, x) {
+    let low = 0;
+    let high = n - 1;
+    let last = -1;
+    while (low <= high) {
+      let mid = Math.floor(low + (high - low) / 2);
+      if (arr[mid] == x) {
+        last = mid;
+        low = mid + 1;
+      } else if (arr[mid] < x) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return last;
+  }
+}

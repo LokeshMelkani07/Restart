@@ -75,28 +75,6 @@ var searchInsert = function (nums, target) {
   return end + 1;
 };
 
-// Find Minimum in Rotated Sorted Array
-// Suppose an array of length n sorted in ascending order is rotated between 1 and n times. For example, the array nums = [0,1,2,4,5,6,7] might become: [4,5,6,7,0,1,2] if it was rotated 4 times. [0,1,2,4,5,6,7] if it was rotated 7 times. Notice that rotating an array [a[0], a[1], a[2], ..., a[n-1]] 1 time results in the array [a[n-1], a[0], a[1], a[2], ..., a[n-2]]. Given the sorted rotated array nums of unique elements, return the minimum element of this array. You must write an algorithm that runs in O(log n) time.
-var findMin = function (nums) {
-  // it will be like a mountain array
-  // we have a pivot and our minimum element will always come after pivot
-  // if(nums[mid]>nums[end]) means mid can be a pivot so go to right of mid so start = mid+1
-  // if(nums[mid]<nums[end]) means be in left half so put end = mid
-  // at the end our nums[start] contains our minimum element
-  let start = 0;
-  let end = nums.length - 1;
-  while (start < end) {
-    let mid = Math.floor(start + (end - start) / 2);
-    if (nums[mid] > nums[end]) {
-      start = mid + 1;
-    } else {
-      end = mid;
-    }
-  }
-
-  return nums[start];
-};
-
 // Find First and Last Position of Element in Sorted Array
 // Given an array of integers nums sorted in non-decreasing order, find the starting and ending position of a given target value. If target is not found in the array, return [-1, -1]. You must write an algorithm with O(log n) runtime complexity.
 // find mid, now to get first occurence, do end = mid-1
@@ -448,6 +426,160 @@ var search = function (arr, target) {
   }
   return -1;
 };
+
+// Search in Rotated Sorted Array II
+/*
+There is an integer array nums sorted in non-decreasing order (not necessarily with distinct values).
+
+Before being passed to your function, nums is rotated at an unknown pivot index k (0 <= k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed). For example, [0,1,2,4,4,4,5,6,6,7] might be rotated at pivot index 5 and become [4,5,6,6,7,0,1,2,4,4].
+
+Given the array nums after the rotation and an integer target, return true if target is in nums, or false if it is not in nums.
+
+You must decrease the overall operation steps as much as possible.
+
+Example 1:
+Input: nums = [2,5,6,0,0,1,2], target = 0
+Output: true
+*/
+var search = function (nums, target) {
+  // Problem is same as 'Search in Rotated Sorted Array I' but there we had all distinct elements whereas here we have duplicate elements
+  // So during 'Search in Rotated Sorted Array I' when we were checking left sorted half or right sorted half, we were comparing mid with low and mid with high and then we were checking if our target lies in left sorted part or right sorted part
+  // here if a case comes when arr[low] == arr[mid] == arr[high] and we see arr[low,high,mid] !=  target then we cannot compare which part is sorted one so we can do one thing
+  // trim down the space, we do low = low + 1, high = high - 1, as both are same and not equal to target so we move one step ahead and again compare same thing
+  let n = nums.length;
+  let low = 0;
+  let high = n - 1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    if (nums[mid] == target) {
+      return true;
+    }
+
+    // keeping in mind of duplicates
+    if (nums[mid] == nums[low] && nums[mid] == nums[high]) {
+      low = low + 1;
+      high = high - 1;
+      // it might happen that next time also low,mid,high are equal so we do continue, no need to check below conditions
+      continue;
+    }
+
+    // check for sorted left half
+    if (nums[low] <= nums[mid]) {
+      if (nums[low] <= target && target <= nums[mid]) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    } else {
+      // otherwise check if target lies in right half
+      if (nums[mid] <= target && target <= nums[high]) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+  }
+
+  return false;
+};
+
+// Find Minimum in Rotated Sorted Array
+// Suppose an array of length n sorted in ascending order is rotated between 1 and n times. For example, the array nums = [0,1,2,4,5,6,7] might become: [4,5,6,7,0,1,2] if it was rotated 4 times. [0,1,2,4,5,6,7] if it was rotated 7 times. Notice that rotating an array [a[0], a[1], a[2], ..., a[n-1]] 1 time results in the array [a[n-1], a[0], a[1], a[2], ..., a[n-2]]. Given the sorted rotated array nums of unique elements, return the minimum element of this array. You must write an algorithm that runs in O(log n) time.
+var findMin = function (arr) {
+  // We have a Rotated Sorted Array which will be like a mountain
+  // We will use BS and check if left half is sorted, then take minimum element of left half, which could be our possible answer, store it, eliminate that space because that can never give us a minimum element now so start = mid+1
+  // if right half is sorted, take minimum element of right half which is arr[mid], which can be a possible answer, store it and move to left half as right half is of no use now, right = mid-1
+  let low = 0,
+    high = arr.length - 1;
+  let ans = +Infinity;
+  while (low <= high) {
+    let mid = Math.floor((low + high) / 2);
+
+    // If Search space is already sorted, low will be the minimum element itself so simply store it and break out
+    if (arr[low] <= arr[high]) {
+      ans = Math.min(ans, arr[low]);
+      break;
+    }
+
+    // Otherwise
+    // If left part is sorted:
+    if (arr[low] <= arr[mid]) {
+      // Keep the minimum:
+      ans = Math.min(ans, arr[low]);
+
+      // Eliminate left half:
+      low = mid + 1;
+    } else {
+      // If right part is sorted:
+      // Keep the minimum:
+      ans = Math.min(ans, arr[mid]);
+
+      // Eliminate right half:
+      high = mid - 1;
+    }
+  }
+  return ans;
+};
+
+// Rotation
+/*
+Given an ascending sorted rotated array arr of distinct integers of size n. The array is right-rotated k times. Find the value of k.
+
+Example 1:
+Input:
+n = 5
+arr[] = {5, 1, 2, 3, 4}
+Output: 1
+Explanation: The given array is 5 1 2 3 4.
+The original sorted array is 1 2 3 4 5.
+We can see that the array was rotated
+1 times to the right.
+*/
+function findKRotation(arr, n) {
+  // if any way we could the minimum element in the rotated sorted array
+  // We know the index of that minimum element will be number of times array is rotated because number of time we rotate, the more time value of smallest element of array goes on increasing
+  // We will use 'Find Minimum in Rotated Sorted Array' logic and store index of minimum element everytime
+  let low = 0;
+  let high = n - 1;
+  let ans = +Infinity;
+  let index = -1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    // its an rotated array means there will be a pivot point like an mountain
+    if (arr[low] <= arr[high]) {
+      if (arr[low] < ans) {
+        index = low;
+        ans = arr[low];
+        break;
+      }
+    }
+
+    // means left half is sorted
+    // Pick the minimum element from left half and elimiate it because once we have picked minimum element on left half, this can be our minimum but other can never so no need of this part now move low = mid+1
+    if (arr[low] <= arr[mid]) {
+      // minimum of left half is low which can be a possible answer so store it and leave this half
+      if (arr[low] < ans) {
+        index = low;
+        ans = arr[low];
+      }
+
+      // we have taken the minimum element in this range into the ans now move ahead leave this part
+      low = mid + 1;
+    } else {
+      // right half is sorted
+      // minimum element of right half can be our answer which will be mid
+      if (arr[mid] < ans) {
+        index = mid;
+        ans = arr[mid];
+      }
+
+      // elimiate this half now we have already taken the minimum element present here
+      high = mid - 1;
+    }
+  }
+
+  return index;
+}
 
 // Find Nth root of M
 /*
