@@ -206,6 +206,185 @@ var searchMatrix = function (matrix, target) {
   return false;
 };
 
+// Row with max 1s
+/*
+Given a boolean 2D array of n x m dimensions, consisting of only 1's and 0's, where each row is sorted. Find the 0-based index of the first row that has the maximum number of 1's.
+
+Example 1:
+Input:
+N = 4 , M = 4
+Arr[][] = {{0, 1, 1, 1},
+           {0, 0, 1, 1},
+           {1, 1, 1, 1},
+           {0, 0, 0, 0}}
+Output: 2
+Explanation: Row 2 contains 4 1's (0-based
+indexing).
+*/
+function rowWithMax1s(arr, n, m) {
+  // We have each row sorted
+  // In case 2 rows have same number of 1's, we return the one which comes earlier
+  // Brute force
+  // We go to each row and calculate number of 1's
+  let maxCount = -1;
+  let index = -1;
+  for (let i = 0; i < n; i++) {
+    let count = 0;
+    for (let j = 0; j < m; j++) {
+      count += arr[i][j];
+    }
+    if (count > maxCount) {
+      maxCount = count;
+      index = i;
+    }
+  }
+
+  return index;
+}
+
+// Optimised
+class Solution {
+  rowWithMax1s(arr, n, m) {
+    // We have each row sorted
+    // In case 2 rows have same number of 1's, we return the one which comes earlier
+    // Optimised Approach
+    // We go to each row and calculate number of 1's but this time we use Binary search in each row to calculate number of 1's because each row is sorted so if by any way we can find (lower bound of 1 or upper bound of 0 or first occurence of 1), to calculate number of 1's in that row, we do number of elements in the row - index of first occurence of 1 in that row
+    let maxCount = 0;
+    let index = -1;
+    // We need to traverse each row but we can consider each row as a sepearated array and do out operation
+    for (let i = 0; i < n; i++) {
+      let count = m - this.lowerBound(arr[i], m, 1);
+      if (count > maxCount) {
+        maxCount = count;
+        index = i;
+      }
+    }
+
+    return index;
+  }
+
+  lowerBound(arr, n, ele) {
+    let low = 0,
+      high = n - 1,
+      ans = n;
+    while (low <= high) {
+      let mid = Math.floor(low + (high - low) / 2);
+      if (arr[mid] >= ele) {
+        ans = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return ans;
+  }
+}
+
+// Search a 2D Matrix II
+/*
+Write an efficient algorithm that searches for a value target in an m x n integer matrix matrix. This matrix has the following properties:
+
+Integers in each row are sorted in ascending from left to right.
+Integers in each column are sorted in ascending from top to bottom.
+
+Example 1:
+Input: matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 5
+Output: true
+*/
+var searchMatrix = function (matrix, target) {
+  // Every Individual Row and Column is sorted
+  // Brute force Approach: We check each element and search for target using 2 loops, O(n^2)
+  // Better Approach: We traverse each row and apply binary search on each row to get the target considering each row is sorted in itself, O(nlogn)
+  // Optimised Approach
+  // We will use the information that each row and each col is sorted individually
+  // If we stand at mat[0][0] = 1 and we want to find target = 8, we can see standing at 0th row 0th col, our elements in  first are increasing, elements in first column are increasing
+  // If we stand at mat[n-1][m-1] = 30, we see elements in that row and decreasing both ways
+  // But if we stand at last col, first row, we see elements in that col are increasing in and in that row are decreasing if we stand at mat[0][n-1]
+  // so if mat[0][n-1] = 15, we can surely say 8 will not lie in n-1th column, it might lie in 0th row as 8 < 15
+  // We do col-- and come to mat[0][n-2] = 11, we check 8 < 11 so it cannot lie on that col, but might lie on that row so again
+  // col--, mat[0][n-3] = 7, it might lie on that col as 8 > 7 but it will never lie on that row so this time we do row++
+  // mat[1][n-3] = 8 so yes we have got our answer otherwise we would have done col-- or row++ until we get our target otherwise return [-1,-1]
+  // last row, first col can also be our starting point, mat[n-1][0] is also a possible starting point
+  // TC: O(n+m), to reach target we have to travel n rows and m cols steps at max
+  let n = matrix.length,
+    m = matrix[0].length;
+  let row = 0,
+    col = m - 1;
+  while (row < n && col >= 0) {
+    if (matrix[row][col] == target) {
+      return true;
+    } else if (matrix[row][col] > target) {
+      col--;
+    } else {
+      row++;
+    }
+  }
+
+  return false;
+};
+
+// Find a Peak Element II
+/*
+A peak element in a 2D grid is an element that is strictly greater than all of its adjacent neighbors to the left, right, top, and bottom.
+
+Given a 0-indexed m x n matrix mat where no two adjacent cells are equal, find any peak element mat[i][j] and return the length 2 array [i,j].
+
+You may assume that the entire matrix is surrounded by an outer perimeter with the value -1 in each cell.
+
+You must write an algorithm that runs in O(m log(n)) or O(n log(m)) time.
+
+Example 1:
+Input: mat = [[1,4],[3,2]]
+Output: [0,1]
+Explanation: Both 3 and 4 are peak elements so [1,0] and [0,1] are both acceptable answers.
+*/
+var findPeakGrid = function (mat) {
+  // Peak element is the one which is greater than its left, right, up, down element
+  // if there is no left or no right or no up or no bottom for any element like if its at the boundary then -1 is filled there
+  // There can be multiple peak elements, we can return any one of them
+  // Brute force: We go to every element and check if all 4 directions, O(n*m*4)
+  // We start from low = 0, high = last column i.e n-1
+  // We find mid (gives us a column), we find max element of that col and go to it, as we have taken max element of that column means its already greater than it up and down, check for left and right
+  // if left > maxEle means if we assume mountaineous array graph, there is someone greater than maxEle which can be a potential peak or someone who is more closer to peak so what to do? reduce search space, high = mid-1
+  // if right > maxEle means there is someone greater than maxEle which can be closer to peak so, low = mid+1;
+  // we make a function which return the row of maxElement in a column
+  // leftElement = arr[row][mid-1]
+  // rightElement = arr[row][mid+1]
+  let n = mat.length,
+    m = mat[0].length;
+  let low = 0,
+    high = m - 1;
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let row = findMaxInCol(mat, mid, n);
+    let left = mid - 1 >= 0 ? mat[row][mid - 1] : -1;
+    let right = mid + 1 < m ? mat[row][mid + 1] : -1;
+    if (mat[row][mid] > left && mat[row][mid] > right) {
+      return [row, mid];
+    } else if (mat[row][mid] < left) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return [-1, -1];
+};
+
+function findMaxInCol(arr, col, n) {
+  let maxiIndex = 0;
+  let maxEle = -1;
+  for (let i = 0; i < n; i++) {
+    if (arr[i][col] > maxEle) {
+      maxEle = arr[i][col];
+      maxiIndex = i;
+    }
+  }
+
+  return maxiIndex;
+}
+
 // Find Peak Element
 // A peak element is an element that is strictly greater than its neighbors. Given a 0-indexed integer array nums, find a peak element, and return its index. If the array contains multiple peaks, return the index to any of the peaks. You may imagine that nums[-1] = nums[n] = -∞. In other words, an element is always considered to be strictly greater than a neighbor that is outside the array. You must write an algorithm that runs in O(log n) time.
 var findPeakElement = function (arr) {
@@ -548,6 +727,187 @@ function mergeTwoSortedArrays(nums1, nums2) {
   }
 
   return nums3;
+}
+
+// Optimised Approach
+var findMedianSortedArrays = function (nums1, nums2) {
+  // median is the middle element of an sorted sequence
+  // if size of the sequence is odd, median is middle element
+  // if size of the sequence is even, media is (middle + (middle+1))/2th element
+  // Optimised Approach
+  // Our method of finding the median differs on basis of whether the length of the array is odd or even
+  // for odd, median has equal number of elements on both sides
+  // We see array is sorted so we can think of binary search to optimise
+  // but how to apply binary search?
+  // Instead of merging both arrays, we can think of an approach where withour merging we can find the median
+  // Let say we merged nums1 = [1,3], nums2 = [2,4] into nums3 = [1,2,3,4], let us now derive an algo for even length
+  // Now let say we draw a line in the middle and we see total = 4, left half has 2 elements and right half has 2 elements
+  // median = max(of left half) + min(of right half)/2
+  // if somehow we could formulate a correct left half and right half, we can find the median for even case
+  // We see in left half total element = 2 and 1 from nums1, 1 from nums2
+  // Sameway in right half, total element = 2 and 1 from nums1, 1 from nums2
+  // On process of making left half and right half, we start from left half, we pick 1 element from nums1, total = 2 - 1 = 1 element from nums2
+  // let say in left half we had total = 5, we started form trying 1 element from nums1, 4 element from nums2. sameways for right half, we put left over elements
+  // We sort them and we see, sorted order is not corect means this way is failed
+  // Now we take 2 element from nums1 and 3 element from nums2 in left half, which makes total = 5 and leftover elements in right half
+  // We sort them and check, whether it makes a well sorted sequence or not
+  // How to check if its a well sorted sequence or not??
+  // We will sort both left and right half and then pick last element of left half and first element of right half and if last element of left half > first element of right half. Its not a valid sorted sequence
+  // if its not a well sorted sequence, we pick 3 elements from nums1 and 2 element from nums2 in left half and leftOver in right half
+  // We check and yes, it forms valid sorted sequence so we have valid left half and valid right half
+  // Let us go ahead and check for 4 element form nums1, 1 from nums2 and check. No, it does not make valid well sorted sequence so once we have got our valid sequence its of no use to go forward
+  // To check well sorted sequence, we are sorting + then checking which takes some time so instead we can try another approach
+  // (As both nums1 and nums2 are sorted individually and when we are taking them, that order will be maintained so the elements we are taking from nums1 in left ka last element should be smaller than first element we are taking in right half from nums2 && last element of nums2 we are taking in left half should be smaller than first element of nums1 we are taking in right half) then its a valid sequence
+  // Now we have formulated correct sequence, how to find median using it??
+  // We take last element of nums1 added in left half = l1
+  // last element of nums2 added in left half = l2
+  // first element of nums1 added in right half = r1
+  // first element of nums2 added in right half = r2
+  // We know median is last elemnt of left half + first element of right half / 2
+  // So in left half, last element will be max(l1,l2) whichever is maximum of both of them
+  // So in right half, first element will be min(r1,r2) whichever is minimum of both of them
+  // median = max(l1,l2) + min(r1,r2)/2
+  // We need to know how many elements from nums1 in left half say n1, total - n1 = number of elements from nums2 in left half
+  // number of elements from nums1 can be anything between 0 to max(number of elements from nums1)
+  // if any mid comes, we check if we can make a correct sequence out of it. if no, we will not be able to do it for mid+1,mid+2.... so eliminate right half and stay in left half
+  // How to check whether to go in left half (high = mid-1) or right half (low = mid+1) ?
+  // We have had l1, l2, r1, r2
+  // if l1 > r2, high = mid-1
+  // if l2 > r1, low = mid+1
+  // So we are doing binary Search to determine, how many elements to take from nums1 where range can go from 0 to max(number of element in nums1)
+  // What if we apply binary search on min(nums1,nums2) so that TC of binary search is reduced as our search space gets reduced, because we are applying BS on array whose length is smaller
+  // If a case comes when we take 0 elements of nums1 in left half, so in that case we will take l1 = -Infinity
+  // Our mid1 will be mid found using BS in nums1 which always point to the  the first element of right half
+  // mid2 = total - mid1 which will be mid of elements from nums2, which will always point to the first element of right half
+  // so we can say arr1[mid1] = r1, arr2[mid2] = r2, l1 = arr1[mid1-1], l2 = arr2[mid2-1]
+  // What if array length is odd? then to draw symmetry we need to either take more number of elements on left and one lesser on right in this case formula of median becomes max(l1,l2)
+  // or more number of elements on right and one lesser on left in this case median formula becomes min(r1,r2)
+  // Number of elements needed on left will be (n1+n2+1)/2 (always) this formula works on both even and odd
+  // It might happen that mid1 or mid2 gets a value which is not present in the array so always check conditions before assigning l1,l2,r1,r2
+  let n1 = nums1.length;
+  let n2 = nums2.length;
+  if (n1 > n2) {
+    return findMedianSortedArrays(nums2, nums1);
+  }
+
+  let low = 0;
+  let high = n1;
+  let n = n1 + n2;
+  let totalElementsOnLeftHalf = Math.floor((n1 + n2 + 1) / 2);
+  while (low <= high) {
+    let mid1 = (low + high) >> 1;
+    let mid2 = totalElementsOnLeftHalf - mid1;
+    let l1 = -Infinity;
+    let l2 = -Infinity;
+    let r1 = +Infinity;
+    let r2 = +Infinity;
+    if (mid1 < n1) r1 = nums1[mid1];
+    if (mid2 < n2) r2 = nums2[mid2];
+    if (mid1 - 1 >= 0) l1 = nums1[mid1 - 1];
+    if (mid2 - 1 >= 0) l2 = nums2[mid2 - 1];
+    if (l1 <= r2 && l2 <= r1) {
+      if (n % 2 == 1) {
+        // odd
+        return Math.max(l1, l2);
+      } else {
+        return (Math.max(l1, l2) + Math.min(r1, r2)) / 2;
+      }
+    } else if (l1 > r2) high = mid1 - 1;
+    else low = mid1 + 1;
+  }
+
+  return 0;
+};
+
+// K-th element of two Arrays
+/*
+Given two sorted arrays arr1 and arr2 of size N and M respectively and an element K. The task is to find the element that would be at the kth position of the final sorted array.
+
+Example 1:
+Input:
+arr1[] = {2, 3, 6, 7, 9}
+arr2[] = {1, 4, 8, 10}
+k = 5
+Output:
+6
+Explanation:
+The final sorted array would be -
+1, 2, 3, 4, 6, 7, 8, 9, 10
+The 5th element of this array is 6.
+*/
+class Solution {
+  kthElement(A, B, n, m, k) {
+    // Both A and B array are in sorted order
+    // Merge them hypothetically and return the kth element of both merged arrays
+    // Brute force approach, we will merge both arrays, return kth element from merged array
+    let nums3 = this.mergeTwoSortedArrays(A, B);
+    return nums3[k - 1];
+  }
+
+  mergeTwoSortedArrays(nums1, nums2) {
+    let i = 0,
+      j = 0,
+      k = 0;
+    let m = nums1.length,
+      n = nums2.length;
+    let nums3 = [];
+    while (i < m && j < n) {
+      if (nums1[i] <= nums2[j]) {
+        nums3[k++] = nums1[i++];
+      } else {
+        nums3[k++] = nums2[j++];
+      }
+    }
+
+    while (i < m) {
+      nums3[k++] = nums1[i++];
+    }
+
+    while (j < n) {
+      nums3[k++] = nums2[j++];
+    }
+
+    return nums3;
+  }
+}
+
+// Optimised
+class Solution {
+  kthElement(nums1, nums2, n1, n2, k) {
+    // Optimised Approach
+    // We will follow 'Median of 2 sorted Arrays' Symmetry approach
+    // Over there we were trying to making left half containing half of elements and rest elements on right half
+    // We were applying binary search to find our number of elements from arr1 in left half and do accordingly
+    // Here we will try to form left half of k elements and right half of (n+m) - k elements and last element of left half willbe our kth element, return it
+    if (n1 > n2) {
+      return this.kthElement(nums2, nums1, n2, n1, k);
+    }
+
+    let low = 0;
+    let high = Math.min(k, n1); // if given k =2 and n1=6, to formulate a correct left half, we only need k elements in left half so no need to take n1 elements completely, just take min(k,n1)
+    let n = n1 + n2;
+    // we only need k elements on left half
+    let totalElementsOnLeftHalf = k;
+    while (low <= high) {
+      let mid1 = (low + high) >> 1;
+      let mid2 = totalElementsOnLeftHalf - mid1;
+      let l1 = -Infinity;
+      let l2 = -Infinity;
+      let r1 = +Infinity;
+      let r2 = +Infinity;
+      if (mid1 < n1) r1 = nums1[mid1];
+      if (mid2 < n2) r2 = nums2[mid2];
+      if (mid1 - 1 >= 0) l1 = nums1[mid1 - 1];
+      if (mid2 - 1 >= 0) l2 = nums2[mid2 - 1];
+      if (l1 <= r2 && l2 <= r1) {
+        // we just need to return kth element
+        return Math.max(l1, l2);
+      } else if (l1 > r2) high = mid1 - 1;
+      else low = mid1 + 1;
+    }
+
+    return 0;
+  }
 }
 
 // Koko Eating Bananas
