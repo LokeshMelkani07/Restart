@@ -204,6 +204,36 @@ var moveZeroes = function (nums) {
   return nums;
 };
 
+var moveZeroes = function (nums) {
+  // Another Approach
+  // j points to index of first 0 of array
+  // i points to next index of j
+  // Everytime we see any non-zero element, we swap arr[j],arr[i] and move j++
+  let j = -1;
+  let i = 0;
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    if (nums[i] == 0) {
+      j = i;
+      break;
+    }
+  }
+
+  // if j is still -1 means there is no zero in array, return nums as it is
+  if (j == -1) {
+    return nums;
+  }
+
+  for (i = j + 1; i < n; i++) {
+    if (nums[i] != 0) {
+      [nums[i], nums[j]] = [nums[j], nums[i]];
+      j++;
+    }
+  }
+
+  return nums;
+};
+
 // Remove Element
 // Given an integer array nums and an integer val, remove all occurrences of val in nums in-place. The order of the elements may be changed. Then return the number of elements in nums which are not equal to val.
 var removeElement = function (nums, val) {
@@ -237,6 +267,7 @@ var removeElement = function (nums, val) {
 // Max Consecutive Ones
 // Given a binary array nums, return the maximum number of consecutive 1's in the array.
 var findMaxConsecutiveOnes = function (nums) {
+  // We will count, consecutive ones and store it in a max variable
   let maxLength = 0;
   let maxConsOnes = 0;
   for (let i = 0; i < nums.length; i++) {
@@ -457,3 +488,379 @@ var maxProfit = function (prices) {
 
   return profit;
 };
+
+// Second Largest
+/*
+Given an array Arr of size N, print the second largest distinct element from an array. If the second largest element doesn't exist then return -1.
+
+Example 1:
+Input:
+N = 6
+Arr[] = {12, 35, 1, 10, 34, 1}
+Output: 34
+Explanation: The largest element of the
+array is 35 and the second largest element
+is 34.
+*/
+function print2largest(arr, n) {
+  // We will use vairbales to store largest element of array using a for loop
+  // Now we again run a loop to check any element which is not equal to largest but the largest element of the array that will be our second largest element of array
+  let largest = -1,
+    second_largest = -1;
+  for (let i = 0; i < n; i++) {
+    // find the largest element of array
+    largest = Math.max(largest, arr[i]);
+  }
+
+  for (let i = 0; i < n; i++) {
+    if (arr[i] > second_largest && arr[i] != largest) {
+      second_largest = arr[i];
+    }
+  }
+
+  return second_largest;
+}
+
+// Optimal
+function print2largest(arr, n) {
+  // Optimal approach
+  // We will try to do everything in one loop instead of 2 loops
+  if (n < 2) {
+    return -1;
+  }
+
+  let large = -1,
+    second_large = -1;
+  let i;
+  for (i = 0; i < n; i++) {
+    if (arr[i] > large) {
+      second_large = large;
+      large = arr[i];
+    } else if (arr[i] > second_large && arr[i] != large) {
+      second_large = arr[i];
+    }
+  }
+  return second_large;
+}
+
+// Check if Array Is Sorted and Rotated
+/*
+Given an array nums, return true if the array was originally sorted in non-decreasing order, then rotated some number of positions (including zero). Otherwise, return false.
+
+There may be duplicates in the original array.
+
+Note: An array A rotated by x positions results in an array B of the same length such that A[i] == B[(i+x) % A.length], where % is the modulo operation.
+
+Example 1:
+Input: nums = [3,4,5,1,2]
+Output: true
+Explanation: [1,2,3,4,5] is the original sorted array.
+You can rotate the array by x = 3 positions to begin on the the element of value 3: [3,4,5,1,2].
+*/
+var check = function (nums) {
+  // Brute force: We will use 2 loops, pick each element and compare it with all next elements j = i+1 till n and if anytime arr[i] > arr[j], return false
+  // Optimial: Do this in one traversal instead of 2 loops
+  // We will run a loop from i = 1 -> n and check if arr[i] > arr[i-1], if anytime this condition is false, return false because we know in a sorted array arr[i] >= arr[i-1] considering duplicates
+  // How to check if a array is rotated?
+  // Elements will keep on increasing till a point and after than they will decrease
+  // How to check if Array is sorted and rotated both?
+  // Elements will be sorted till pivot point, elements will be sorted after pivot point so there will be only one element which does not follow sorting order in rotated array means arr[i-1] > arr[i] for only 1 element in a successful sorted array, last element should be less than first element for it to be a rotated and sorted array
+  let count = 0;
+  let n = nums.length;
+  for (let i = 1; i < n; i++) {
+    if (nums[i - 1] > nums[i]) {
+      count++;
+    }
+  }
+
+  if (nums[n - 1] > nums[0]) {
+    count++;
+  }
+
+  // if count == 1 or less than it, means array was earlier sorted and yes, it is rotated
+  return count <= 1;
+};
+
+// Rotate Array
+/*
+Given an integer array nums, rotate the array to the right by k steps, where k is non-negative.
+
+Example 1:
+Input: nums = [1,2,3,4,5,6,7], k = 3
+Output: [5,6,7,1,2,3,4]
+Explanation:
+rotate 1 steps to the right: [7,1,2,3,4,5,6]
+rotate 2 steps to the right: [6,7,1,2,3,4,5]
+rotate 3 steps to the right: [5,6,7,1,2,3,4]
+*/
+var rotate = function (nums, k) {
+  // Brute force: We will make an temporary array of size k, we will copy all elements from n-k -> n in the temp array
+  // We will store all elements from i = 0 -> k in nums to nums[i+k]
+  // we will store all elements of temp in nums from starting position
+  // nums = [1,2,3,4,5,6,7], k = 3
+  // first step: temp = [5,6,7], second step: fill arr in reverse order from end, arr = [na,na,na,1,2,3,4]
+  // last step = arr[5,6,7,1,2,3,4]
+  let n = nums.length;
+  if (n == 0) {
+    return [];
+  }
+
+  // 0 <= k <= 10^5 so make it within our range
+  k = k % n;
+  if (k > n) {
+    return [];
+  }
+
+  let temp = Array(k);
+  for (let i = n - k; i < n; i++) {
+    temp[i + k - n] = nums[i];
+  }
+
+  // fill elements in nums from end index [na,na,na,1,2,3,4] are getting fill in nums in reverse order
+  for (let j = n - k - 1; j >= 0; j--) {
+    nums[j + k] = nums[j];
+  }
+
+  // copying first k elements from temp, back to nums
+  for (let i = 0; i < k; i++) {
+    nums[i] = temp[i];
+  }
+
+  return nums;
+};
+
+// Optimial
+var rotate = function (nums, k) {
+  // Optimal Approach: We will use reverse Algorithm
+  // First rotate 0 to (n-k)  elements [1,2,3,4,5,6,7] -> [4,3,2,1,5,6,7]
+  // Then rotate (n-k+1) till n elements [4,3,2,1,5,6,7] -> [4,3,2,1,7,6,5]
+  // Then rotate whole array once [4,3,2,1,7,6,5] -> [5,6,7,1,2,3,4]
+  if (nums.length == 0) {
+    return nums;
+  }
+
+  // 0 <= k <= 10^5 so make it within our range
+  k = k % nums.length;
+  if (k > nums.length) {
+    return nums;
+  }
+  let n = nums.length - 1;
+  rotateArray(nums, 0, n - k);
+  rotateArray(nums, n - k + 1, n);
+  rotateArray(nums, 0, n);
+};
+
+function rotateArray(nums, start, end) {
+  while (start <= end) {
+    let temp = nums[start];
+    nums[start] = nums[end];
+    nums[end] = temp;
+    start++;
+    end--;
+  }
+}
+
+// Union of Two Sorted Arrays
+/*
+Given two sorted arrays of size n and m respectively, find their union. The Union of two arrays can be defined as the common and distinct elements in the two arrays. Return the elements in sorted order.
+
+Example 1:
+Input:
+n = 5, arr1[] = {1, 2, 3, 4, 5}
+m = 5, arr2 [] = {1, 2, 3, 6, 7}
+Output:
+1 2 3 4 5 6 7
+Explanation:
+Distinct elements including both the arrays are: 1 2 3 4 5 6 7.
+*/
+function findUnion(arr1, arr2, n, m) {
+  // Brute force: We can make use of map data structure to store frequency of elements from both nums1, nums2
+  // The map will store everything in key-value pairs and In JS map stores everything in order as inserted so we need to sort it
+  // We fill elements back from back to new array and return it
+  // We can also use a set instead of it and do the same
+  let freq = new Map();
+  let union = [];
+
+  for (let num of arr1) {
+    freq.set(num, (freq.get(num) || 0) + 1);
+  }
+
+  for (let num of arr2) {
+    freq.set(num, (freq.get(num) || 0) + 1);
+  }
+
+  let sortedMap = new Map([...freq].sort((a, b) => a[0] - b[0]));
+  for (let [num, count] of sortedMap) {
+    union.push(num);
+  }
+
+  return union;
+}
+
+// Optimal
+function findUnion(arr1, arr2, n, m) {
+  // Optimal Approach: We can use 2 pointers to traverse arr1 and arr2 simultaneously
+  // if arr1[i] <= arr2[j], we check if last element of union[] != arr[i], push it and i++
+  // samway for arr2 and j++
+  // at the end, push all elements of arr1 and arr2 till it does not gets empty keeping in mind that union[] should not contain these elements already
+  // arr1[ i ] == arr2[ j ]  Here we found a common element, so insert only one element in the union. Let’s insert arr[i] in union and increment i. There may be cases like the element to be inserted is already present in the union, in that case, we are inserting duplicates which is not desired. So while inserting always check whether the last element in the union vector is equal or not to the element to be inserted.
+  // arr1[ i ] < arr2[ j ] so we need to insert arr1[ i ] in union.IF last element in  union vector is not equal to arr1[ i ],then insert in union else don’t insert. After checking Increment i.
+  // arr1[ i ] > arr2[ j ] so we need to insert arr2[ j ] in union. IF the last element in the union vector is not equal to arr2[ j ], then insert in the union, else don’t insert. After checking Increment j.
+
+  let i = 0,
+    j = 0;
+  let union = [];
+  while (i < arr1.length && j < arr2.length) {
+    if (arr1[i] <= arr2[j]) {
+      // Case 1 and 2
+      if (union.length === 0 || union[union.length - 1] !== arr1[i])
+        union.push(arr1[i]);
+      i++;
+    } else {
+      // Case 3
+      if (union.length === 0 || union[union.length - 1] !== arr2[j])
+        union.push(arr2[j]);
+      j++;
+    }
+  }
+
+  while (i < arr1.length) {
+    // If any elements left in arr1
+    if (union[union.length - 1] !== arr1[i]) union.push(arr1[i]);
+    i++;
+  }
+
+  while (j < arr2.length) {
+    // If any elements left in arr2
+    if (union[union.length - 1] !== arr2[j]) union.push(arr2[j]);
+    j++;
+  }
+
+  return union;
+}
+
+// Missing Number
+/*
+Given an array nums containing n distinct numbers in the range [0, n], return the only number in the range that is missing from the array.
+
+Example 1:
+Input: nums = [3,0,1]
+Output: 2
+Explanation: n = 3 since there are 3 numbers, so all numbers are in the range [0,3]. 2 is the missing number in the range since it does not appear in nums.
+*/
+var missingNumber = function (nums) {
+  // We have n distinct numbers so we have numbers from 0 to n where n is array length
+  // We will find the sum of all digits of array say fTotal
+  // We will find sum of all number from 1 to n say fn
+  // missing Number = fn - fTotal
+  let sumTotal = 0;
+  for (let i = 0; i < nums.length; i++) {
+    sumTotal += nums[i];
+  }
+
+  let sumN = (nums.length * (nums.length + 1)) / 2;
+  return sumN - sumTotal;
+};
+
+// Single Number
+/*
+Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+Example 1:
+Input: nums = [2,2,1]
+Output: 1
+*/
+var singleNumber = function (nums) {
+  // We can think of using map to store frequency and check
+  // but we can also think of using XOR operator as we know, a^a = 0, a^0 = a
+  // In [4,1,2,1,2], all same number gives res = 0 ^ 4 = 4
+  // 4^1^1^2^2 = 4 so thats the answer
+  let XOR = 0;
+  for (let i = 0; i < nums.length; i++) {
+    XOR = XOR ^ nums[i];
+  }
+
+  return XOR;
+};
+
+// Longest Sub-Array with Sum K
+/*
+Given an array containing N integers and an integer K., Your task is to find the length of the longest Sub-Array with the sum of the elements equal to the given value K.
+
+Example 1:
+Input :
+A[] = {10, 5, 2, 7, 1, 9}
+K = 15
+Output : 4
+Explanation:
+The sub-array is {5, 2, 7, 1}.
+*/
+function lenOfLongSubarr(a, n, k) {
+  // Brute force Approach: We will run 2 loops and one will run from i = 0 ->n , another will run from j = i->n, and inside it we run a loop to take sum of all elements between the range [i,j] and sum them and compare the sum
+  // Optimal Approach: we will use hashing to store {sum, i} to store sum related to each index i
+  let preSumMap = new Map();
+  let sum = 0;
+  let maxLen = 0;
+  for (let i = 0; i < n; i++) {
+    // calculate the prefix sum till index i
+    sum += a[i];
+
+    // if the sum = k, update the maxLen
+    if (sum === k) {
+      maxLen = Math.max(maxLen, i + 1);
+    }
+
+    // calculate the sum of remaining part i.e. x - k
+    let rem = sum - k;
+
+    // calculate the length and update maxLen
+    if (preSumMap.has(rem)) {
+      let len = i - preSumMap.get(rem);
+      maxLen = Math.max(maxLen, len);
+    }
+
+    // update the map checking the conditions
+    if (!preSumMap.has(sum)) {
+      preSumMap.set(sum, i);
+    }
+  }
+
+  return maxLen;
+}
+
+// Optimal (For only positives, if it includes negative too then hashing approach is sufficient)
+function lenOfLongSubarr(arr, n, k) {
+  // Most Optimal Approach (For only positives)
+  // We will take 2 pointers left = 0 and right = 0, we take sum = arr[0], maxLen = -1
+  // we will move right to index = 1 start taking sum += a[right] now [left,right] denotes our subarray
+  // So if our sum == k anytime, we update maxLen
+  // if anytime our sum > k, we will move left++ and sum = sum - arr[left]
+  let left = 0,
+    right = 0;
+  let sum = arr[0];
+  let maxLen = 0;
+  while (right < n) {
+    // we do right++ initially because our left, right = 0 both initially
+    // To start taking sum of subarray elements we need to expand our subarray using right++
+    // We will shrink our subarray using left++ when sum > k
+    right++;
+    if (right < n) {
+      sum += arr[right];
+    }
+
+    // if sum > k, move left
+    while (left <= right && sum > k) {
+      sum = sum - arr[left];
+      left++;
+    }
+
+    if (sum == k) {
+      // store maxLen, as we need maximum subarray so we do not stop till our right goes out of bound
+      maxLen = Math.max(maxLen, right - left + 1);
+    }
+  }
+
+  return maxLen;
+}
