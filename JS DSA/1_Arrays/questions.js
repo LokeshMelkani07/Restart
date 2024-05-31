@@ -1393,3 +1393,331 @@ var subarraySum = function (nums, k) {
 
   return count;
 };
+
+// Pascal's Triangle
+/*
+Given an integer numRows, return the first numRows of Pascal's triangle.
+In Pascal's triangle, each number is the sum of the two numbers directly above it
+*/
+function nCr(n, r) {
+  // If we are given with row number and col number and we are told to find out the element, we can use nCr = n! / (n-r)! * r!
+  // To calculate nCr, we can either calculate n!, r!, (n-r)! invidually and use it in our answer, or we can open this formula out and come to a observation
+  /*
+    Assume, given r = 7, c = 4.
+    Now, n = r-1 = 7-1 = 6 and r = c-1 = 4-1 = 3
+    Let’s calculate 6C3 = 6! / (3! *(6-3)!) = (6*5*4*3*2*1) / ((3*2*1)*(3*2*1))
+    This will boil down to (6*5*4) / (3*2*1)
+    So, nCr = (n*(n-1)*(n-2)*.....*(n-r+1)) / (r*(r-1)*(r-2)*....1)
+    */
+  let res = 1;
+
+  // calculating nCr:
+  for (let i = 0; i < r; i++) {
+    // below statement calculates numerator part n*n-1*n-2*...n-r+1
+    res = res * (n - i);
+    // below statement calculates denominator part res / 1,2,3,....r
+    res = res / (i + 1);
+  }
+  return res;
+}
+
+function pascalTriangle(r, c) {
+  const element = nCr(r - 1, c - 1);
+  return element;
+}
+
+// Another Variation
+function pascalTriangle(n) {
+  // Another Variation can be that we will be given row number, we need to print that whole row of Pascal's triangle
+  // One observation is: 1st row has 1 element, 2nd row has 2 elements, 3rd row has 3 elements, 4th row has 4 elements and so on
+  //      Nc0 where N (row number) = 1
+  //    Nc0  Nc1 where N = 2
+  //  Nc0  Nc1  Nc2 where N = 3
+  // Nc0  Nc1  Nc2   Nc3 where N = 4
+  // and we have already written nCr function so we use it and run a loop to get all C values from 1 to n and calculate the whole row for the given row
+  // printing the entire row n:
+  for (let c = 1; c <= n; c++) {
+    console.log(nCr(n - 1, c - 1) + " ");
+  }
+  console.log("n");
+}
+
+// Variation 3
+var generate = function (n) {
+  // Variation 3: Given a number numRows, generate pascal traingle of numRows number of rows
+  // We will just use nCr function and run a loop which traverse through each row and then another loop which travel for each column and it will generate nCr for each col element for that row
+  // We will store it in an array and return it
+  const ans = [];
+
+  //Store the entire pascal's triangle:
+  for (let row = 1; row <= n; row++) {
+    const tempLst = []; // temporary list
+    for (let col = 1; col <= row; col++) {
+      tempLst.push(nCr1(row - 1, col - 1));
+    }
+    ans.push(tempLst);
+  }
+  return ans;
+};
+
+function nCr1(n, r) {
+  let res = 1;
+  // calculating nCr:
+  for (let i = 0; i < r; i++) {
+    // below statement calculates numerator part n*n-1*n-2*...n-r+1
+    res = res * (n - i);
+    // below statement calculates denominator part res / 1,2,3,....r
+    res = res / (i + 1);
+  }
+  return res;
+}
+
+// Majority Element II
+/*
+Given an integer array of size n, find all elements that appear more than ⌊ n/3 ⌋ times.
+
+Example 1:
+Input: nums = [3,2,3]
+Output: [3]
+*/
+var majorityElement = function (nums) {
+  // Brute force - Use count variable and run multiple loops to count number of occurence of each element in the array and compare count > n/3. if yes, store in ans array else move forward
+  // Better Approach: Use hashmap to store frequency of each element in key-value pair and now traverse the hash map and if frequence > n/3, store in the answer
+  // Optimal Approach
+  // We will use Moore voting algorithm but in some modifications
+  // We will use 3 variables ele1, ele2 and cnt1, cnt2 initially 0 to store the elements in  majority and their count
+  /*
+    Initialize 4 variables:
+cnt1 & cnt2 –  for tracking the counts of elements
+el1 & el2 – for storing the majority of elements.
+Traverse through the given array.
+If cnt1 is 0 and the current element is not el2 then store the current element of the array as el1 along with increasing the cnt1 value by 1.
+If cnt2 is 0 and the current element is not el1 then store the current element of the array as el2 along with increasing the cnt2 value by 1.
+If the current element and el1 are the same increase the cnt1 by 1.
+If the current element and el2 are the same increase the cnt2 by 1.
+Other than all the above cases: decrease cnt1 and cnt2 by 1.
+The integers present in el1 & el2 should be the result we are expecting. So, using another loop, we will manually check their counts if they are greater than the floor(N/3).
+*/
+  let ele1 = -Infinity,
+    ele2 = -Infinity;
+  let cnt1 = 0,
+    cnt2 = 0;
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    if (cnt1 == 0 && ele2 != nums[i]) {
+      cnt1 = 1;
+      ele1 = nums[i];
+    } else if (cnt2 == 0 && ele1 != nums[i]) {
+      cnt2 = 1;
+      ele2 = nums[i];
+    } else if (nums[i] == ele1) {
+      cnt1++;
+    } else if (nums[i] == ele2) {
+      cnt2++;
+    } else {
+      cnt1--;
+      cnt2--;
+    }
+  }
+
+  // Now let us check if our ele1 and ele2 actually occure > n/3 times or not
+  let cntEle1 = 0,
+    cntEle2 = 0;
+  let res = [];
+  for (let i = 0; i < n; i++) {
+    if (nums[i] == ele1) {
+      cntEle1++;
+    } else if (nums[i] == ele2) {
+      cntEle2++;
+    }
+  }
+
+  let majority = Math.floor(n / 3) + 1;
+  if (cntEle1 >= majority) {
+    res.push(ele1);
+  }
+
+  if (cntEle2 >= majority) {
+    res.push(ele2);
+  }
+
+  return res;
+};
+
+// 3Sum
+/*
+Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+Notice that the solution set must not contain duplicate triplets.
+
+Example 1:
+Input: nums = [-1,0,1,2,-1,-4]
+Output: [[-1,-1,2],[-1,0,1]]
+Explanation:
+nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
+nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
+nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.
+The distinct triplets are [-1,0,1] and [-1,-1,2].
+Notice that the order of the output and the order of the triplets does not matter.
+*/
+var threeSum = function (nums) {
+  // Brute force Approach: We need to store the triplet which gives sum = 0 and all elements should be unique in it as 'solution set must not contain duplicate triplets.'
+  // We will use 3 loops i = 0 -> n, j = i+1 -> n, k = j+1 -> n, and inside third loop, we check if arr[i]+arr[j]+arr[k]==0, we will store them inside a set
+  // We use set so that we do not store duplicates, at the end store everything present in set to a new fresh array and return the array
+  // Better Approach: We need to omit one loop i.e k loop to get better complexity, nums[i] + nums[j] + nums[k] == 0, to get the third element, we can do it like nums[k] = -(nums[i] + nums[j])
+  // nums[k] should be between nums[i] and nums[j] where i = 0 -> n and j = i+1 -> n
+  // to get only unique values, we will make a hashset and store all values between i and j into it, everytime when we move i, a new hashset will be created
+  let n = nums.length;
+  let ans = [];
+  for (let i = 0; i < n; i++) {
+    let st = new Set();
+    for (let j = i + 1; j < n; j++) {
+      let third = -(nums[i] + nums[j]);
+      if (st.has(third)) {
+        let temp = [nums[i], nums[j], third];
+        temp.sort((a, b) => a - b);
+        ans.push(temp);
+      }
+      st.add(nums[j]);
+    }
+  }
+
+  // our ans might contain duplicate triplets so store them in an set and then again in array
+  let set = new Set(ans.map(JSON.stringify));
+  ans = Array.from(set).map(JSON.parse);
+  return ans;
+};
+
+// Most Optimal Approach (using 3 pointers)
+var threeSum = function (nums) {
+  // Most Optimal Approach
+  // We need to get rid of set to store sorted triplets
+  // First of all sort the array so that we do not need to care for sorted triplets
+  // We take 3 pointers i,j,k
+  // i = 0 -> n
+  // j will always be i + 1
+  // k = n-1 always
+  // We check if nums[i]+nums[j]+nums[k]==0, we have found our triplet, store it in ans and move j++, k-- (we do not move i because i will be constant, its like for a particular i, we get all the triplets present in our array) but but while moving j and k, make sure that j and k do not have same value as they had earlier i.e arr[j] != arr[j-1] and arr[k] != arr[k+1] then only move them
+  // means once you have got the triplet, move j and k to such a value that was not used for previous triplet because we need unique triplets
+  // do this till j < k, once they cross, means we have got our all triplets which are unique and which could have formed using current nums[i] so now we go to next iteration of i
+  // What if our nums[i]+nums[j]+nums[k] < 0, we need to increase value, our i is constant, j and k are only moving, its an sorted array if we move k-- our value will further decrease, i is constant so whom to move?? yes, we will move j so if(sum < 0) j++
+  // What if sum > 0, we need to decrease the value so simply k--
+  // While we are moving i, we need to make sure we move i to such a value which is not taken earlier so move i till we have a unique value of it and do j = i+1, k = n-1 and while(j<k) thing
+  // This was we get our triplets
+  let n = nums.length;
+  nums.sort((a, b) => a - b);
+  let ans = [];
+  for (let i = 0; i < n; i++) {
+    if (i > 0 && nums[i] == nums[i - 1]) {
+      // if i>0 means we are not at 0th index, move i till we get a unique value
+      continue;
+    }
+
+    // once we have a unique value for i
+    let j = i + 1;
+    let k = n - 1;
+    while (j < k) {
+      let sum = nums[i] + nums[j] + nums[k];
+      if (sum < 0) {
+        j++;
+      } else if (sum > 0) {
+        k--;
+      } else {
+        let temp = [nums[i], nums[j], nums[k]];
+        ans.push(temp);
+        j++;
+        k--;
+        while (nums[j] == nums[j - 1]) j++;
+        while (nums[k] == nums[k + 1]) k--;
+      }
+    }
+  }
+
+  return ans;
+};
+
+// 4Sum
+/*
+Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:
+
+0 <= a, b, c, d < n
+a, b, c, and d are distinct.
+nums[a] + nums[b] + nums[c] + nums[d] == target
+You may return the answer in any order.
+
+Example 1:
+Input: nums = [1,0,-1,0,-2,2], target = 0
+Output: [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+*/
+var fourSum = function (nums, target) {
+  // Brute Approach: It will be to run 4 loops and do the calculations
+  // Better Approach: Omit 1 loop by using a set data structure to store unique quadruplet just like we did in 3 sum
+  let n = nums.length;
+  let set = new Set();
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      let hashset = new Set();
+      for (let k = j + 1; k < n; k++) {
+        let sum = nums[i] + nums[j];
+        sum += nums[k];
+        let fourth = target - sum;
+        if (hashset.has(fourth)) {
+          let temp = [nums[i], nums[j], nums[k], fourth];
+          temp.sort((a, b) => a - b);
+          set.add(temp);
+        }
+        hashset.add(nums[k]);
+      }
+    }
+  }
+
+  let ans = Array.from(set);
+  return ans;
+};
+
+// Optimal Approach (Same as 3 sum)
+var fourSum = function (nums, target) {
+  // Optimal Approach
+  // we intend to get rid of two things i.e. the HashSet we were using for the look-up operation and the set data structure used to store the unique quadruplets
+  // solution to this will be similar to the optimal approach of the  3-sum problem. In that approach, we had fixed a pointer i, and the rest 2 pointers were moving. Similarly, here, as we are dealing with quads instead of triplets we will fix 2 pointers i.e. i and j and the rest of the 2 pointers will be moving.
+  // To get the quadruplets in sorted order, we will sort the entire array in the first step and to get the unique quads, we will simply skip the duplicate numbers while moving the pointers.
+  let n = nums.length; //size of the array
+  let ans = [];
+
+  // sort the given array:
+  nums.sort((a, b) => a - b);
+
+  //calculating the quadruplets:
+  for (let i = 0; i < n; i++) {
+    // avoid the duplicates while moving i:
+    if (i > 0 && nums[i] == nums[i - 1]) continue;
+    for (let j = i + 1; j < n; j++) {
+      // avoid the duplicates while moving j:
+      if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+
+      // 2 pointers:
+      let k = j + 1;
+      let l = n - 1;
+      while (k < l) {
+        let sum = nums[i];
+        sum += nums[j];
+        sum += nums[k];
+        sum += nums[l];
+        if (sum == target) {
+          let temp = [nums[i], nums[j], nums[k], nums[l]];
+          ans.push(temp);
+          k++;
+          l--;
+
+          //skip the duplicates:
+          while (k < l && nums[k] == nums[k - 1]) k++;
+          while (k < l && nums[l] == nums[l + 1]) l--;
+        } else if (sum < target) k++;
+        else l--;
+      }
+    }
+  }
+
+  return ans;
+};
