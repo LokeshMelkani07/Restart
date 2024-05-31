@@ -370,22 +370,42 @@ var maxSubArray = function (nums) {
   // We will use this algo which states that to get maximum sum in a subarray
   // We need to consider only positive elements because if we consider negative elements then its difficult to get the maximum sum
   // The intuition of the algorithm is not to consider the subarray as a part of the answer if its sum is less than 0. A subarray with a sum less than 0 will always reduce our answer and so this type of subarray cannot be a part of the subarray with maximum sum.
+  // Follow up Question: Print the maximum sum subarray also
+  // There can be many subarrays with maximum sum, we need to print any one of them. What we can do is
+  // We observe our subarray starts when Currsum == 0 from then our new subarray starts and when Currsum > maxSum, it ends one subarray for us
+  // If somehow we can store these start and end index of our subarray, we can run a loop between these indexes and print the largest sum subarray
+  // So we make use of 3 variables, start, subStart, subEnd
   let currSum = 0;
   let maxSum = -Infinity;
+  let start = 0,
+    subStart = -1,
+    subEnd = -1;
 
   for (let i = 0; i < nums.length; i++) {
+    if (currSum == 0) {
+      // This is the beginning of new Subarray so store the starting index
+      start = i; // starting index
+    }
     // keep on adding element to the sum
     currSum += nums[i];
 
     // if we get any maximum sum, update it
     if (currSum > maxSum) {
       maxSum = currSum;
+      // Store the starting and ending of this subarray with maximum sum
+      subStart = start;
+      subEnd = i;
     }
 
     // if current sum becomes negative, make it 0 as negative will not help us in getting maximum sum
     if (currSum < 0) {
       currSum = 0;
     }
+  }
+
+  // Print the subarray
+  for (let i = subStart; i <= subEnd; i++) {
+    console.log(nums[i] + " ");
   }
 
   return maxSum;
@@ -864,3 +884,512 @@ function lenOfLongSubarr(arr, n, k) {
 
   return maxLen;
 }
+
+// Sort an array of 0's 1's and 2's
+/*
+Given an array nums with n objects colored red, white, or blue, sort them in-place so that objects of the same color are adjacent, with the colors in the order red, white, and blue.
+
+We will use the integers 0, 1, and 2 to represent the color red, white, and blue, respectively.
+
+You must solve this problem without using the library's sort function.
+
+Example 1:
+Input: nums = [2,0,2,1,1,0]
+Output: [0,0,1,1,2,2]
+*/
+var sortColors = function (nums) {
+  // Brute Force Approach: We will just simply sort the array although it is not expexted in the problem statement
+  // Better Approach: We will simply count number of 0's, number of 1's, number of 2's and paste in the based indexes in sequence of 0,1,2 running 3 loops based on count
+  // Optimal Approach: We will use 3 pointers where we want to run them such that arr[0….low-1] contains 0. [Extreme left part], arr[low….mid-1] contains 1. arr[high+1….n-1] contains 2. [Extreme right part], n = size of the array
+  // We will use 3 pointers, low, mid, high
+  // low starts from 0, mid also starts from 0, high starts from nums.length-1
+  // we will run a loop till mid <= high
+  // low will take care of 0's, mid will take care of 1's and high will take care of 2's
+  let low = 0,
+    mid = 0,
+    high = nums.length - 1,
+    temp = 0;
+  while (mid <= high) {
+    if (nums[mid] == 0) {
+      temp = nums[low];
+      nums[low] = nums[mid];
+      nums[mid] = temp;
+      low++;
+      mid++;
+    } else if (nums[mid] == 1) {
+      mid++;
+    } else {
+      temp = nums[mid];
+      nums[mid] = nums[high];
+      nums[high] = temp;
+      high--;
+    }
+  }
+
+  return nums;
+};
+
+// Rearrange Array Elements by Sign
+/*
+You are given a 0-indexed integer array nums of even length consisting of an equal number of positive and negative integers.
+
+You should return the array of nums such that the the array follows the given conditions:
+
+Every consecutive pair of integers have opposite signs.
+For all integers with the same sign, the order in which they were present in nums is preserved.
+The rearranged array begins with a positive integer.
+Return the modified array after rearranging the elements to satisfy the aforementioned conditions.
+
+Example 1:
+Input: nums = [3,1,-2,-5,2,-4]
+Output: [3,-2,1,-5,2,-4]
+Explanation:
+The positive integers in nums are [3,1,2]. The negative integers are [-2,-5,-4].
+The only possible way to rearrange them such that they satisfy all conditions is [3,-2,1,-5,2,-4].
+Other ways such as [1,-2,2,-5,3,-4], [3,1,2,-2,-5,-4], [-2,3,-5,1,-4,2] are incorrect because they do not satisfy one or more conditions.
+*/
+var rearrangeArray = function (nums) {
+  // Brute Force Approach: We will try to calculate number of positive elements and store them in an array pos[], calculate number of negative elements and store them in an array neg[]
+  // 'nums consists of equal number of positive and negative integers.' is given
+  // We will again do a traversal from i = 0 -> i < n/2 and at all 2*i (even index) indexes we fill positive numbers, At all 2*i + 1 (odd index) we will fill all negative numbers
+  let pos = [];
+  let neg = [];
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    if (nums[i] > 0) {
+      pos.push(nums[i]);
+    } else {
+      neg.push(nums[i]);
+    }
+  }
+
+  for (let j = 0; j < n / 2; j++) {
+    nums[2 * j] = pos[j];
+    nums[2 * j + 1] = neg[j];
+  }
+
+  return nums;
+};
+
+// Better Approach
+var rearrangeArray = function (nums) {
+  // Better Approach: Instead of doing everything in 2 loops, we will try to do everything in a single pass
+  // It is given that resultant array should start from positive element so we can make 2 variables, posIndex = 0 as we need positive element in 0th index, negIndex = 1 (initially) as we need to start filling negative elements from 1st index
+  // Once we store any positive element we increment by 2 steps and sameway for negative element
+  let n = nums.length;
+  let arr = Array(n).fill(0);
+  let posIndex = 0,
+    negIndex = 1;
+  for (let i = 0; i < n; i++) {
+    if (nums[i] > 0) {
+      arr[posIndex] = nums[i];
+      posIndex += 2;
+    } else {
+      arr[negIndex] = nums[i];
+      negIndex += 2;
+    }
+  }
+
+  return arr;
+};
+
+// Follow Up Question
+var rearrangeArray = function (nums) {
+  // Follow Up Question: Do the same thing given that number of positive elements are not equal to negative elements so while rearranging elements alternatively, start with a positive element and fill all leftover elements are at the end
+  // So we will use pos[] and neg[] approach only but this time, if we check whether number of positive is greater in number or number of negatives are greater in number
+  // whomsoever is greater, leftover elements will be coming from it only
+  let pos = [];
+  let neg = [];
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    if (nums[i] > 0) pos.push(nums[i]);
+    else neg.push(nums[i]);
+  }
+
+  if (pos.length < neg.length) {
+    // negatives are in greater number
+    for (let i = 0; i < pos.length; i++) {
+      nums[2 * i] = pos[i];
+      nums[2 * i + 1] = neg[i];
+    }
+
+    // nums is already filled till pos.length*2 index because half element of pos.length come from neg also so we need to fill leftOver negatives in nums from pos.length*2 index
+    let index = pos.length * 2;
+    for (let i = pos.length; i < neg.length; i++) {
+      nums[index] = neg[i];
+      index++;
+    }
+  }
+  // If negatives are lesser than the positives.
+  else {
+    // First, fill array alternatively till the point
+    // where positives and negatives are equal in number.
+    for (let i = 0; i < neg.length; i++) {
+      nums[2 * i] = pos[i];
+      nums[2 * i + 1] = neg[i];
+    }
+
+    // Fill the remaining positives at the end of the array.
+    let index = neg.length * 2;
+    for (let i = neg.length; i < pos.length; i++) {
+      nums[index] = pos[i];
+      index++;
+    }
+  }
+  return nums;
+};
+
+// Next Permutation
+/*
+A permutation of an array of integers is an arrangement of its members into a sequence or linear order.
+
+For example, for arr = [1,2,3], the following are all the permutations of arr: [1,2,3], [1,3,2], [2, 1, 3], [2, 3, 1], [3,1,2], [3,2,1].
+The next permutation of an array of integers is the next lexicographically greater permutation of its integer. More formally, if all the permutations of the array are sorted in one container according to their lexicographical order, then the next permutation of that array is the permutation that follows it in the sorted container. If such arrangement is not possible, the array must be rearranged as the lowest possible order (i.e., sorted in ascending order).
+
+For example, the next permutation of arr = [1,2,3] is [1,3,2].
+Similarly, the next permutation of arr = [2,3,1] is [3,1,2].
+While the next permutation of arr = [3,2,1] is [1,2,3] because [3,2,1] does not have a lexicographical larger rearrangement.
+Given an array of integers nums, find the next permutation of nums.
+
+The replacement must be in place and use only constant extra memory.
+
+Example 1:
+Input: nums = [1,2,3]
+Output: [1,3,2]
+*/
+var nextPermutation = function (nums) {
+  // Problem statement: We will be given an array and we need to return the next permutation of that array sequence
+  // For arr [1,2,3], all its permutations are [1,2,3], [1,3,2], [2, 1, 3], [2, 3, 1], [3,1,2], [3,2,1]
+  // Now arr could be anything say arr = [2,3,1] then we need to return next lexicographically greater permutation of [2,3,1] in sequence of its all sequence i.e return [3,1,2]
+  // How to find next permutation?
+  // We observe that there can be presence of a mountaineous sttucture in the array if we look from the end of array like it is there in [2,3,1] or [1,3,2] or [3,1,2] but its not necessary, it might also happen that array is sorted in decreasing order if we look from end of array
+  // first and foremost task is to find the break point of array i.e such a index where arr[i] < arr[i+1]
+  // if break point is found, repeat some steps i.e from index = brk_point till index = n, we have whole right half of array, in that right half. find an element such that it is greater than arr[brk_point] say ind2
+  // if such element is found, store its index and swap it with break point index value, now reverse whole right half from brk_pint +1 till n
+  // and that is our next permutation because if we see [2,3,1] brk_pointi is arr[0] = 2, we see gretest element on right half is arr[1] = 3 so swap. after swap it becomes [3,2,1] now we reverse brk_point+1 i.e arr[0+1] till arr[n] so array becomes [3,1,2] and i.e our next permutation of [2,3,1]
+  // Now what if break point is not present? like [3,2,1] means array is sorted in decreasing order and that is case when that permutation is the last permutation of that array so its next permutation will be reverse(Arr) so array becomes [1,2,3] i.e increasingly sorted and thats our answer
+  let brk_pt = -1;
+  let n = nums.length;
+  // we will start searching for break point from index = n-2 because we will look for ind and ind+1 so to avoid overflow
+  for (let i = n - 2; i >= 0; i--) {
+    if (nums[i] < nums[i + 1]) {
+      brk_pt = i;
+      break;
+    }
+  }
+
+  // if break point not found
+  if (brk_pt == -1) {
+    reverse(nums, 0, n - 1);
+    return nums;
+  }
+
+  let ind2 = -1;
+  for (let i = n - 1; i > brk_pt; i--) {
+    if (nums[i] > nums[brk_pt]) {
+      // if such element found, swap and break out
+      [nums[i], nums[brk_pt]] = [nums[brk_pt], nums[i]];
+      break;
+    }
+  }
+
+  // reverse whole right half
+  reverse(nums, brk_pt + 1, n - 1);
+  return nums;
+};
+
+function reverse(arr, start, end) {
+  while (start <= end) {
+    let temp = arr[start];
+    arr[start] = arr[end];
+    arr[end] = temp;
+    start++;
+    end--;
+  }
+}
+
+// Leaders in an array
+/*
+Given an array A of positive integers. Your task is to find the leaders in the array. An element of the array is a leader if it is greater than all the elements to its right side or if it is equal to the maximum element on its right side. The rightmost element is always a leader.
+
+Example 1:
+Input:
+n = 6
+A[] = {16,17,4,3,5,2}
+Output: 17 5 2
+Explanation: The first leader is 17
+as it is greater than all the elements
+to its right.  Similarly, the next
+leader is 5. The right most element
+is always a leader so it is also
+included.
+*/
+
+function leaders(arr, n) {
+  // Based on conditions of a leader and the given fact that 'The rightmost element is always a leader.'
+  // What we are doing is, we are always comparing any element with all elements on its right and deciding whether current element is an leader or not
+  // What if we start traversal from the end element and each time we store the maximum element we encounter
+  // In this process if we find someone greater than our maximum element means he is also a leader so push him in result array and update the maximum
+  let res = [];
+  // Rightmost element is always a leader so push it in array everytime and start traversal from i = n-2
+  let maxi = arr[n - 1];
+  res.push(arr[n - 1]);
+  for (let i = n - 2; i >= 0; i--) {
+    if (arr[i] > maxi) {
+      res.push(arr[i]);
+      maxi = arr[i];
+    }
+  }
+
+  return res;
+}
+
+// Longest Consecutive Sequence
+/*
+Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+
+You must write an algorithm that runs in O(n) time.
+
+Example 1:
+Input: nums = [100,4,200,1,3,2]
+Output: 4
+Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+*/
+var longestConsecutive = function (nums) {
+  // We will use set Data structure to store elements in unique fashion
+  // We will add all elements inside set
+  // Now we traverse the set, for each element inside set
+  // we check its ele-1, if not found
+  // we check for its ele+1 and count it till we find it
+  let n = nums.length;
+  if (n == 0) {
+    return 0;
+  }
+
+  let longest = 1; // there will always be one element inside array so longest = 1
+  const st = new Set();
+  for (let i = 0; i < n; i++) {
+    st.add(nums[i]);
+  }
+
+  // Check inside set
+  for (let val of st) {
+    if (!st.has(val - 1)) {
+      // check for val+1
+      let count = 1; // we have found the first element so count = 1 initialised
+      let x = val;
+      while (st.has(x + 1)) {
+        // check till we get consecutive number and do count++
+        count++;
+        x++;
+      }
+
+      // update longest variable with count
+      longest = Math.max(longest, count);
+    }
+  }
+
+  return longest;
+};
+
+// Set Matrix Zeroes
+/*
+Given an m x n integer matrix matrix, if an element is 0, set its entire row and column to 0's.
+You must do it in place.
+*/
+var setZeroes = function (matrix) {
+  // Brute force Approach: We will traverse all row and col and if we encounter a mat[i][j] == 0, we make whole row and whole col as -1
+  // Why -1, why not 0? because if we mark everyone as 0 in that row and col, then it will make other 1's in those row and col as 0 which will bring change in our answer so initially mark them all as -1 and later we will mark them all with 0 once whole traversal is done
+  let n = matrix.length;
+  let m = matrix[0].length;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (matrix[i][j] == 0) {
+        markRow(i, matrix, m);
+        markCol(j, matrix, n);
+      }
+    }
+  }
+
+  // Mark all -1 as 0
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (matrix[i][j] === -1) {
+        matrix[i][j] = 0;
+      }
+    }
+  }
+
+  return matrix;
+};
+
+function markRow(row, matrix, m) {
+  for (let i = 0; i < m; i++) {
+    if (matrix[row][i] !== 0) {
+      matrix[row][i] = -1;
+    }
+  }
+}
+
+function markCol(col, matrix, n) {
+  for (let i = 0; i < n; i++) {
+    if (matrix[i][col] !== 0) {
+      matrix[i][col] = -1;
+    }
+  }
+}
+
+// Better Approach
+var setZeroes = function (matrix) {
+  // Better Approach, Instead of making -1 this time, we will use 2 arrays row and col which will store indexes where we have to make element as 0
+  // say matrix[i][j] = 0 then row[i] = 1, col[j] = 1
+  // now after whole traversal, we traverse again and if(row[i] || col[j]) then matrix[i][j] = 0
+  const n = matrix.length;
+  const m = matrix[0].length;
+  const row = new Array(n).fill(0); // row array
+  const col = new Array(m).fill(0); // col array
+
+  // Traverse the matrix:
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (matrix[i][j] === 0) {
+        // mark ith index of row with 1:
+        row[i] = 1;
+
+        // mark jth index of col with 1:
+        col[j] = 1;
+      }
+    }
+  }
+
+  // Finally, mark all (i, j) as 0
+  // if row[i] or col[j] is marked with 1.
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (row[i] || col[j]) {
+        matrix[i][j] = 0;
+      }
+    }
+  }
+
+  return matrix;
+};
+
+// Rotate Image
+/*
+You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+
+You have to rotate the image in-place, which means you have to modify the input 2D matrix directly. DO NOT allocate another 2D matrix and do the rotation.
+
+Example 1:
+Input: matrix = [[1,2,3],[4,5,6],[7,8,9]]
+Output: [[7,4,1],[8,5,2],[9,6,3]]
+*/
+var rotate = function (matrix) {
+  // By observation, we see that the first column of the original matrix is the reverse of the first row of the rotated matrix, so that’s why we transpose the matrix and then reverse each row, and since we are making changes in the matrix itself space complexity gets reduced to O(1).
+  // Transpose each col and reverse each row
+  // we get the answer
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = i + 1; j < matrix[i].length; j++) {
+      let temp = matrix[i][j];
+      matrix[i][j] = matrix[j][i];
+      matrix[j][i] = temp;
+    }
+  }
+  for (let i = 0; i < matrix.length; i++) {
+    matrix[i].reverse();
+  }
+};
+
+// Spiral Matrix
+/*
+Given an m x n matrix, return all elements of the matrix in spiral order.
+
+Example 1:
+Input: matrix = [[1,2,3],[4,5,6],[7,8,9]]
+Output: [1,2,3,6,9,8,7,4,5]
+*/
+var spiralOrder = function (matrix) {
+  // TC: O(m*n)
+  let ans = [];
+  let row_size = matrix.length;
+  let col_size = matrix[0].length;
+
+  let count = 0;
+  let total = row_size * col_size;
+
+  let startingRow = 0;
+  let startingCol = 0;
+  let endingRow = row_size - 1;
+  let endingCol = col_size - 1;
+
+  while (count < total) {
+    // Print starting row
+    for (let i = startingCol; count < total && i <= endingCol; i++) {
+      ans.push(matrix[startingRow][i]);
+      count++;
+    }
+    startingRow++;
+
+    // Print ending col
+    for (let i = startingRow; count < total && i <= endingRow; i++) {
+      ans.push(matrix[i][endingCol]);
+      count++;
+    }
+    endingCol--;
+
+    // print ending row
+    for (let i = endingCol; count < total && i >= startingCol; i--) {
+      ans.push(matrix[endingRow][i]);
+      count++;
+    }
+    endingRow--;
+
+    // print starting col
+    for (let i = endingRow; count < total && i >= startingRow; i--) {
+      ans.push(matrix[i][startingCol]);
+      count++;
+    }
+    startingCol++;
+  }
+  return ans;
+};
+
+// Subarray Sum Equals K
+/*
+Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+
+A subarray is a contiguous non-empty sequence of elements within an array.
+
+Example 1:
+Input: nums = [1,1,1], k = 2
+Output: 2
+*/
+var subarraySum = function (nums, k) {
+  // Brute force Approach: We will use 2 loops and take a variable count = 0, we take sum of all elements in second loop which start from j = i -> n
+  // if(sum==k) we do count++ and in the end, we return count
+  // Optimal Approach: We will use map and prefixSum, Inside the map we will store prefix and its count
+  // We will set mpp[0] = 1 because say given array is [3, -3, 1, 1, 1] and k is 3. Now, for index 0, we get the total prefix sum as 3, and k is also 3. So, the prefix sum of the remove-part should be x-k = 3-3 = 0. Now, if the value is not previously set for the key 0 in the map, we will get the default value 0 for the key 0 and we will add 0 to our answer. This will mean that we have not found any subarray with sum 3 till now. But this should not be the case as index 0 itself is a subarray with sum k i.e. 3. So, in order to avoid this situation we need to set the value of 0 as 1 on the map beforehand.
+  // we will calculate prefix sum for each element and we check if prefix - k is present in the map because let say our current_sum = 14 , required  = 7 , then 14-7 if its exited in map ealrier. means there must have been an subarray with required sum of 7, add into count and add that prefix sum into the answer
+  let mpp = new Map();
+  let count = 0;
+  let n = nums.length;
+  let prefixSum = 0;
+  mpp.set(0, 1);
+  for (let i = 0; i < n; i++) {
+    prefixSum += nums[i];
+
+    if (prefixSum == k) {
+      count++;
+    }
+
+    let remove = prefixSum - k;
+    if (mpp.has(remove)) {
+      count += mpp.get(remove);
+    }
+
+    mpp.set(prefixSum, (mpp.get(prefixSum) || 0) + 1);
+  }
+
+  return count;
+};
