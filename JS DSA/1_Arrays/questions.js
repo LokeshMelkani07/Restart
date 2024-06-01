@@ -1721,3 +1721,666 @@ var fourSum = function (nums, target) {
 
   return ans;
 };
+
+// Largest subarray with 0 sum
+/*
+Given an array having both positive and negative integers. The task is to compute the length of the largest subarray with sum 0.
+
+Example 1:
+Input:
+N = 8
+A[] = {15,-2,2,-8,1,7,10,23}
+Output: 5
+Explanation: The largest subarray with
+sum 0 will be -2 2 -8 1 7.
+*/
+function maxLen(arr, n) {
+  // Brute force Approach
+  /*
+        Initialize a variable max = 0, which stores the length of the longest subarray with a sum of 0.
+        Traverse the array from the start and initialize a variable sum = 0 which stores the sum of the subarray starting with the current index
+        Traverse from the next element of current_index up to the end of the array, each time add the element to the sum and check if it is equal to 0.
+        If sum = 0, check if the length of the subarray so far is > max and if yes update max
+        Now keep adding elements and repeat step 3 a.
+        After the outer loop traverses all elements return max
+        */
+  // Optimised Approach
+  // We will make a map to store sum till each index
+  // if anytime our sum==0 means we have our subarray with sum 0  so maxLen = i+1 (0- basec indexing)
+  // if anytime our sum != 0 but map.has(sum) means we had same sum for some index i1, now we have same sum for a index i, means all elements between i and i1 had cumulative sum of 0 means they can be our answer so how to get length of those elements?
+  // maxLen = max(maxLen, i - map.has(sum))
+  // if neither sum==0 nor map.has(sum) means just simply add (sum,i) to map
+  let mpp = new Map();
+  let sum = 0;
+  let maxLen = 0;
+  for (let i = 0; i < n; i++) {
+    sum += arr[i];
+    if (sum == 0) {
+      maxLen = i + 1;
+    } else if (mpp.has(sum)) {
+      maxLen = Math.max(maxLen, i - mpp.get(sum));
+    } else {
+      mpp.set(sum, i);
+    }
+  }
+
+  return maxLen;
+}
+
+// Count the number of subarrays with given xor K
+// Problem Statement: Given an array of integers A and an integer B. Find the total number of subarrays having bitwise XOR of all elements equal to k.
+function subarraysWithXorK(a, k) {
+  // Brute force Approach: Generate all subarrays and count their XOR, if XOR == k, count++ and return count in the end
+  // How to generate all subarrays using loops?
+  // run a outer loop for i = 0 -> n
+  // run a inner loop for j = i -> n
+  // run a inner-inner loop for k = i -> j to cover all subarrays between i and j
+  // Do the computing inside inner-inner loop
+  const n = a.length;
+  let cnt = 0;
+
+  // Step 1: Generating subarrays:
+  for (let i = 0; i < n; i++) {
+    for (let j = i; j < n; j++) {
+      // Step 2: calculate XOR of all elements:
+      let xorr = 0;
+      for (let K = i; K <= j; K++) {
+        xorr = xorr ^ a[K];
+      }
+
+      // Step 3: check XOR and count:
+      if (xorr === k) cnt++;
+    }
+  }
+  return cnt;
+}
+
+// Better Approach
+function subarraysWithXorK(a, k) {
+  // Instead of using 3 loops, we will use only 2 loops and xorr all elements and simultaneously check if anytime xor == k do count++
+  const n = a.length; //size of the given array.
+  let cnt = 0;
+
+  // Step 1: Generating subarrays:
+  for (let i = 0; i < n; i++) {
+    let xorr = 0;
+    for (let j = i; j < n; j++) {
+      //step 2:calculate XOR of all
+      // elements:
+      xorr = xorr ^ a[j];
+
+      // step 3:check XOR and count:
+      if (xorr == k) cnt++;
+    }
+  }
+  return cnt;
+}
+
+// Optimal Approach
+/*
+First, we will declare a map to store the prefix XORs and their counts.
+Then, we will set the value of 0 as 1 on the map.
+Then we will run a loop(say i) from index 0 to n-1(n = size of the array).
+For each index i, we will do the following:
+We will XOR the current element i.e. arr[i] to the existing prefix XOR.
+Then we will calculate the prefix XOR i.e. xr^k, for which we need the occurrence.
+We will add the occurrence of the prefix XOR xr^k i.e. mpp[xr^k] to our answer.
+Then we will store the current prefix XOR, xr in the map increasing its occurrence by 1.
+Why do we need to set the value of 0 beforehand?
+Let’s understand this using an example. Assume the given array is [3, 3, 1, 1, 1] and k is 3. Now, for index 0, we get the total prefix XOR as 3, and k is also 3. So, the prefix XOR xr^k will be = 3^3 = 0. Now, if the value is not previously set for the key 0 in the map, we will get the default value 0 and we will add 0 to our answer. This will mean that we have not found any subarray with XOR 3 till now. But this should not be the case as index 0 itself is a subarray with XOR k i.e. 3.
+So, in order to avoid this situation we need to set the value of 0 as 1 on the map beforehand.
+*/
+function subarraysWithXorK(a, k) {
+  const n = a.length; //size of the given array.
+  let xr = 0;
+  const mpp = new Map(); //declaring the map.
+  mpp.set(xr, 1); //setting the value of 0.
+  let cnt = 0;
+
+  for (let i = 0; i < n; i++) {
+    // prefix XOR till index i:
+    xr = xr ^ a[i];
+
+    // Now we have XOR till a range = xr
+    // In that range we say have x element till a point, then k elements till another point after x
+    // and x^k = xr
+    // Taking XOR of k both sides
+    // (x^k)^k = xr^k => x (as k^k = 0, and 0^x = x) = xr ^ k so if somehow we have xr^k in the map means we have a subarray where x^k = xr
+    // if we remove x, we get subbarray with exactly xor = k so count += map.get(xr^k) gives number of such subarrays we have till xor == xr, from where we can get subarray with xor = k
+    //By formula: x = xr^k:
+    const x = xr ^ k;
+
+    // add the occurrence of xr^k
+    // to the count:
+    cnt += mpp.get(x) || 0;
+
+    // Insert the prefix xor till index i
+    // into the map: xr , occurence
+    mpp.set(xr, (mpp.get(xr) || 0) + 1);
+  }
+  return cnt;
+}
+
+// Merge Intervals
+/*
+Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+Example 1:
+Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+*/
+var merge = function (intervals) {
+  // Brute force Approach: We will traverse all elements using a loop
+  // Group all close intervals together so sort the array first
+  // Stand at an element, take start and end of that interval in 2 variables
+  // now check if our ans[] contains such interval which covers till current interval completely means jo last element hai humare ans[] ka, agar vo current interval ko completely apne andar le rha h means current interval is of no use, continue;
+  // but agar aisa nhi ho rha, matlab ek aisa interval mila h jo ki start toh ho rha h ans[] ke last element interval ke andar andar but ending nhi ho rha so hume unn dono intervals ko merge krne hoga end ko update krna hoga and then ans[] mai push krna hoga
+  intervals.sort((a, b) => a[0] - b[0]);
+  let n = intervals.length;
+  let ans = [];
+  for (let i = 0; i < n; i++) {
+    let start = intervals[i][0];
+    let end = intervals[i][1];
+    if (ans.length && end <= ans[ans.length - 1][1]) {
+      continue;
+    }
+
+    // if we are here means we can use current interval to merge it with some other intervals so we run loop i = j+1 and check if current interval can be merged with some next intervals
+    for (let j = i + 1; j < n; j++) {
+      if (intervals[j][0] <= end) {
+        start = Math.min(start, intervals[j][0]);
+        end = Math.max(end, intervals[j][1]);
+      } else {
+        break;
+      }
+    }
+
+    ans.push([start, end]);
+  }
+
+  return ans;
+};
+
+// Better Approach
+var merge = function (arr) {
+  // Better Approach: Intead of using 2 loops, we will try to merge (if possible) using single loop only
+  // Sort the array first to group all close intervals together and now, insert first interval in the answer because first element will always be alone so insert it
+  // now start traversing from index = 1 and check if any interval overlap with last added element in the array, if yes, update the end of last added element in the array or if no, insert current interval completely in the answer
+  let n = arr.length;
+  // sort the given intervals
+  arr.sort((a, b) => a[0] - b[0]);
+
+  const ans = [arr[0]];
+
+  for (let i = 1; i < n; i++) {
+    // last inserted interval in the ans[]
+    const last = ans[ans.length - 1];
+    // current interval
+    const curr = arr[i];
+
+    // if the current interval overlaps with the last interval
+    if (curr[0] <= last[1]) {
+      last[1] = Math.max(last[1], curr[1]);
+    }
+    // if the current interval does not overlap with the last interval
+    else {
+      ans.push(curr);
+    }
+  }
+
+  return ans;
+};
+
+// Merge Sorted Array Without using an Extra Space
+/*
+You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
+
+Merge nums1 and nums2 into a single array sorted in non-decreasing order.
+
+The final sorted array should not be returned by the function, but instead be stored inside the array nums1. To accommodate this, nums1 has a length of m + n, where the first m elements denote the elements that should be merged, and the last n elements are set to 0 and should be ignored. nums2 has a length of n.
+
+Example 1:
+Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+Output: [1,2,2,3,5,6]
+Explanation: The arrays we are merging are [1,2,3] and [2,5,6].
+The result of the merge is [1,2,2,3,5,6] with the underlined elements coming from nums1.
+*/
+var merge = function (nums1, m, nums2, n) {
+  // Merging without any extra space
+  // Given that nums1, nums2 are already sorted in non-decreasing order
+  // Merge them into a single array in nums1 only for which nums1 has m+n space where it can accomodate all elements easily
+  // So we start from end of both arrays and start filling nums1 from the end, we take 3 pointers i,j,k
+  // filling largest element at the last, moving to smaller ones, till j>=0  because nums1 has extra space for nums2.size elements only and nums1 is already sorted for itself
+  let i = m - 1;
+  let j = n - 1;
+  let k = m + n - 1;
+
+  while (j >= 0) {
+    if (i >= 0 && nums1[i] > nums2[j]) {
+      nums1[k--] = nums1[i--];
+    } else {
+      nums1[k--] = nums2[j--];
+    }
+  }
+};
+
+// Find Missing and Repeated Values
+/*
+You are given a 0-indexed 2D integer matrix grid of size n * n with values in the range [1, n2]. Each integer appears exactly once except a which appears twice and b which is missing. The task is to find the repeating and missing numbers a and b.
+
+Return a 0-indexed integer array ans of size 2 where ans[0] equals to a and ans[1] equals to b.
+
+Example 1:
+Input: grid = [[1,3],[2,2]]
+Output: [2,4]
+Explanation: Number 2 is repeated and number 4 is missing so the answer is [2,4].
+*/
+var findMissingAndRepeatedValues = function (g) {
+  // To find the repeated value, we use a set to store each element, if we encounter any such element which is already there in our set means its occuring twice so repeated = that element
+  // To find the missing element we will use range [1, n2] given
+  // We will have all our elements in the set (unique)
+  // We will run a loop from i = 1 -> n^2 and check if any value is not present in the set means its the missing one so return it
+  const n = g.length;
+  let a, b;
+  const set = new Set();
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const val = g[i][j];
+      if (set.has(val)) {
+        a = val;
+      }
+      set.add(val);
+    }
+  }
+
+  for (let val = 1; val <= n * n; val++) {
+    if (!set.has(val)) {
+      b = val;
+      break;
+    }
+  }
+  return [a, b];
+};
+
+// Find Missing And Repeating
+/*
+Given an unsorted array Arr of size N of positive integers. One number 'A' from set {1, 2,....,N} is missing and one number 'B' occurs twice in array. Find these two numbers.
+
+Example 1:
+Input:
+N = 2
+Arr[] = {2, 2}
+Output: 2 1
+Explanation: Repeating number is 2 and
+smallest positive missing number is 1.
+*/
+findTwoElement(arr, n);
+{
+  // We will make use of set, as we did in previous problem
+  // Given range set {1, 2,....,N}, we will use this range
+  let st = new Set();
+  let repeated = -1,
+    missing = -1;
+  for (let i = 0; i < n; i++) {
+    if (st.has(arr[i])) {
+      repeated = arr[i];
+    }
+    st.add(arr[i]);
+  }
+
+  // Now we find missing
+  for (let j = 1; j <= n; j++) {
+    if (!st.has(j)) {
+      missing = j;
+      break;
+    }
+  }
+
+  return [repeated, missing];
+}
+
+// Better Approach
+function findTwoElement(a, n) {
+  // Better Approach
+  // We can think of using a hashmap where we will have elements from 0 to N
+  // We will store frequencey of all as 0 initially
+  // then we will run a loop to store frequency of all
+  // Now we run another loop inside map, if any frequency > 1, store it, if any freq is 0 means its a missing so store it
+  const hash = new Array(n + 1).fill(0);
+
+  for (let i = 0; i < n; i++) {
+    hash[a[i]]++;
+  }
+
+  let repeating = -1,
+    missing = -1;
+  for (let i = 1; i <= n; i++) {
+    if (hash[i] == 2) repeating = i;
+    else if (hash[i] == 0) missing = i;
+
+    if (repeating != -1 && missing != -1) break;
+  }
+
+  return [repeating, missing];
+}
+
+// Optimal Approach
+function findTwoElement(a, n) {
+  // Most Optimal Solution
+  // Using maths
+  // We know 1+2+3+4+.....+n = n*(n+1)/2
+  // We know 1^2 + 2^2 + 3^2 +....... + n^2 = n*(n+1)*(2n+1)/6
+  // We will use these formulas to find sum of first n say Sn and n^2 natural numbers say Sn2
+  // Now we run the loop and take sum of all number in array say s1, sum of their sequares also s2
+  // if we find val1 = S1 - Sn = we get some value which we observe by pen and paper, consist of our missing and repeating numbers
+  // Samways val2 = S2 - Sn2 = we get some value which we observe by pen and paper, consist of our squares of missing and repeating numbers
+  // Let say repated = x,  missing  = y then val1 = x - y = some value which comes
+  // val2 = x^2 - y^2 = some value which comes, we know x^2 - y^2 = (x+y)(x-y) and we already have val1 = x - y so val2 = val2 / val1
+  // Once we have val1 and val2, In reality we have 2 equation of 2 variables, X + Y = something, X - Y = something, we can solve both equation and get X and Y
+  // Once Solving them on pen and paper, we observe X =  (val1 + val2)/2 and Y = X - val1
+  // This way we get our repeated and missing numbers
+
+  // Find Sn and S2n:
+  const SN = (n * (n + 1)) / 2;
+  const S2N = (n * (n + 1) * (2 * n + 1)) / 6;
+
+  // Calculate S and S2:
+  let S = 0,
+    S2 = 0;
+  for (let i = 0; i < n; i++) {
+    S += a[i];
+    S2 += a[i] * a[i];
+  }
+
+  //S-Sn = X-Y:
+  const val1 = S - SN;
+
+  // S2-S2n = X^2-Y^2:
+  let val2 = S2 - S2N;
+
+  //Find X+Y = (X^2-Y^2)/(X-Y):
+  val2 = val2 / val1;
+
+  //Find X and Y: X = ((X+Y)+(X-Y))/2 and Y = X-(X-Y),
+  // Here, X-Y = val1 and X+Y = val2:
+  const x = (val1 + val2) / 2;
+  const y = x - val1;
+
+  return [x, y];
+}
+
+// Count Inversions
+/*
+Given an array of integers. Find the Inversion Count in the array.
+
+Inversion Count: For an array, inversion count indicates how far (or close) the array is from being sorted. If the array is already sorted then the inversion count is 0.
+If an array is sorted in the reverse order then the inversion count is the maximum.
+Formally, two elements a[i] and a[j] form an inversion if a[i] > a[j] and i < j.
+
+Example 1:
+Input: N = 5, arr[] = {2, 4, 1, 3, 5}
+Output: 3
+Explanation: The sequence 2, 4, 1, 3, 5
+has three inversions (2, 1), (4, 1), (4, 3).
+*/
+
+function inversionCount(a, N) {
+  // Brute force: We will run 2 loops, outer i = 0 ->n, inner j = i+1 -> n
+  // We will check if arr[i] > arr[j] means one inversion is found, if we can invert such inversions, our array gets sorted after a time
+  // Count the number of pairs:
+  let cnt = 0;
+  for (let i = 0; i < N; i++) {
+    for (let j = i + 1; j < N; j++) {
+      if (a[i] > a[j]) cnt++;
+    }
+  }
+  return cnt;
+}
+
+// Optimal Approach
+class Solution {
+  // Function to count inversions in the array.
+  inversionCount(a, n) {
+    // Better Approach
+    /*
+        Assume two sorted arrays are given i.e. a1[] = {2, 3, 5, 6} and a2[] = {2, 2, 4, 4, 8}. Now, we have to count the pairs i.e. a1[i] and a2[j] such that a1[i] > a2[j].
+
+In order to solve this, we will keep two pointers i and j, where i will point to the first index of a1[] and j will point to the first index of a2[]. Now in each iteration, we will do the following:
+
+If a1[i] <= a2[j]: These two elements cannot be a pair and so we will move the pointer i to the next position. This case is illustrated below:
+
+Why we moved the i pointer: We know, that the given arrays are sorted. So, all the elements after the pointer j, should be greater than a2[j]. Now, as a1[i] is smaller or equal to a2[j], it is obvious that a1[i] will be smaller or equal to all the elements after a2[j]. We need a bigger value of a1[i] to make a pair and so we move the i pointer to the next position i.e. next bigger value.
+If a1[i] > a2[j]: These two elements can be a pair and so we will update the count of pairs. Now, here, we should observe that as a1[i] is greater than a2[j], all the elements after a1[i] will also be greater than a2[j] and so, those elements will also make pair with a2[j]. So, the number of pairs added will be n1-i (where n1 = size of a1[ ]). Now, we will move the j pointer to the next position.
+
+The above process will continue until at least one of the pointers reaches the end.
+
+Until now, we have figured out how to count the number of pairs in one go if two sorted arrays are given. But in our actual question, only a single unsorted array is given. So, how to break it into two sorted halves so that we can apply the above observation?
+
+
+We can think of the merge sort algorithm that works in a similar way we want. In the merge sort algorithm, at every step, we divide the given array into two halves and then sort them, and while doing that we can actually count the number of pairs.
+
+Basically, we will use the merge sort algorithm to use the observation in the correct way.
+
+        The steps are basically the same as they are in the case of the merge sort algorithm. The change will be just a one-line addition inside the merge() function. Inside the merge(), we need to add the number of pairs to the count when a[left] > a[right].
+
+The steps of the merge() function were the following:
+
+In the merge function, we will use a temp array to store the elements of the two sorted arrays after merging. Here, the range of the left array is low to mid and the range for the right half is mid+1 to high.
+Now we will take two pointers left and right, where left starts from low and right starts from mid+1.
+Using a while loop( while(left <= mid && right <= high)), we will select two elements, one from each half, and will consider the smallest one among the two. Then, we will insert the smallest element in the temp array.
+After that, the left-out elements in both halves will be copied as it is into the temp array.
+Now, we will just transfer the elements of the temp array to the range low to high in the original array.
+Modifications in merge() and mergeSort():
+
+In order to count the number of pairs, we will keep a count variable, cnt, initialized to 0 beforehand inside the merge().
+While comparing a[left] and a[right] in the 3rd step of merge(), if a[left] > a[right], we will simply add this line:
+cnt += mid-left+1 (mid+1 = size of the left half)
+Now, we will return this cnt from merge() to mergeSort().
+Inside mergeSort(), we will keep another counter variable that will store the final answer. With this cnt, we will add the answer returned from mergeSort() of the left half, mergeSort() of the right half, and merge().
+Finally, we will return this cnt, as our answer from mergeSort().
+*/
+    // Count the number of pairs:
+    return this.mergeSort(a, 0, n - 1);
+  }
+
+  mergeSort(arr, low, high) {
+    let cnt = 0;
+    if (low >= high) return cnt;
+    let mid = (low + high) / 2;
+    cnt += this.mergeSort(arr, low, mid); // left half
+    cnt += this.mergeSort(arr, mid + 1, high); // right half
+    cnt += this.merge(arr, low, mid, high); // merging sorted halves
+    return cnt;
+  }
+
+  merge(arr, low, mid, high) {
+    let temp = []; // temporary array
+    let left = low; // starting index of left half of arr
+    let right = mid + 1; // starting index of right half of arr
+
+    //Modification 1: cnt variable to count the pairs:
+    let cnt = 0;
+
+    //storing elements in the temporary array in a sorted manner//
+
+    while (left <= mid && right <= high) {
+      if (arr[left] <= arr[right]) {
+        temp.push(arr[left]);
+        left++;
+      } else {
+        temp.push(arr[right]);
+        cnt += mid - left + 1; //Modification 2
+        right++;
+      }
+    }
+
+    // if elements on the left half are still left //
+
+    while (left <= mid) {
+      temp.push(arr[left]);
+      left++;
+    }
+
+    //  if elements on the right half are still left //
+    while (right <= high) {
+      temp.push(arr[right]);
+      right++;
+    }
+
+    // transfering all elements from temporary to arr //
+    for (let i = low; i <= high; i++) {
+      arr[i] = temp[i - low];
+    }
+
+    return cnt; // Modification 3
+  }
+}
+
+// Reverse Pairs
+/*
+Given an integer array nums, return the number of reverse pairs in the array.
+
+A reverse pair is a pair (i, j) where:
+
+0 <= i < j < nums.length and
+nums[i] > 2 * nums[j].
+
+Example 1:
+Input: nums = [1,3,2,3,1]
+Output: 2
+Explanation: The reverse pairs are:
+(1, 4) --> nums[1] = 3, nums[4] = 1, 3 > 2 * 1
+(3, 4) --> nums[3] = 3, nums[4] = 1, 3 > 2 * 1
+*/
+var reversePairs = function (nums) {
+  /*
+    In order to solve this problem we will use the merge sort algorithm like we used in the problem count inversion with a slight modification of the merge() function. But in this case, the same logic will not work. In order to understand this, we need to deep dive into the merge() function.
+
+Why the same logic of count inversion will not work?
+
+The merge function works by comparing two elements from two halves i.e. arr[left] and arr[right]. Now, the condition in the question was arr[i] > arr[j]. That is why we merged the logic. While comparing the elements, we counted the number of pairs.
+But in this case, the condition is arr[i] > 2*arr[j]. And, we cannot change the condition of comparing the elements in the merge() function. If we change the condition, the merge() function will fail to merge the elements. So, we need to check this condition and count the number of pairs separately.
+Here, our approach will be to check, for every element in the sorted left half(sorted), how many elements in the right half(also sorted) can make a pair. Let’s try to understand, using the following example:
+
+
+For the first element of the left half i.e. 6, we will start checking from index 0 of the right half i.e. arr2[]. Now, we can clearly see that the first two elements of arr2[] can make a pair with arr1[0] i.e. 6.
+
+
+For the next element i.e. arr1[1], we will start checking from index 2(0-based indexing) i.e. where we stopped for the previous element.
+
+Note: This process will work because arr1[1] will always be greater than arr1[0] which concludes if arr2[0] and arr2[1] are making a pair with arr1[0], they will obviously make pairs with a number greater than arr1[0] i.e. arr1[1].
+
+Thus before the merge step in the merge sort algorithm, we will calculate the total number of pairs each time.
+
+Approach:
+The steps are basically the same as they are in the case of the merge sort algorithm. The change will be just in the mergeSort() function:
+
+In order to count the number of pairs, we will keep a count variable, cnt, initialized to 0 beforehand inside the mergeSort().
+We will add the numbers returned by the previous mergeSort() calls.
+Before the merge step, we will count the number of pairs using a function, named countPairs().
+We need to remember that the left half starts from low and ends at mid, and the right half starts from mid+1 and ends at high.
+The steps of the countPairs() function will be as follows:
+
+We will declare a variable, cnt, initialized with 0.
+We will run a loop from low to mid, to select an element at a time from the left half.
+Inside that loop, we will use another loop to check how many elements from the right half can make a pair.
+Lastly, we will add the total number of elements i.e. (right-(mid+1)) (where right = current index), to the cnt and return it.
+*/
+  let n = nums.length;
+  return mergeSort(nums, 0, n - 1);
+};
+
+function merge(arr, low, mid, high) {
+  let temp = []; // temporary array
+  let left = low; // starting index of left half of arr
+  let right = mid + 1; // starting index of right half of arr
+
+  // storing elements in the temporary array in a sorted manner
+  while (left <= mid && right <= high) {
+    if (arr[left] <= arr[right]) {
+      temp.push(arr[left]);
+      left++;
+    } else {
+      temp.push(arr[right]);
+      right++;
+    }
+  }
+
+  // if elements on the left half are still left
+  while (left <= mid) {
+    temp.push(arr[left]);
+    left++;
+  }
+
+  // if elements on the right half are still left
+  while (right <= high) {
+    temp.push(arr[right]);
+    right++;
+  }
+
+  // transferring all elements from temporary to arr
+  for (let i = low; i <= high; i++) {
+    arr[i] = temp[i - low];
+  }
+}
+
+function countPairs(arr, low, mid, high) {
+  let right = mid + 1;
+  let cnt = 0;
+  for (let i = low; i <= mid; i++) {
+    while (right <= high && arr[i] > 2 * arr[right]) right++;
+    cnt += right - (mid + 1);
+  }
+  return cnt;
+}
+
+function mergeSort(arr, low, high) {
+  let cnt = 0;
+  if (low >= high) return cnt;
+  let mid = Math.floor((low + high) / 2);
+  cnt += mergeSort(arr, low, mid); // left half
+  cnt += mergeSort(arr, mid + 1, high); // right half
+  cnt += countPairs(arr, low, mid, high); // Modification
+  merge(arr, low, mid, high); // merging sorted halves
+  return cnt;
+}
+
+// Maximum Product Subarray
+/*
+Given an integer array nums, find a subarray that has the largest product, and return the product.
+
+The test cases are generated so that the answer will fit in a 32-bit integer.
+
+Example 1:
+Input: nums = [2,3,-2,4]
+Output: 6
+Explanation: [2,3] has the largest product 6.
+*/
+var maxProduct = function (arr) {
+  // Brute force: We can run 3 loops and find the subarray and store the product inside a maxi and store maximum product
+  // Better Approach: We can reduce 3 loops to 2 loops by omitting inner-most loop of k, and just take product = product*arr[j] inside inner loop and everytime maxi = max(maxi,product)
+  // Most Optimal Approach
+  // Given is that '-10 <= nums[i] <= 10' means we can have negative numbers in our product, we know -ve * -ve is +ve but -ve * -ve * -ve = -ve
+  // So if we have even number of negatives, we can handle it to get maximum product
+  // But if we have odd number of negatives, we need to somehow remove one -ve and make it even number of negatives to make the product maximum
+  // We may also have 0's in our array, whenever we encounter a 0 means our product becomes 0 so we can get our max product subarray before 0, we might get after 0 but we can never get it if we include 0 in the answer
+  // Say when we try to remove odd number of negatives to make it evern number of negative, if we have 3 elements in the array having -ve value, say [2,3,-2,4,5,-6,3,4,-9,1,2,4], first time we will skip '-2' and try to get the answer by making even number of negatives in the array so answer will come either from [2,3] prefix of removed item (-2) or [4,5,-6,3,4,-9,1,2,4] (suffix of removed item (-2))
+  // next time try to remove -6 to make even number of negatives in array, ans will come either from [2,3,-2,4,5] prefix of -6 or [3,4,-9,1,2,4] suffix of -6
+  // So this way we first calculate product from 0 to n and store maximum product inside maxi, if we encounter -ve product it automatically gets discarded because we are storing only max(maxi, product) in maxi
+  // if we encounter element as 0, we make product = 1
+  // Now we take product from back of arrray and store maximum product
+  let n = arr.length; // size of array.
+
+  let pre = 1,
+    suff = 1;
+  let ans = -Infinity;
+  for (let i = 0; i < n; i++) {
+    if (pre === 0) pre = 1;
+    if (suff === 0) suff = 1;
+    pre *= arr[i];
+    suff *= arr[n - i - 1];
+    ans = Math.max(ans, Math.max(pre, suff));
+  }
+  return ans;
+};
