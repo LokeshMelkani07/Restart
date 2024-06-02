@@ -37,6 +37,28 @@ var reverseString = function (s) {
   return s;
 };
 
+// Score of a String
+/*
+You are given a string s. The score of a string is defined as the sum of the absolute difference between the ASCII values of adjacent characters.
+
+Return the score of s.
+
+Example 1:
+Input: s = "hello"
+Output: 13
+Explanation:
+The ASCII values of the characters in s are: 'h' = 104, 'e' = 101, 'l' = 108, 'o' = 111. So, the score of s would be |104 - 101| + |101 - 108| + |108 - 108| + |108 - 111| = 3 + 7 + 0 + 3 = 13.
+*/
+var scoreOfString = function (s) {
+  let res = 0;
+  let n = s.length;
+  for (let i = 0; i < n - 1; i++) {
+    res += Math.abs(s.charCodeAt(i) - s.charCodeAt(i + 1));
+  }
+
+  return res;
+};
+
 // Valid Anagram
 // Given two strings s and t, return true if t is an anagram of s, and false otherwise. An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
 var isAnagram = function (s, t) {
