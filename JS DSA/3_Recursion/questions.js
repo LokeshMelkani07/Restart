@@ -1,3 +1,4 @@
+// Notes: https://drive.google.com/file/d/1aZe9r3XW1WIMjWkuaaWzJFbXT12RhTyK/view?usp=sharing
 // Check whether a string is palindrome or not
 function isPalindrome(str) {
   // Base case: If the string is empty or has only one character, it's a palindrome
