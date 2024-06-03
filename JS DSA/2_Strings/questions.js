@@ -344,3 +344,37 @@ var compareVersion = function (version1, version2) {
 
   return 0;
 };
+
+// Append Characters to String to Make Subsequence
+/*
+You are given two strings s and t consisting of only lowercase English letters.
+
+Return the minimum number of characters that need to be appended to the end of s so that t becomes a subsequence of s.
+
+A subsequence is a string that can be derived from another string by deleting some or no characters without changing the order of the remaining characters.
+
+Example 1:
+Input: s = "coaching", t = "coding"
+Output: 4
+Explanation: Append the characters "ding" to the end of s so that s = "coachingding".
+Now, t is a subsequence of s ("coachingding").
+It can be shown that appending any 3 characters to the end of s will never make t a subsequence.
+*/
+var appendCharacters = function (s, t) {
+  // We are given 2 strings s and t
+  // We need to find out how many characters we need to add at the end of 's' to make 't' out of it
+  // We can run a simple approach of calculating number of characters which are coming in same order and same value in both s and t
+  // These many characters are already present
+  // Number of characters to be added = t.length - number of characters already present
+  let si = 0;
+  let ti = 0;
+  while (si < s.length) {
+    if (s[si] == t[ti]) {
+      si++;
+      ti++;
+    } else {
+      si++;
+    }
+  }
+  return t.length - ti;
+};
