@@ -378,3 +378,30 @@ var appendCharacters = function (s, t) {
   }
   return t.length - ti;
 };
+
+// Longest Palindrome
+/*
+Given a string s which consists of lowercase or uppercase letters, return the length of the longest palindrome that can be built with those letters.
+
+Letters are case sensitive, for example, "Aa" is not considered a palindrome.
+
+Example 1:
+Input: s = "abccccdd"
+Output: 7
+Explanation: One longest palindrome that can be built is "dccaccd", whose length is 7.
+*/
+var longestPalindrome = function (s) {
+  // We need to return 'length of the longest palindrome that can be built with those letters.'
+  // We need atleast 2 characters of same value to make a palindrome so we store frequency of all elements in the map.
+  // if frequency of any element is multiple of 2 means we can form a palindrome from it of atleast length 2 so we add 2 in answer
+  // At the end if s.length > ans means there are still elements in the string s which can become part of our palindrome so we add +1 for them like In the example "dccaccd". "a" occur only once in the string but it stills adds to the length of longest parlindrome
+  let answer = 0;
+  let hashTable = {};
+  for (let char of s) {
+    hashTable[char] = (hashTable[char] || 0) + 1;
+    if (hashTable[char] % 2 === 0) {
+      answer += 2;
+    }
+  }
+  return s.length > answer ? answer + 1 : answer;
+};
