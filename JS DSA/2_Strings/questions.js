@@ -405,3 +405,58 @@ var longestPalindrome = function (s) {
   }
   return s.length > answer ? answer + 1 : answer;
 };
+
+// Find Common Characters
+/*
+Given a string array words, return an array of all characters that show up in all strings within the words (including duplicates). You may return the answer in any order.
+
+Example 1:
+Input: words = ["bella","label","roller"]
+Output: ["e","l","l"]
+
+Example 2:
+Input: words = ["cool","lock","cook"]
+Output: ["c","o"]
+*/
+var commonChars = function (words) {
+  // Hard Problem
+  // Simple, we will create a array of 26 characters say common and store frequency in the charCode of each character of words[0] string
+  // Hum charCode vale index mai uss element ki frequency store krenge
+  // Matlab agar charCode('a') = 12 then arr[12] = 1
+  // Now hum baaki ki strings ka bhi aise hi krenge and everytime we compare the minimum frequency and store it in common array so that we have common characters with freuqncy and index representing the charCode
+  // because say between "label"and "roller". we see 'r' is not repeating so while storing
+  // At the end we convert back the character from charCode and store in result array "common[k] = Math.min(common[k],commonChar[k]);" for 'r' we will pick commonChar[k] = 0 for 'r' so this way we only store common elements in the common array everytime
+  let res = [];
+  // Create an array
+  let common = Array(26).fill(0);
+  for (let i = 0; i < words[0].length; i++) {
+    // Store the frequency at charCode for first string
+    let count = words[0][i].charCodeAt(0) - "a".charCodeAt(0);
+    common[count]++;
+  }
+
+  // Doing same for other strings now
+  for (let i = 1; i < words.length; i++) {
+    let commonChar = Array(26).fill(0);
+    for (let j = 0; j < words[i].length; j++) {
+      // Store the frequency at charCode for first string
+      let count = words[i][j].charCodeAt(0) - "a".charCodeAt(0);
+      commonChar[count]++;
+    }
+
+    // compare and store minimum inside common array now
+    for (let k = 0; k < common.length; k++) {
+      common[k] = Math.min(common[k], commonChar[k]);
+    }
+  }
+
+  // Store the characters based on charCode inside result now
+  for (let k = 0; k < common.length; k++) {
+    while (common[k] != 0) {
+      res.push(String.fromCharCode(k + "a".charCodeAt(0)));
+      common[k]--;
+    }
+  }
+
+  return res;
+};
