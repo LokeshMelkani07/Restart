@@ -2384,3 +2384,51 @@ var maxProduct = function (arr) {
   }
   return ans;
 };
+
+// Continuous Subarray Sum
+/*
+Given an integer array nums and an integer k, return true if nums has a good subarray or false otherwise.
+
+A good subarray is a subarray where:
+
+its length is at least two, and
+the sum of the elements of the subarray is a multiple of k.
+
+Note that:
+A subarray is a contiguous part of the array.
+An integer x is a multiple of k if there exists an integer n such that x = n * k. 0 is always a multiple of k.
+
+Example 1:
+Input: nums = [23,2,4,6,7], k = 6
+Output: true
+Explanation: [2, 4] is a continuous subarray of size 2 whose elements sum up to 6.
+*/
+var checkSubarraySum = function (nums, k) {
+  // we will store the prefixSumMod and first occurence in the map
+  let mpp = new Map();
+  let prefixSum = 0;
+  // Initialize map with prefixSum 0 at index -1 to handle edge case
+  mpp.set(0, -1);
+  for (let i = 0; i < nums.length; i++) {
+    prefixSum += nums[i];
+    let prefixSumMod = prefixSum % k;
+    // we need multiple of k, so we use mod
+    // if prefixSumMod is 0 means subarray from 0 to that i has sum divisble by k
+    // i+1 >= 2 means as indexing in array starts from 0 means minimum length is 2 because written in the question, minimum length should be 2
+    if (prefixSumMod == 0 && i + 1 >= 2) {
+      // if mod = 0 means its a multiple and i+1 >=2 means on 0-based indexing its length is more than equal to 2 so it can be a good subarray
+      return true;
+    }
+    if (mpp.has(prefixSumMod)) {
+      // if map has multiple of k already present
+      // search if we have length >= 2
+      if (i - mpp.get(prefixSumMod) >= 2) {
+        return true;
+      }
+    } else {
+      // set the prefix sum mod for current index
+      mpp.set(prefixSumMod, i);
+    }
+  }
+  return false;
+};
