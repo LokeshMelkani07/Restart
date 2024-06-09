@@ -2432,3 +2432,50 @@ var checkSubarraySum = function (nums, k) {
   }
   return false;
 };
+
+// Subarray Sums Divisible by K
+/*
+Given an integer array nums and an integer k, return the number of non-empty subarrays that have a sum divisible by k.
+A subarray is a contiguous part of an array.
+
+Example 1:
+Input: nums = [4,5,0,-2,-3,1], k = 5
+Output: 7
+Explanation: There are 7 subarrays with a sum divisible by k = 5:
+[4, 5, 0, -2, -3, 1], [5], [5, 0], [5, 0, -2, -3], [0], [0, -2, -3], [-2, -3]
+*/
+var subarraysDivByK = function (nums, k) {
+  // First and foremost observation is -104 <= nums[i] <= 104
+  // means array can contain negative numbers so while taking mod, it may come out negative also so to make it positive we add k in it
+  // We take prefix sum and take mod and make an map to store mod results
+  // everytime we check if mod is already present in the map means all the element between previous mod value and current mod value forms a subarray which is divisble by k so we do count++
+  // everytime our res becomes negative means we encountered a negative number and our prefixSum becomes -ve say k = 7, in a number line for k = -7 these are the numbers  -7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7
+  // In our above number line, -7,0,7 are divisble by k
+  // say our mod comes -ve i.e -2 if we add +k in it -2+7 = +5 so -2 in number line corresponds to +5 in positive number line
+  // if mod = -7 then its positive = 0 which is divisble by 7
+  // In our map we are storing only positive numbers in result so anytime our mod becomes -ve we make it +ve by adding +k in it
+  let mpp = new Map();
+  mpp.set(0, 1); // To handle the case where the prefix sum itself is divisible by k
+  let prefix = 0;
+  let count = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    prefix += nums[i];
+    let res = prefix % k;
+
+    // Handle negative mod results
+    if (res < 0) {
+      res += k;
+    }
+
+    // Check if the current mod result exists in the map
+    if (mpp.has(res)) {
+      count += mpp.get(res);
+      mpp.set(res, mpp.get(res) + 1);
+    } else {
+      mpp.set(res, 1);
+    }
+  }
+
+  return count;
+};
