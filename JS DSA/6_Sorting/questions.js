@@ -200,3 +200,66 @@ var sortColors = function (nums) {
 
   return nums;
 };
+
+// Height Checker
+/*
+A school is trying to take an annual photo of all the students. The students are asked to stand in a single file line in non-decreasing order by height. Let this ordering be represented by the integer array expected where expected[i] is the expected height of the ith student in line.
+
+You are given an integer array heights representing the current order that the students are standing in. Each heights[i] is the height of the ith student in line (0-indexed).
+
+Return the number of indices where heights[i] != expected[i].
+
+Example 1:
+Input: heights = [1,1,4,2,1,3]
+Output: 3
+Explanation:
+heights:  [1,1,4,2,1,3]
+expected: [1,1,1,2,3,4]
+Indices 2, 4, and 5 do not match.
+*/
+var heightChecker = function (heights) {
+  // Brute force Approach: Make another array, sort it and now compare element by element and count number of mismatches
+  let count = 0;
+  const ss = [...heights];
+  ss.sort((a, b) => a - b);
+  for (let i = 0; i < heights.length; i++) {
+    if (ss[i] !== heights[i]) {
+      count++;
+    }
+  }
+  return count;
+};
+
+// Optimised Approach
+var heightChecker = function (heights) {
+  // Optimised Approach
+  // We can use any of the sorting algorithm which takes less TC
+  // We will use counting sort algorithm
+  // We have been given that 1 <= heights[i] <= 100 so we will make a array count[101] of 101 size where we store count of each index in heights
+  // once we have it, we start traversing count[] from index = 1 and if count[i] > 0, we check if its height[j] where j starts from 0
+  // if not means mismatch is found so mismatch++, j++, count[i]--
+  // if count[i] = 0 means we have exhausted current element, move forward so i++
+  // at the end return mismatch
+  let mismatch = 0;
+  let count = Array(101).fill(0);
+
+  for (let i = 0; i < heights.length; i++) {
+    count[heights[i]]++;
+  }
+
+  let i = 1,
+    j = 0;
+  while (i < 101) {
+    if (count[i] == 0) {
+      i++;
+    } else {
+      if (i != heights[j]) {
+        mismatch++;
+      }
+      count[i]--;
+      j++;
+    }
+  }
+
+  return mismatch;
+};
