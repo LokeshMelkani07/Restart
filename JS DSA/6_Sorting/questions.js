@@ -263,3 +263,40 @@ var heightChecker = function (heights) {
 
   return mismatch;
 };
+
+// Relative Sort Array
+/*
+Given two arrays arr1 and arr2, the elements of arr2 are distinct, and all elements in arr2 are also in arr1.
+
+Sort the elements of arr1 such that the relative ordering of items in arr1 are the same as in arr2. Elements that do not appear in arr2 should be placed at the end of arr1 in ascending order.
+
+Example 1:
+Input: arr1 = [2,3,1,3,2,4,6,7,9,2,19], arr2 = [2,1,4,3,9,6]
+Output: [2,2,2,1,4,3,3,9,6,7,19]
+*/
+var relativeSortArray = function (arr1, arr2) {
+  // We are given 2 arrays, arr1 and arr2
+  // All elements of arr2 are distinct and are present in arr1
+  // We want to sort arr1 in such a way that all elements of arr2 are there in arr1 and those elements not present in arr2 but are present in arr1 come at the end of arr1
+  // So we take an auxilliary array
+  // arr1 may contain duplicates of arr2 elements also like Input: arr1 = [2,3,1,3,2,4,6,7,9,2,19], arr2 = [2,1,4,3,9,6], Output: [2,2,2,1,4,3,3,9,6,7,19]
+  // We copy them as it is that number of times
+  // We will copy all included elements of arr1 in aux array which are there in arr2
+  // now we sort arr1 so that not included elements come at the end in sorted order
+  // now we traverse arr1 and check if element is not present in arr2, push it in aux array
+  // return aux array
+  let arr = [];
+  for (let x of arr2) {
+    while (arr1.includes(x)) {
+      arr.push(x);
+      arr1.splice(arr1.indexOf(x), 1);
+    }
+  }
+  arr1.sort((a, b) => a - b);
+  for (let x of arr1) {
+    if (!arr2.includes(x)) {
+      arr.push(x);
+    }
+  }
+  return arr;
+};
