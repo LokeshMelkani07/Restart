@@ -173,6 +173,9 @@ Input: nums = [2,0,2,1,1,0]
 Output: [0,0,1,1,2,2]
 */
 var sortColors = function (nums) {
+  // Brute Force Approach: We will just simply sort the array although it is not expexted in the problem statement
+  // Better Approach: We will simply count number of 0's, number of 1's, number of 2's and paste in the based indexes in sequence of 0,1,2 running 3 loops based on count
+  // Optimal Approach: We will use 3 pointers where we want to run them such that arr[0….low-1] contains 0. [Extreme left part], arr[low….mid-1] contains 1. arr[high+1….n-1] contains 2. [Extreme right part], n = size of the array
   // We will use 3 pointers, low, mid, high
   // low starts from 0, mid also starts from 0, high starts from nums.length-1
   // we will run a loop till mid <= high
