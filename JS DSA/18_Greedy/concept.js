@@ -960,3 +960,46 @@ var insert = function (intervals, newInterval) {
 
   return res;
 };
+
+// Minimum Increment to Make Array Unique
+/*
+You are given an integer array nums. In one move, you can pick an index i where 0 <= i < nums.length and increment nums[i] by 1.
+
+Return the minimum number of moves to make every value in nums unique.
+
+The test cases are generated so that the answer fits in a 32-bit integer.
+
+Example 1:
+Input: nums = [1,2,2]
+Output: 1
+Explanation: After 1 move, the array could be [1, 2, 3].
+
+Example 2:
+Input: nums = [3,2,1,2,1,7]
+Output: 6
+Explanation: After 6 moves, the array could be [3, 4, 1, 2, 5, 7].
+It can be shown with 5 or less moves that it is impossible for the array to have all unique values.
+*/
+var minIncrementForUnique = function (nums) {
+  // Optimised Solution
+  // We will apply greedy method
+  // Sort the array first, [3,2,1,2,1,7] becomes [1,1,2,2,3,7]
+  // Now we start traversing from index = 1
+  // We check if index[i-1]==index[i],
+  // if yes, nums[i] = nums[i+1], count++
+  // if nums[i] < nums[i-1], say array looks like [1,2,3,2 (this should be 4 ideally buts its 2, so 3-2 = 1, if we do nums[i-1] + diff that is 3+1 = 4 and count = diff + 1),3,7]
+  let count = 0;
+  nums.sort((a, b) => a - b);
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] == nums[i - 1]) {
+      nums[i] += 1;
+      count += 1;
+    } else if (nums[i] < nums[i - 1]) {
+      let diff = Math.abs(nums[i] - nums[i - 1]);
+      nums[i] += diff + 1;
+      count += diff + 1;
+    }
+  }
+
+  return count;
+};
