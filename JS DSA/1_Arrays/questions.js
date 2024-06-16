@@ -2479,3 +2479,54 @@ var subarraysDivByK = function (nums, k) {
 
   return count;
 };
+
+// Patching Array
+/*
+Given a sorted integer array nums and an integer n, add/patch elements to the array such that any number in the range [1, n] inclusive can be formed by the sum of some elements in the array.
+
+Return the minimum number of patches required.
+
+Example 1:
+Input: nums = [1,3], n = 6
+Output: 1
+Explanation:
+Combinations of nums are [1], [3], [1,3], which form possible sums of: 1, 3, 4.
+Now if we add/patch 2 to nums, the combinations are: [1], [2], [3], [1,3], [2,3], [1,2,3].
+Possible sums are 1, 2, 3, 4, 5, 6, which now covers the range [1, 6].
+So we only need 1 patch.
+*/
+var minPatches = function (nums, n) {
+  // What we are doing in the problem is
+  // We are adding values in the array such that at the end if we take sum of any subarray from nums, it should give answer between [1,n]
+  // As array is sorted, we start from first element, we take sum vairbale and add it into it, sum denotes maximum sum we can get if we sum all element of subarray taken which should be between 1,n only
+  // Next we check if we can make sum+1 by adding i+1th element of array
+  // if yes, no patch needed to add
+  // But if we cannot, we add a patch of sum+1 in the array and do sum = sum + (prevsum + 1), i++
+  // Now our check if newSum + 1 is possible by adding i+1th element of array
+  // if yes, do it
+  // if no, patch is needed so add it and update new sum and i++
+  // do this till our maxSum < n
+  // When we need to add a patch??
+  // When we see that next ith value is greater than sum+1 value means we can never make sum+1 by adding next ith value so we need to add a patch
+  let patch = 0;
+  let Maxsum = 0;
+  let i = 0;
+  // do this till our sum does not exceed n as add/patch elements to the array such that any number in the range [1, n] inclusive can be formed by the sum of some elements in the array.
+  while (Maxsum < n) {
+    // if current element is smaller than sum+1 means we can make sum+1 after adding current element so add it
+    if (i < nums.length && nums[i] <= Maxsum + 1) {
+      Maxsum += nums[i];
+      i++;
+    } else {
+      // if we cannot add it, we need to add a patch
+      // We add patch of sum+1 and increase our range of sum
+      // we increase patch variable as one patch is added
+      Maxsum += Maxsum + 1;
+      patch++;
+    }
+  }
+
+  // Output: Return the minimum number of patches required
+  // return total number of patches added
+  return patch;
+};
