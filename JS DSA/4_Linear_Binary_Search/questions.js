@@ -1643,3 +1643,69 @@ function required(maxPage, a, noOfStudents) {
 
   return false;
 }
+
+// Sum of Square Numbers
+/*
+Given a non-negative integer c, decide whether there're two integers a and b such that a2 + b2 = c.
+
+Example 1:
+Input: c = 5
+Output: true
+Explanation: 1 * 1 + 2 * 2 = 5
+*/
+var judgeSquareSum = function (c) {
+  // Using Binary Search
+  // We know 1...............c are all sorted numbers
+  // We will decide our search space from 0 to sqrt(c) and find mid using given formula: a^2 + b^2 = c
+  // if mid == c, return true
+  // if mid>c means decrease search space
+  // if mid<c means increase search space
+  let i = 0;
+  let j = Math.floor(Math.sqrt(c));
+  while (i <= j) {
+    let mid = Math.floor(i * i + j * j);
+    if (mid == c) {
+      return true;
+    } else if (mid > c) {
+      j--;
+    } else {
+      i++;
+    }
+  }
+
+  return false;
+};
+
+// Valid Perfect Square
+/*
+Given a positive integer num, return true if num is a perfect square or false otherwise.
+
+A perfect square is an integer that is the square of an integer. In other words, it is the product of some integer with itself.
+
+You must not use any built-in library function, such as sqrt.
+
+Example 1:
+Input: num = 16
+Output: true
+Explanation: We return true because 4 * 4 = 16 and 4 is an integer.
+*/
+var isPerfectSquare = function (num) {
+  if (num <= 1) {
+    return true;
+  }
+  let start = 1;
+  let end = Math.floor(num / 2);
+  while (start <= end) {
+    let mid = Math.floor(start + (end - start) / 2);
+    let product = mid * mid;
+    if (product === num) {
+      return true;
+    } else if (product > num) {
+      end = mid - 1;
+    } else {
+      start = mid + 1;
+    }
+  }
+
+  return false;
+};

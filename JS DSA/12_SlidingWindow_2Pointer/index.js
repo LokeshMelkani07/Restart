@@ -485,3 +485,32 @@ var minWindow = function (s, t) {
 
   return sIndex === -1 ? "" : s.substr(sIndex, sIndex + minLen);
 };
+
+// Sum of Square Numbers
+/*
+Given a non-negative integer c, decide whether there're two integers a and b such that a2 + b2 = c.
+
+Example 1:
+Input: c = 5
+Output: true
+Explanation: 1 * 1 + 2 * 2 = 5
+*/
+var judgeSquareSum = function (c) {
+  // One of the approach can be
+  // Take 2 pointers, i starts from 0 and j starts from sqrt(c)
+  // sqrt(c) is max value for which its square can be == c if one of the number is 0
+  let i = 0;
+  let j = Math.floor(Math.sqrt(c));
+  while (i <= j) {
+    let sum = i * i + j * j;
+    if (sum == c) {
+      return true;
+    } else if (sum > c) {
+      j--;
+    } else {
+      i++;
+    }
+  }
+
+  return false;
+};
