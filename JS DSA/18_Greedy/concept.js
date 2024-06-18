@@ -1003,3 +1003,73 @@ var minIncrementForUnique = function (nums) {
 
   return count;
 };
+
+// Most Profit Assigning Work
+/*
+You have n jobs and m workers. You are given three arrays: difficulty, profit, and worker where:
+
+difficulty[i] and profit[i] are the difficulty and the profit of the ith job, and
+worker[j] is the ability of jth worker (i.e., the jth worker can only complete a job with difficulty at most worker[j]).
+Every worker can be assigned at most one job, but one job can be completed multiple times.
+
+For example, if three workers attempt the same job that pays $1, then the total profit will be $3. If a worker cannot complete any job, their profit is $0.
+Return the maximum profit we can achieve after assigning the workers to the jobs.
+
+Example 1:
+Input: difficulty = [2,4,6,8,10], profit = [10,20,30,40,50], worker = [4,5,6,7]
+Output: 100
+Explanation: Workers are assigned jobs of difficulty [4,4,6,6] and they get a profit of [20,20,30,30] separately.
+
+Example 2:
+Input: difficulty = [85,47,57], profit = [24,66,99], worker = [40,25,25]
+Output: 0
+*/
+var maxProfitAssignment = function (difficulty, profit, worker) {
+  // Means we have been given the work of units in worker[] for each worker
+  // Difficulty[] gives us the unit of that ith job for the worker to perform
+  // profit[] gives us the profit worker will get for completing ith job
+  // one job can be finished by multiple workers
+  // We need to return the maximum profit
+  // We see to maximise our profit, we need to pick the job with highest profit such that difficulty[] is wiithin worker[j] ability
+  // First of all let us store [profit[i],difficulty[i]] as a pair and sort the array based on profit[i] in descending order say array name is arr
+  // sort the worker array also
+  // Once we have sorted it, let us start picking from the first value of our arr array and match if difficulty is below ability of worker? if yes, add it in the maxProfit
+  let arr = [];
+  let n = profit.length;
+  // Storing [difficulty[i],profit[i]]
+  for (let i = 0; i < n; i++) {
+    arr.push([profit[i], difficulty[i]]);
+  }
+
+  // sorting it in descending order of profit so max profit remains at top
+  arr.sort((a, b) => {
+    if (a[0] == b[0]) {
+      return a[1] - b[1];
+    } else {
+      return b[0] - a[0];
+    }
+  });
+
+  // sort the workers on ascending order so that maximum able can be assigned first
+  worker.sort((a, b) => b - a);
+
+  // pick each worker and check its ability, compare it with difficulty of work
+  let maxProfit = 0;
+  for (let i = 0; i < worker.length; i++) {
+    let j = 0;
+    while (j < arr.length && arr[j][1] > worker[i]) {
+      j++;
+    }
+
+    // if we did not find any work accoriding to workers ability means add 0 in the profit as no work can be assigned to that worker
+    if (j == arr.length) {
+      maxProfit += 0;
+    } else {
+      // else add the profit
+      maxProfit += arr[j][0];
+    }
+  }
+
+  // return the profit
+  return maxProfit;
+};
