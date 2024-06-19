@@ -120,7 +120,7 @@ var removeDuplicates = function (nums) {
 
 var removeDuplicates = function (nums) {
   // we will use a 2 pointer approach
-  // second pointer points to first element i.e 0 index of array as its always unique and loop till end of loop
+  // first pointer points to first element i.e 0 index of array as its always unique and loop till end of loop
   // second pointer points to next element of first i.e starts with 1 index and is used to swap
   // everytime we check if second == second+1 then do second++
   // if second != second+1, swap first with second+1 and second++, first++;
