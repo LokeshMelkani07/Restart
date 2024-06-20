@@ -26,6 +26,7 @@ var mySqrt = function (x) {
 // You are a product manager and currently leading a team to develop a new product. Unfortunately, the latest version of your product fails the quality check. Since each version is developed based on the previous version, all the versions after a bad version are also bad. Suppose you have n versions [1, 2, ..., n] and you want to find out the first bad one, which causes all the following ones to be bad. You are given an API bool isBadVersion(version) which returns whether version is bad. Implement a function to find the first bad version. You should minimize the number of calls to the API.
 var solution = function (isBadVersion) {
   return function (n) {
+    // It is like finding the first occurence of any number
     // Let say we have an array of good and bad like [G,G,G,B,B,B,B] and we want to find first bad product (B)
     // This question is same as find pivot point in an array
     // We have isBadVersion(version) function which is an API which tells us whether that product is bad or good so we use it
@@ -225,6 +226,7 @@ class Solution {
   rowWithMax1s(arr, n, m) {
     // We have each row sorted
     // In case 2 rows have same number of 1's, we return the one which comes earlier
+    // As each row is sorted means once 1's start in a row, they keep on coming till end of that row because our row only contains 0's and 1's only and in sorted order 0 comes before 1
     // Optimised Approach
     // We go to each row and calculate number of 1's but this time we use Binary search in each row to calculate number of 1's because each row is sorted so if by any way we can find (lower bound of 1 or upper bound of 0 or first occurence of 1), to calculate number of 1's in that row, we do number of elements in the row - index of first occurence of 1 in that row
     let maxCount = 0;
@@ -675,9 +677,9 @@ Output: 1024.00000
 var myPow = function (x, n) {
   // Optimised way
   // Binary Exponentiation
-  // 2^10 = (2*2)^9 = 4^9 (even power -> num = num*num krke power/2 krdia)
+  // 2^10 = (2*2)^5 = 4^5 (even power -> num = num*num krke power/2 krdia)
   // 4^9 = 4 * 4^8 (odd power -> ek power bahaar nikalke answer mai leli and power-1 krdia)
-  // 4^8 = (4*4)^4
+  // 4^8 = (4*4)^2
   // odd power = take x out  * x^pow-1
   // even power = do (x*x)^pow/2
   // till power != 0
@@ -1709,3 +1711,71 @@ var isPerfectSquare = function (num) {
 
   return false;
 };
+
+//  Magnetic Force Between Two Balls
+/*
+In the universe Earth C-137, Rick discovered a special form of magnetic force between two balls if they are put in his new invented basket. Rick has n empty baskets, the ith basket is at position[i], Morty has m balls and needs to distribute the balls into the baskets such that the minimum magnetic force between any two balls is maximum.
+
+Rick stated that magnetic force between two different balls at positions x and y is |x - y|.
+
+Given the integer array position and the integer m. Return the required force.
+
+Example 1:
+Input: position = [1,2,3,4,7], m = 3
+Output: 3
+Explanation: Distributing the 3 balls into baskets 1, 4 and 7 will make the magnetic force between ball pairs [3, 3, 6]. The minimum magnetic force is 3. We cannot achieve a larger minimum magnetic force than 3.
+*/
+var maxDistance = function (position, m) {
+  // Problem is same as Agressive Cows, where we are given with posiiton of stalls and we need to distribute k cows in such a way that minimum distance between any 2 cows is maximum
+  // Here we have buckets poisition instead of stalls
+  // we have balls instead of cows
+  // We need to place m ball such that minimum distance between any 2 is maximum
+  // We will apply binary search because we have the search space of minimum distance = first element of sorted array, maximum distance = maxi - mini element of sorted array so they become our low and high
+  // We find a mid, which signifies minimum distance to place m balls
+  // We try to place m balls, if possible, we store min in answer and look for more bigger answer as we need maximum distance
+  // if not possible, we need to reduce our distance so high = mid-1
+  position.sort((a, b) => a - b);
+  let low = 0;
+  let n = position.length;
+  let mini = +Infinity;
+  let maxi = -Infinity;
+  let ans = -1;
+  for (let i = 0; i < n; i++) {
+    mini = Math.min(mini, position[i]);
+    maxi = Math.max(maxi, position[i]);
+  }
+  let high = maxi - mini;
+
+  while (low <= high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let possible = isPlacingMballspossibleAtMidDistance(mid, position, m);
+    if (possible) {
+      ans = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return ans;
+};
+
+function isPlacingMballspossibleAtMidDistance(dist, position, m) {
+  // let us place 1st ball at first index and count becomes 1
+  // Now we will try to place m balls at dist distance minimum
+  // if we cannot place m balls at dist distance means mid cannot be a good answer, alter the search space
+  let count = 1;
+  let lastBallPlaced = position[0];
+  for (let i = 1; i < position.length; i++) {
+    if (position[i] - lastBallPlaced >= dist) {
+      count++;
+      lastBallPlaced = position[i];
+    }
+
+    if (count == m) {
+      return true;
+    }
+  }
+
+  return false;
+}
