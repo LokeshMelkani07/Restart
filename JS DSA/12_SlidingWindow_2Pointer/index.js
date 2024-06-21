@@ -514,3 +514,63 @@ var judgeSquareSum = function (c) {
 
   return false;
 };
+
+// Grumpy Bookstore Owner
+/*
+There is a bookstore owner that has a store open for n minutes. Every minute, some number of customers enter the store. You are given an integer array customers of length n where customers[i] is the number of the customer that enters the store at the start of the ith minute and all those customers leave after the end of that minute.
+
+On some minutes, the bookstore owner is grumpy. You are given a binary array grumpy where grumpy[i] is 1 if the bookstore owner is grumpy during the ith minute, and is 0 otherwise.
+
+When the bookstore owner is grumpy, the customers of that minute are not satisfied, otherwise, they are satisfied.
+
+The bookstore owner knows a secret technique to keep themselves not grumpy for minutes consecutive minutes, but can only use it once.
+
+Return the maximum number of customers that can be satisfied throughout the day.
+
+Example 1:
+Input: customers = [1,0,1,2,1,1,7,5], grumpy = [0,1,0,1,0,1,0,1], minutes = 3
+Output: 16
+Explanation: The bookstore owner keeps themselves not grumpy for the last 3 minutes.
+The maximum number of customers that can be satisfied = 1 + 1 + 1 + 1 + 7 + 5 = 16.
+*/
+var maxSatisfied = function (customers, grumpy, minutes) {
+  // In the customers, we have customer[i] = number of customers entering the shop at ith minute, customer[i] leaves as soon as ith minute ends
+  // grumpy[i] = 1 if owner is grumpy for that ith minute
+  // grumpy[i] = 0 if owner is not grumpy for that ith minute
+  // if owner is grumpy he cannot satisfy customer at ith minute
+  // he has a technique where he can keep himself not grumpy for 'minutes' consecutive minutes but that technique, he can use only once
+  // Return the maximum number of customers that can be satisfied throughout the day
+  // Approach
+  // First of all, we can simply take all customers with grumpty[i] = 0, so they will always become part of my answer defniately
+  // Now i will use my 'minutes' technique in such a way that on those 'minutes' consecutive minutes, I have the maximum customers that is only way to get maximum customers as result
+  // So, I will make a window of 'minutes' size and take sum of customers in it, everytime I will slide that window and everytime I take maximum customers i can get in that window
+  // As i move my window, I have to subtract one element from beginning of window everytime so [i-minute] element has to be subtracted as soon as I slide the window
+  let n = customers.length;
+  let zeroGrumpyCustomers = 0;
+  let windowCustomersSum = 0;
+  let maxWindowCustomers = 0;
+  for (let i = 0; i < n; i++) {
+    // if grumpy[i]==0, simply add that customer
+    if (grumpy[i] == 0) {
+      zeroGrumpyCustomers += customers[i];
+    }
+
+    // if its 1, make a window of 'minutes' size
+    if (i < minutes) {
+      // Take all elements of grumpy[i] == 1, inside window till i<minutes means till window size reaches miniutes size
+      windowCustomersSum += grumpy[i] == 1 ? customers[i] : 0;
+    } else {
+      // Once size of window has reached 'minutes' size, slide the window
+      // Everytime, add one extra element of grumpy[i]==1 and remove one element from beginning of window having grumpy[i]==1, i-minutes gives us element at starting of window
+      // slide the window now
+      windowCustomersSum +=
+        (grumpy[i] == 1 ? customers[i] : 0) -
+        (grumpy[i - minutes] == 1 ? customers[i - minutes] : 0);
+    }
+    // Everytime store the maximum customers we can gather from that window
+    maxWindowCustomers = Math.max(maxWindowCustomers, windowCustomersSum);
+  }
+
+  // At the end total maximum customers is -> all with zero grumpy + maximum customer from window having grumpy[i]==1
+  return zeroGrumpyCustomers + maxWindowCustomers;
+};
