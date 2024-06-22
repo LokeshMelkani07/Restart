@@ -155,6 +155,9 @@ var hasCycle = function (head) {
 //  Linked List Cycle II
 // Given the head of a linked list, return the node where the cycle begins. If there is no cycle, return null. There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that tail's next pointer is connected to (0-indexed). It is -1 if there is no cycle. Note that pos is not passed as a parameter. Do not modify the linked list.
 var detectCycle = function (head) {
+  // Earlier we only had to detect a cycle and give true or false
+  // This time we need to return the node from where the cycle starts
+  // By using slow and fast pointer, we can get the cycle where fast and slow meets but to get that node, we make another node 'entry' which move till slow != entry and at the end, return entry or slow to return the cycle node
   // We will use slow and fast pointer approach to find the collision point
   // means where our cycle let slow and fast meet
   // Now we have another pointer entry == head, move slow and entry till

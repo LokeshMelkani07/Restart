@@ -72,6 +72,7 @@ class LinkedList {
 
   // Remove element
   // We will take 2 pointers, prev and current
+  // We need a prev here because when we remove a node, we want to connext its previous node to its next node so to keep track of previous node, we will use prev
   removeElement(data) {
     if (this.isEmpty()) {
       return "List is already empty";
@@ -82,9 +83,10 @@ class LinkedList {
     while (current) {
       if (current.data === data) {
         if (prev === null) {
-          // prev=null means its first element
+          // prev=null means the node to be removed is the first one only
           this.head = current.next;
         } else {
+          // prev != null means node to be removed is somewhere in between so we need to connect 'prev' of 'to be removed' to 'next' of it
           prev.next = current.next;
         }
         this.size--;
@@ -130,6 +132,14 @@ class LinkedList {
   // Given the head of a singly linked list, reverse the list, and return the reversed list.
   reverse() {
     // We will take 3 pointers, prev,curr,next
+    // We will put curr at the block we want to reverse
+    // We reverse the connextions of that block and then move forward
+    // To move forward we already set next = curr.next
+    // Now we have a way to go to next node, let us reverse the connections of curr node, to reverse it, we connect it to previous node
+    // So we do curr.next = prev
+    // move prev = curr for further nodes reversing
+    // curr = next to go to next node
+    // do this, till we are out of LL, prev has last node which is head of our reversed LL
     let prev = null,
       curr = this.head,
       next;
