@@ -25,7 +25,7 @@ In these type of problems, We find
 ** Number of subarrays where sum <= k - Number of subarrays where sum <= (k-1) **
 
 4. Find the Shortest / Minimum Window <condition>
-We get a valid window, we shrink the window till condition is valid to egt the minimum window.
+We get a valid window, we shrink the window till condition is valid to get the minimum window.
 */
 
 // Maximum Points You Can Obtain from Cards
@@ -448,42 +448,60 @@ var minWindow = function (s, t) {
   // Now we try to shrink down the window as we need minimum window substring so
   // map[s[left]]-- and if at anytime map[s[left]] > 0 means count-- as we have missed one character of t in our substring
   // At the end we have startIndex and minLen so we can use s.substr() function
-  let hash = {};
-  let m = t.size;
-  let n = s.size;
-  for (let i = 0; i < m; i++) {
-    hash[t[i]] = (hash[t[i]] || 0) + 1;
+  if (s.length === 0 || t.length === 0) {
+    return "";
   }
 
-  let l = 0;
-  let r = 0;
-  let minLen = Infinity;
-  let sIndex = -1;
-  let count = 0;
-  while (r < n) {
-    if (hash[s[r]] !== undefined && hash[s[r]] > 0) {
-      // means t contains this character
-      count++;
-    }
+  let hash = new Map();
 
-    hash[s[r]] = (hash[s[r]] || 0) - 1;
-
-    while (count == m) {
-      if (r - l + 1 < minLen) {
-        minLen = r - l + 1;
-        sIndex = l;
-      }
-
-      hash[l]++;
-      if (hash[l] > 0) {
-        count--;
-      }
-    }
-
-    r++;
+  // Initialize the hash map with characters of t
+  for (let i = 0; i < t.length; i++) {
+    hash.set(t[i], (hash.get(t[i]) || 0) + 1);
   }
 
-  return sIndex === -1 ? "" : s.substr(sIndex, sIndex + minLen);
+  let left = 0,
+    right = 0;
+  let required = hash.size;
+  let formed = 0;
+  let windowCounts = new Map();
+
+  // ans array format: [window length, left, right]
+  let ans = [-1, 0, 0];
+
+  while (right < s.length) {
+    // Add one character from the right to the window
+    let c = s[right];
+    windowCounts.set(c, (windowCounts.get(c) || 0) + 1);
+
+    // If the frequency of the current character added equals to the desired count in t
+    if (hash.has(c) && windowCounts.get(c) === hash.get(c)) {
+      formed++;
+    }
+
+    // Try and contract the window till the point where it ceases to be 'desirable'
+    while (left <= right && formed === required) {
+      c = s[left];
+
+      // Save the smallest window until now
+      if (ans[0] === -1 || right - left + 1 < ans[0]) {
+        ans = [right - left + 1, left, right];
+      }
+
+      // The character at the position pointed by the `left` pointer is no longer a part of the window
+      windowCounts.set(c, windowCounts.get(c) - 1);
+      if (hash.has(c) && windowCounts.get(c) < hash.get(c)) {
+        formed--;
+      }
+
+      // Move the left pointer ahead, this would help to look for a new window
+      left++;
+    }
+
+    // Keep expanding the window
+    right++;
+  }
+
+  return ans[0] === -1 ? "" : s.slice(ans[1], ans[2] + 1);
 };
 
 // Sum of Square Numbers

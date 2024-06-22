@@ -130,6 +130,23 @@ function checkPrime(n) {
   for (let i = 1; i * i <= n; i++) {
     if (n % i === 0) {
       count++;
+      /*
+* We can reduce the above time complexity like
+* say n = 36 then we know we have divisors as
+1 x 36  i.e 1 x 36/1
+2 x 18  i.e 2 x 36/2
+3 x 12  i.e 3 x 36/3
+4 x 9   i.e 4 x 36/4
+6 x 6   i.e 6 x 36/6
+9 x 4  --> Repeat
+12 x 3  --> Repeat
+18 x 2 --> Repeat
+36 x 1 --> Repeat
+* So if we take only loop from 1 to sqrt(n) then also our purpose fulfills
+* Just that if n%i == 0 then n/10 is also a divisor
+* But in case of 6 x 6, 6 gets repeated so keeping in mind, if(n/i !== i) then i and n/i both are divisors.
+* Our divisors may not come in sorted order so to make them sorted we use an array and sort it
+*/
       if (n / i != i) {
         count++;
       }

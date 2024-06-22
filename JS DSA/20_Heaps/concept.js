@@ -167,7 +167,9 @@ function heapSort(nums) {
   buildHeap(nums);
 
   for (let i = nums.length - 1; i >= 1; i--) {
+    // We know max heap has largest element at front so we swap it with last element and once 1 element is sorted we build heap from rest of leftover array 0 to ith index
     [nums[0], nums[i]] = [nums[i], nums[0]];
+    // We will call heapify for 0 to ith index and leave last index as it has largest element now, which is in its sorted order correctly
     heapify(nums, i, 0);
   }
 
@@ -175,12 +177,17 @@ function heapSort(nums) {
 }
 
 function buildHeap(nums) {
+  // We will start building heap from first non leaf node till 0th root node and first non-leaf node is at n/2 - 1
   for (let i = Math.floor(nums.length / 2) - 1; i >= 0; i--) {
     heapify(nums, nums.length, i);
   }
 }
 
 function heapify(nums, n, i) {
+  // nothing just ith is our node from where we have to start building our heap
+  // We need to check all elements below it to build heap from there so
+  // check its left and right child and swap if needed
+  // Now again build heap from that swapped value
   let largest = i;
   let left = 2 * i + 1;
   let right = 2 * i + 2;
