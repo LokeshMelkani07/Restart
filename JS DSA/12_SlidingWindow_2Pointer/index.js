@@ -592,3 +592,71 @@ var maxSatisfied = function (customers, grumpy, minutes) {
   // At the end total maximum customers is -> all with zero grumpy + maximum customer from window having grumpy[i]==1
   return zeroGrumpyCustomers + maxWindowCustomers;
 };
+
+//  Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit
+/*
+Given an array of integers nums and an integer limit, return the size of the longest non-empty subarray such that the absolute difference between any two elements of this subarray is less than or equal to limit.
+
+Example 1:
+Input: nums = [8,2,4,7], limit = 4
+Output: 2
+Explanation: All subarrays are:
+[8] with maximum absolute diff |8-8| = 0 <= 4.
+[8,2] with maximum absolute diff |8-2| = 6 > 4.
+[8,2,4] with maximum absolute diff |8-2| = 6 > 4.
+[8,2,4,7] with maximum absolute diff |8-2| = 6 > 4.
+[2] with maximum absolute diff |2-2| = 0 <= 4.
+[2,4] with maximum absolute diff |2-4| = 2 <= 4.
+[2,4,7] with maximum absolute diff |2-7| = 5 > 4.
+[4] with maximum absolute diff |4-4| = 0 <= 4.
+[4,7] with maximum absolute diff |4-7| = 3 <= 4.
+[7] with maximum absolute diff |7-7| = 0 <= 4.
+Therefore, the size of the longest subarray is 2.
+*/
+var longestSubarray = function (nums, limit) {
+  // For every subarray, we find abs diff between its maximum element and its minimum element
+  // We need to maintain maxElement of each element and minElement of each element in arrays
+  // Deques to store the indexes of the max and min elements
+  let maxDeque = [];
+  let minDeque = [];
+
+  let left = 0;
+  let maxLength = 0;
+
+  for (let right = 0; right < nums.length; right++) {
+    // Maintain the max deque in decreasing order
+    while (
+      maxDeque.length > 0 &&
+      nums[maxDeque[maxDeque.length - 1]] <= nums[right]
+    ) {
+      maxDeque.pop();
+    }
+    maxDeque.push(right);
+
+    // Maintain the min deque in increasing order
+    while (
+      minDeque.length > 0 &&
+      nums[minDeque[minDeque.length - 1]] >= nums[right]
+    ) {
+      minDeque.pop();
+    }
+    minDeque.push(right);
+
+    // Ensure the current window satisfies the condition
+    while (nums[maxDeque[0]] - nums[minDeque[0]] > limit) {
+      left++;
+      // Remove elements that are out of the current window
+      if (maxDeque[0] < left) {
+        maxDeque.shift();
+      }
+      if (minDeque[0] < left) {
+        minDeque.shift();
+      }
+    }
+
+    // Calculate the maximum length of the valid window
+    maxLength = Math.max(maxLength, right - left + 1);
+  }
+
+  return maxLength;
+};
