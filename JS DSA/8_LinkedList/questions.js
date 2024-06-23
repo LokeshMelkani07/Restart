@@ -643,3 +643,49 @@ function merge(list1, list2) {
 
   return head.next;
 }
+
+// Flatten a multilevel linked list
+// Given a linked list where in addition to the next pointer, each node has a child pointer, which may or may not point to a separate list. These child lists may have one or more children of their own, and so on, to produce a multilevel data structure, as shown in below figure. You are given the head of the first level of the list. Flatten the list so that all the nodes appear in a single-level linked list. You need to flatten the list in way that all nodes at the first level should come first, then nodes of second level, and so on.
+class Node {
+  // Every node has a data, next pointer, child pointer
+  constructor() {
+    this.next = null;
+    this.child = null;
+    this.data = 0;
+  }
+}
+
+function flattenLinkedList(head) {
+  // What we will do is, we will have a head pointer and a tail pointer
+  // Head pointer will point to head of LL, tail pointer points to last node of LL
+  // We start traversing from head of LL, if any node has child, we will append tail.next to curr.child and traverse tail to last node of that child
+  // now do curr = curr.next and again if any curr has a child, move it to tail.next and move tail to end of that list
+  // do this till curr reaches the tail itself
+  // This way we get whole LL flattened
+  if (!head) return;
+
+  let curr = head;
+  let tail = head;
+  let temp = head;
+
+  while (tail.next != null) {
+    // move tail to the end
+    tail = tail.next;
+  }
+
+  while (curr != tail) {
+    // if curr has child, append it to the tail
+    if (curr.child) {
+      tail.next = curr.child;
+      temp = curr.child;
+      while (temp.next != null) {
+        temp = temp.next;
+      }
+      tail = temp;
+    }
+
+    curr = curr.next;
+  }
+
+  return head;
+}

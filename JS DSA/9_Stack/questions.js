@@ -78,6 +78,7 @@ var backspaceCompare = function (s, t) {
     }
   }
 
+  // .join("") makes them a string
   return stack1.join("") === stack2.join("");
 };
 
@@ -91,6 +92,9 @@ var nextGreaterElement = function (nums1, nums2) {
   // We will make a map in which we store NGE for each corresponding element of nums2 which we later use in nums1
   // We will use a stack which will give us NGE for an element
   // NGE means first greater element that is to the right of x in the same array
+  // We want to find NGE of all elements present in nums1, using nums2
+  // It is given that nums1 is subset of nums2 so we first store NGE of all elements in nums2 using a stack inside map
+  // Now we traverse nums1 and find if map has that element as key, if yes, return its NGE else return -1
   const map = {};
   const stack = [];
 
@@ -108,6 +112,7 @@ var nextGreaterElement = function (nums1, nums2) {
 
   // Now for each element in nums2, check if that key has a value in map, store it in array else store -1
   // .map returns us a new array
+  // if no NGE found, return -1
   return nums1.map((n) => map[n] || -1);
 };
 
@@ -190,11 +195,11 @@ var nextGreaterElements = function (nums) {
   // Using stack
   // We will start traversing from back of array
   // We push element in the stack
-  // if st.top is smaller than current element we pop
+  // if st.top is smaller than current element we pop till we encounter an element greater than current element, it not found we store -1
   // we put ans[i] = st.top and if st.top is empty, we push -1 in ans[i]
-  // Now again we traverse from back of array
+  // Now again we traverse from back of array, as its a circular array so if any element has NGE of itself anywhere we will get it after first pass inside our stack
   // for element with ans[i] = -1
-  // we check if st.top is lesser than nums[i], pop it
+  // we check if st.top is lesser than nums[i], pop it till we encounter greater than current element
   // after that put ans[i] = st.top else -1
   // if ans[i] != -1 simply push that element in stack
   const stack = [];
@@ -230,6 +235,7 @@ var nextGreaterElements = function (nums) {
 // Output: "1219"
 // Explanation: Remove the three digits 4, 3, and 2 to form the new number 1219 which is the smallest.
 var removeKdigits = function (num, k) {
+  // Funda is: Apan sab characters ko stack mai dalenge, character by character, but agar apne ko aisa character mila jo stack.top se bhi chota h toh st.top ko nikaal lenge bahaar till removedElements < k and push krdenge uss element ko, so that hum minimum number bna ske inside stack
   // We will make use of stack
   // We will store characters into the stack but if stack.top contains character greater than our current character we pop it out
   // because we need to make smallest possible number
@@ -254,11 +260,12 @@ var removeKdigits = function (num, k) {
     removed++;
   }
 
-  // Loop to remove trailing 0's if any
+  // Loop to remove trailing 0's if any, we can accomodate 0's in between the resultant number but we do not need any trailing 0's so we remove them from beginnning of stack
   while (stack[0] == "0") {
     stack.shift();
   }
 
+  // At the end our stack contain the resultant minimum number
   return stack.length ? stack.join("") : "0";
 };
 
@@ -586,6 +593,7 @@ var largestRectangleArea = function (heights) {
 };
 
 function previousSmallerElement(arr, n) {
+  // For previous smaller element or previous greater element, always start traversal from beginning of array
   let result = [];
   let stack = [];
 
@@ -600,6 +608,7 @@ function previousSmallerElement(arr, n) {
       result.push(stack[stack.length - 1]);
     }
 
+    // Storing indexes so that it can help in later calculation
     stack.push(i);
   }
 
@@ -607,6 +616,7 @@ function previousSmallerElement(arr, n) {
 }
 
 function nextSmallerElement(arr, n) {
+  // For next smaller element or next greater element, always start traversal from end of array
   let result = [];
   let stack = [];
 

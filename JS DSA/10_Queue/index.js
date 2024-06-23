@@ -66,6 +66,7 @@ class QueueLinkedList {
   }
 
   enqueue(data) {
+    // Peeche se daalo, aage se nikaalo
     const newNode = new Node(data);
 
     if (this.head === null) {
@@ -79,6 +80,7 @@ class QueueLinkedList {
   }
 
   dequeue() {
+    // Peeche se daalo, aage se nikaalo
     if (this.isEmpty()) {
       return null;
     }
@@ -194,6 +196,8 @@ class Node {
 
 class MyCircularQueue {
   constructor(k) {
+    // Capacity is given by us for the maximum size of our queue
+    // size represents number of elements present currently inside the queue
     this.capacity = k;
     this.head = null;
     this.tail = null;
@@ -228,6 +232,8 @@ class MyCircularQueue {
       this.head = null;
       this.tail = null;
     } else {
+      // As it is a circular Queue, we need to maintain the property where, last element points to first element so during Dequeue, we remove element from front and maintain the property by pointing tail.next to head.next
+      // if head==tail means both becomes null now after dequeue
       this.head = this.head.next;
       this.tail.next = this.head;
     }
@@ -294,7 +300,9 @@ var MyCircularDeque = function (k) {
   this.data = [];
   this.front = 0;
   this.rear = 0;
+  // size represents the capacity
   this.size = k;
+  // length represents the number of elements currently present inside queue
   this.length = 0;
 };
 
@@ -415,7 +423,7 @@ function flattenLinkedList(head) {
 function flattenUsingQueue(head) {
   // In this solution we will make use of queue
   // We will have a curr which starts from the head pointer
-  // We will traverse till curr.next != null and print but while doing this, if amy curr has child, we will push it in the queue
+  // We will traverse till curr.next != null and print but while doing this, if any curr has child, we will push it in the queue
   // Once we reach curr.next == null, we check the queue
   // if its not empty, we will get the top element of queue (FIFO) and we point curr to it and start traversing from that node until curr.next != null and print it and sameway if we get any curr has child, we push it in the queue
   // We keep on doing this till curr.next === null and queue is empty

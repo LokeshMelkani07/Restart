@@ -32,6 +32,7 @@ class Graph {
   }
 
   // Implement depth-first search (DFS) on a graph
+  // Starting from startNode, usko visited mark kro, push in the result, go to its neighbours and if they are unvisited, call the function again for them recursively
   // DFS is an graph traversal technique in which we go to the depth then come back using backtracking
   // We start from root, move to left, till we reach last node, then backtrack and go to right node and so on. So we cover the depth
   DfsRecursive(startVertex) {
@@ -584,6 +585,8 @@ class Graph {
 // Find means to check whether one is inside set of another and way of checking it is check who is its parent, if parent is same means they are inside same set
 // For Union operation, we first find parent of both elements, if parents is same, we return back, else we see rank of both parents
 // Rank is an array which stores, number of elements whose parent a particular element is say rank[0] tells number of children 0 has
+// Rank tells us kaun kitno ka baap h
+// Union means dono ko saath jod do and in this operation of saath jod do, one with higher rank becomes parent so rank[parent]++ and lower rank vala becomes child and if rank of both are same, anyone can become parent and anyone can become child
 // so we check whose rank is greater from both parents. The one with greater rank becomes the parent to one with smaller
 // if rank of both is same, pick anyone as parent and increase its rank by 1
 // For find operation we just recursively traverse the parent array for that element till we get parent[x] = x itself means the top parent itself which can also be considered as root node
@@ -595,6 +598,7 @@ class UnionFind {
 
     // Initialize each element's parent to itself and rank to 0
     // Initially all has rank = 0, parent is element itself
+    // Initially sabka rank krdo 0 and sabko apna hi baap bnado
     for (let i = 0; i < size; i++) {
       this.parent[i] = i;
       this.rank[i] = 0;
@@ -603,9 +607,12 @@ class UnionFind {
 
   // find operation
   find(x) {
+    // Only the root node will be the one jo apna hi parent hoga
+    // So till the time parent[x] != x means apan root node nahi pahuche h abhi
     // if element is not parent of itself means we have not reached the top root yet, call recursively but to make our work easy
     // update the parent array value for that x with current parent so that we do not have to again go to depth of same element
     if (this.parent[x] !== x) {
+      // Path compression means, we want to make the tree as smallest as possible so instead of joining a node at some level we diectly join it with root node so its easy to find it and we do not need to travel to many depths using recursion
       // Path compression: Make the parent of x point to the root
       this.parent[x] = this.find(this.parent[x]);
     }
@@ -729,10 +736,11 @@ class Graph {
 
     for (const edge of sortedEdges) {
       // pick shortest weight edge one by one
+      // find will get us to the parent of current node
       const rootSrc = uf.find(edge.src);
       const rootDest = uf.find(edge.dest);
 
-      // if ther both do not belong to one set, consider them
+      // if parents are not same means they both do not belong to one set, consider them
       if (rootSrc !== rootDest) {
         // push it in result
         result.push(edge);
