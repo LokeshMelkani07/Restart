@@ -16,23 +16,29 @@ Input: nums = [0,1,0,3,2,3]
 Output: 4
 */
 var lengthOfLIS = function (nums) {
+  // We need to take account of Previous element we have picked so that we can compare it with current element and add it in our subsequence accordingly
   let n = nums.length;
   // we will make dp[n][n+1] as we do coordinate change to store prev
+  // We have 2 states here: index and prev
+  // ind values goes from 0 to n-1 so dp[n] for it
+  // prev value start from -1 and go till n so dp[n+1] for it
   // prev start from -1 which we cannot store in 2D array so we store -1 in index 0, 0th in 1st index and so on so we create n+1 length array for prev
   let dp = Array.from({ length: n }, () => Array(n + 1).fill(-1));
   return helper(0, -1, nums, n, dp);
 };
 
 function helper(ind, prev, nums, n, dp) {
-  // base case
+  // base case: we are at last index
   if (ind == n) {
     return 0;
   }
 
+  // prev+1 so that we can store prev = -1 value at 0th index so this way prev = n value get stored in n+1 so we have taken dp[n+1]
   if (dp[ind][prev + 1] != -1) {
     return dp[ind][prev + 1];
   }
 
+  // Either we pick a element for our subsequence, In this case our s=prev updates to current element and length of subsequence increase by 1 and we move to next index
   // if we do not pick, we do not update the length and prev index, just move to next index
   let len = 0 + helper(ind + 1, prev, nums, n, dp);
 
@@ -105,11 +111,15 @@ var lengthOfLIS = function (nums) {
   // TC: O(n)
   let n = nums.length;
   // dp[i] means length of LIS till index i
+  // Initially its all 1 because a number can make an LIS of maximum 1 size with itself
   let dp = Array(n).fill(1);
 
   let maxi = 1;
   for (let ind = 0; ind < n; ind++) {
     for (let prev = 0; prev < ind; prev++) {
+      // if nums[prev] < nums[ind] means we can make a LIS using it
+      // if nums[prev] < nums[ind] then its obvious that the subsequence till prev is also capable of becoming a LIS for index ind so dp[ind] = Math.mac(dp[ind], 1 + dp[prev])
+      // dp[i] means length of LIS till ith index
       if (nums[prev] < nums[ind]) {
         dp[ind] = Math.max(dp[ind], 1 + dp[prev]);
       }
@@ -139,6 +149,7 @@ longest Increasing subsequence is 0 4 6 9 13 15  and the length of the longest i
 function longestIncreasingSubsequence(n, nums) {
   // Most Optimal Solution
   // TC: O(n)
+  // We know how to print length of LIS using above method, but if we want to print the LIS, we need those elements so we need to have a hash where we can store the last previous element of any subsequence formed till ith index
   // dp[i] means length of LIS till index i
   let dp = Array(n).fill(1);
   // hash[i] contains prev element for the ith element for which dp[i] has been updated
@@ -156,6 +167,7 @@ function longestIncreasingSubsequence(n, nums) {
     }
 
     // store the lastIndex which will be that of maximum length LIS in dp array
+    // We will store the index of max LIS so that it helps during backtrack
     if (dp[ind] > maxi) {
       maxi = dp[ind];
       lastIndex = ind;
@@ -163,6 +175,7 @@ function longestIncreasingSubsequence(n, nums) {
   }
 
   // backtrack to the first index
+  // Now we want to print LIS using indexes we have stored in the hash
   let ans = [];
   ans.push(nums[lastIndex]);
 
@@ -303,6 +316,7 @@ var longestStrChain = function (nums) {
   // here we deal with " sequence of words" so we can choose words in any fashion from nums array
   // words = ["xbc","pcxbcf","xb","cxbc","pcxbc"] has output 5 as All the words can be put in a word chain ["xb", "xbc", "cxbc", "pcxbc", "pcxbcf"]. so we can choose words in any fashion
   // So instead of subsequence, this question becomes that of subset nums[i] means string ith so we need to sort the nums first based on length of all i strings
+  // It is same as LIS just that whenever we add new element to ind, we check if its strictly one character extra than our previous one
   nums.sort((a, b) => a.length - b.length);
   let n = nums.length;
   // dp[i] means length of LIS till index i
@@ -311,6 +325,7 @@ var longestStrChain = function (nums) {
   let maxi = 1;
   for (let ind = 0; ind < n; ind++) {
     for (let prev = 0; prev < ind; prev++) {
+      // To check if difference between prev and ind is of only 1 character, we make below function
       if (comparePossiblity(nums[ind], nums[prev]) && dp[ind] < 1 + dp[prev]) {
         dp[ind] = 1 + dp[prev];
       }
@@ -334,6 +349,7 @@ function comparePossiblity(s1, s2) {
 
   while (first < n1) {
     if (second < n2 && s1[first] == s2[second]) {
+      // if characters matches, increment both, else increment only extra character vali string
       first++;
       second++;
     } else {
@@ -341,6 +357,7 @@ function comparePossiblity(s1, s2) {
     }
   }
 
+  // if both reach the end means it just contain one extra character
   if (first == n1 && second == n2) {
     return true;
   }
@@ -366,6 +383,12 @@ length 5.
 function LongestBitonicSequence(n, nums) {
   // For strictly increasing sequence
   // dp[i] means length of LIS till index i
+  // We need dp1 to store LIS of each number of nums
+  // We need dp1 to store LIS of each element of reverse(nums)
+  // Bitonic means strictly increasing and then decreasing or only strictly inc or strictly decreasing
+  // If we have LIS for a particular element from front and back, we can find its LIS pattern by doing dp1[i]+dp2[i]-1
+  // -1 for that ith element which is repeated in both dp1 and dp2
+  // At the end, longest such result is our output
   let dp1 = Array(n).fill(1);
   for (let ind = 0; ind < n; ind++) {
     for (let prev = 0; prev < ind; prev++) {
@@ -407,6 +430,8 @@ Explanation: The two longest increasing subsequences are [1, 3, 4, 7] and [1, 3,
 */
 var findNumberOfLIS = function (nums) {
   let n = nums.length;
+  // count[i] stores number of LIS for ith index
+  // We need to consider all LIS a number can make with its previous elements, if [1,5], [4,5], [3,5] all LIS 5 can make of length 2 with everybody previous to him should be considered
   // dp[i] means length of LIS till index i
   let dp = Array(n).fill(1);
   // count[i] means number of LIS till that index i
@@ -420,6 +445,7 @@ var findNumberOfLIS = function (nums) {
         dp[ind] = 1 + dp[prev];
         count[ind] = count[prev];
       } else if (nums[prev] < nums[ind] && dp[prev] + 1 == dp[ind]) {
+        // One element can make LIS of same length with many elements so for that case we have written below statement
         // means an LIS of same length which is already calculated can be formed from another element means count++
         count[ind] += count[prev];
       }

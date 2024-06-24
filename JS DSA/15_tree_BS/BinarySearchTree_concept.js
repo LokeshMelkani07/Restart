@@ -25,7 +25,7 @@ class BinarySearchTree {
     this.root = this.insertNode(this.root, value);
   }
 
-  // Insert node at its right poisiton such that left of any node is always smaller than itself, right of any node is always greater than itself
+  // Insert node at its right position such that left of any node is always smaller than itself, right of any node is always greater than itself
   insertNode(node, value) {
     // TC: O(height of tree), SC: O(height)
     if (!node) {
@@ -138,8 +138,10 @@ function deletingInBST(root, key) {
       return root.left;
     } else {
       // both children present
+      // We will go to leftmost element that is minimum element of right subtree and place it in place of root
       let tempNode = findInorderSuccessor(root.right);
       root.val = tempNode;
+      // Now we need to delete that minimum right subtree node also from its earlier poisiton so we again call the deleting function for that value this time
       root.right = deletingInBST(root.right, tempNode);
     }
   }
@@ -148,7 +150,7 @@ function deletingInBST(root, key) {
 }
 
 function findInorderSuccessor(node) {
-  // we know inorder successor will be the leftmost node
+  // we know inorder successor will be the leftmost node of right subtree
   let curr = node;
   let value = node.val;
   while (curr != null) {
@@ -191,7 +193,7 @@ function helper(root, maxi, mini) {
 // One approach, we can do Inorder Traversal of BST which will result in Sorted Array and search for key in it
 // if key found, element before it = floor, element after it = ceil
 // if key not found, element just greater than it = ceil, just smaller than it = floor
-// But this approach takes space, recusrion also takes space
+// But this approach takes space, recursion also takes space
 // Let us try to do it iteratively
 // We will apply something like Binary Search in BST, where we see a element, we have 2 variable floor = null, ceil = null
 // if(root.val) > key, we store floor = root.val and go root.left

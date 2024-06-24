@@ -2,7 +2,7 @@
 // In a Binary Tree we have limitation of putting only 2 childrens
 // Whereas in a Trie we are free to put as many childrens to a node as possible for that purpose
 // Any TrieNode has a map and variable isEnd
-// map to store all characters node by node like a tree and isEnd tells that this is the end of certai"n word
+// map to store all characters node by node like a tree and isEnd tells that this is the end of certain word
 // Let say we store apple so we start from root node, we go character by character and we see if root ke map has "a"
 // if yes, go inside it using node.children.get(chars)
 // if not, make a new TrieNode there, this was we keep on storing node by node and at the last node we mark isEnd = true to mark the end of a word

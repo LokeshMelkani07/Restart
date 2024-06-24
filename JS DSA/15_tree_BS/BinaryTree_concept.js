@@ -107,6 +107,11 @@ var inorderTraversal = function (root) {
    *       / \   /     (left -> root -> right)
    *      4   5 6
    */
+  // Go all left while simulataneously puttin curr at stack
+  // When there is no left, pop from stack and add into answer, go right
+  // We need left, root, right
+  // We are using stack which is LIFO so we need to first push curr, then go left then go right
+  // But before going right, push in result
   const stack = [];
   let curr = root;
 
@@ -139,6 +144,8 @@ var postorderTraversal = function (root) {
 };
 
 var postorderTraversal = function (root) {
+  // left, right, root
+  // Go left, store it, if left not available, go right, then print at last
   // Iterative Post Order
   if (!root) return [];
   let stack = [],
@@ -269,6 +276,10 @@ Explanation: The recursive calls are as follow:
 */
 
 var constructMaximumBinaryTree = function (nums) {
+  // We are given a nums array and we want to construct binary tree out of it such that
+  // It is given to us that, Root is max value from nums
+  // Its left subtree is all values prefix to that max value
+  // Its right subtree is postfix to that max value so we use this information to solve the problem recursively
   // We will solve for one case, rest recursion will do
   // base case will be when nums array is empty
   if (nums.length === 0) return null;
@@ -558,6 +569,7 @@ var lowestCommonAncestor = function (root, p, q) {
   // We will Traverse left and right of a node
   // Everytime we check if from left we get null and from right we get either of p or q, we return p or q
   // If for any node we get p or q from left and p or q from right means that can be a possible LCA means below that node, there are p or q in its left and right so return that node in this case
+  // LCA means aisa node jiske children mai dono p and q aate ho
   if (root === null || root === p || root === q) {
     // if you have encountered null, return null
     // if you have reached p or q, no need to go futher, return p or q itself
@@ -596,6 +608,11 @@ var lowestCommonAncestor = function (root, p, q) {
 // Now to make sure that we do not burn the node already burnt, we make a visited object and mark all nodes burnt already so that we do not travel them again
 // this approach takes O(n) for level order 2 times + o(n) for map and SC: O(n) for queue 2 times and visited object and map
 function minimumTimeToBurn(root, start) {
+  // We Know from a particular node, we can burn its left child, right child, its parent in one minute
+  // To get the parents we need a mapping of all parents
+  // To get the time burnt we need to do any traversal, we will do BFS
+  // To check if somebody has burnt or not, we make a variable whose value  becomes 1 when somebody out of left, right, parent is burnt
+  // To not burn somebody who is already burnt, we use visited array
   if (!root) return 0;
   // map to store parent mapping
   let mpp = new Map();
@@ -857,7 +874,7 @@ var verticalTraversal = function (root) {
     maxCol = Math.max(maxCol, col);
 
     // Add the node to the column map based on its column index
-    // if any level is not there, create that level and store that element in it
+    // if any level is not there, create that level and making an array for each horizontal level so that we can store all elements for a particular level and then sort them and print them later.
     if (!columnMap.has(col)) {
       columnMap.set(col, []);
     }
@@ -873,6 +890,7 @@ var verticalTraversal = function (root) {
   }
 
   // Extract nodes from column map in vertical order
+  // We made minCol and maxCol to get count of minimum col we have by doing -1 everytime and maxCol we have by doing +1 so that later we can use it in for loop
   const verticalOrder = [];
   for (let col = minCol; col <= maxCol; col++) {
     if (columnMap.has(col)) {

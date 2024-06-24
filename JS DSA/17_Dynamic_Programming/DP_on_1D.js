@@ -141,6 +141,7 @@ would be | 10-30| + |30-20| = 30, which is minimum
 class Solution {
   minimizeCost(height, n, k) {
     // This is same as previous problem just that here k jumps are allowed to us
+    // We will run a loop from 1 to k and we try every poissble jump if its possible to take
     // We can make k jumps but before making any jump we need to take care of the fact that if that jump is allowed or not
     // ind - j  >= 0 then only that jump is possible where j runs from 1 to k
     let dp = Array(n).fill(-1);

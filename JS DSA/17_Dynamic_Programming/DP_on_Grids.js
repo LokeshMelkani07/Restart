@@ -305,6 +305,7 @@ function helper(ind1, ind2, grid, dp) {
     return grid[0][0];
   }
 
+  // If by taking any path, we reach out of bound means that path is not valid and should not be considered so as we are taking min(up,down) at last, so we fill notValidPath = Infinity so that it gets automatically neglected
   if (ind1 < 0 || ind2 < 0) {
     return +Infinity;
   }
