@@ -84,6 +84,16 @@ The first cut is done to a rod of length 7 so the cost is 7. The second cut is d
 Rearranging the cuts to be [3, 5, 1, 4] for example will lead to a scenario with total cost = 16 (as shown in the example photo 7 + 4 + 3 + 2 = 16).
 */
 var minCost = function (n, cuts) {
+  // We are given with an array where array[i] = position of a cut
+  // When we make a cut on a rod, we get cost = that arr.length
+  // n = 7 means our rod in which we want to make a cut is of length = 7, [1,2,3,4,5,6,7]
+  // cuts[] gives position of cuts
+  // We need to cut in such a way that minimum cost comes
+  // First we need to sort the array
+  // then if we make a cut at particular position we do cost + f(i,k) + f(k+1,j)
+  // where i and j are 2 pointers one at index = 0, another at index  = n-1
+  // cost of cutting a rod = a[j+1] - a[i-1] i.e length of that rod
+  // We add 0 and n in the rod array although it does not affect our answer but it gives us flexiblity to take i = 0, j = n-1
   // add 0 and n in cuts array and sort it
   cuts.sort((a, b) => a - b);
   cuts.push(n);
@@ -126,6 +136,14 @@ nums = [3,1,5,8] --> [3,5,8] --> [3,8] --> [8] --> []
 coins =  3*1*5    +   3*5*8   +  1*3*8  + 1*8*1 = 167
 */
 var maxCoins = function (nums) {
+  // for bursting any ballon, we get coins = arr[i-1]*arr[i]*arr[i+1] coins
+  // if i is out of bound, we consider i-1 and i+1 as 1
+  // So first of all let us add 1 from front and back in array
+  // We take 2 pointers i  = 1, j = n-1
+  // We start bursting from k = i to j
+  // Everytime on bursting we have
+  // coins = arr[k-1]*arr[k]*arr[k+1] + f(i,k-1) + f(k+1,j)
+  // kth balloon is already burst and included in the coins i.e why we make call for i->k-1 and k+1->j
   let n = nums.length;
   let dp = Array.from({ length: n + 1 }, () => Array(n + 1).fill(-1));
   nums.push(1);

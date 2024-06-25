@@ -74,6 +74,10 @@ class Solution {
 
   maximumSumRectangle(R, C, M) {
     // We can make a row matrix in which we have row equal to Matrix M
+    // Humare paas matrix hain, hum kya kar rahe h ki
+    // Har baar, C0+C0 ek array bnayega isko hum kadane's algo ki help se maximum sum subrray considering negatives nikalenge and store in a variable 'sum', now for C0+C1 again ek coulmn bnegi jo ki hoga ek array hi, we send this array ot kadane, get sum and if its >previousSum then update 'sum' variable, now do same for C0+C2...same for C0+CN
+    // Now we do this for C1+C1, C1+C2...C1+CN and update 'sum' if found any max sum
+    // Now for C2 + C2, C2+C3...C2+Cn and so on
     // We will Travel from col 0 and col 0 , col 0 and col 1..... col 0 and col C
     // Evertime we store the sum of Col 0 and Col 1 and so on and after storing we use kadane's algo
     // To find the maximum sum inside that array considering negatives also in efficient manner
@@ -127,12 +131,16 @@ There is 1 square of side 2.
 Total number of squares = 6 + 1 = 7.
 */
 var countSquares = function (matrix) {
+  // In DP on rectangle problems, we generally solve using tabulation instead of memoisation
+  // We make a DP table in which dp[i][j] = number of submatrices considering dp[i][j] as last block of that submatrix in bottom right corner
   let n = matrix.length; // row size
   let m = matrix[0].length; // col size
 
   let dp = Array.from({ length: n }, () => Array(n).fill(0));
 
   // fill 1st row and 1st col as it is
+  // 1st row and 1st col can make only 1 or 0 submatrix based on their value with themself only
+  // So copy first row and first column, as it is
   for (let i = 0; i < n; i++) {
     dp[i][0] = matrix[i][0];
   }
@@ -145,8 +153,12 @@ var countSquares = function (matrix) {
   for (let i = 1; i < n; i++) {
     for (let j = 1; j < m; j++) {
       if (matrix[i][j] == 0) {
+        // it is a binary matrix so if element is 0 means no count in submatric for that block
         dp[i][j] = 0;
       } else {
+        // here, means element is 1
+        // Take minimum of diagnol,up, down from DP table
+        // +1 for counting the element itself
         dp[i][j] = 1 + Math.min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]);
       }
     }

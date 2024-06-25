@@ -49,13 +49,19 @@ Then buy on day 4 (price = 3) and sell on day 5 (price = 6), profit = 6-3 = 3.
 Total profit is 4 + 3 = 7.
 */
 var maxProfit = function (prices) {
+  // This time, we can buy and sell as many times as we want so we need to try all possible ways
+  // Condition: If we have already bought, we cannot buy before selling it so we keep a variable 'buy'
+  // if buy == 1, we can buy
+  // if buy == 0, we cannot buy
   // Top Down Approach
   let n = prices.length;
   let dp = Array.from({ length: n }, () => Array(2).fill(-1));
+  // We start from index = 0 and buy = 1
   return profitBuySell(0, 1, prices, n, dp);
 };
 
 function profitBuySell(ind, buy, prices, n, dp) {
+  // if we reach out of bound means no more profit can be added
   if (ind == n) {
     return 0;
   }
@@ -150,6 +156,7 @@ Explanation: Buy on day 4 (price = 0) and sell on day 6 (price = 3), profit = 3-
 Then buy on day 7 (price = 1) and sell on day 8 (price = 4), profit = 4-1 = 3.
 */
 var maxProfit = function (prices) {
+  // This time we can do atmost 2 transactions, one transaction is completed when we buy + sell
   // Top Down Approach
   let n = prices.length;
   // we keep an extra variable now for number of transactions also

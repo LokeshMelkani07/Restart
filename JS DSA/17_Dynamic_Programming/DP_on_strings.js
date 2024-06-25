@@ -110,25 +110,34 @@ var PrintinglongestCommonSubsequence = function (text1, text2) {
     }
   }
 
-  // Now we have the tabulation table
+  // Now we have the tabulation table, we will use it to get the element of string included in LCS
+  // dp[i][j] means Longest common subsequence formed till ith index of str1 and jth index of str2
+  // LCS which can be formed till last index of str1 and str2 will be of length len that is shown by dp[m-1][n-1]
   let len = dp[m][n];
   let str = "";
 
+  // str is our resultant string
   for (let i = 0; i < len; i++) {
     str[i] = "$";
   }
 
+  // we start filling the result string from the end
   let index = len - 1;
   let i = m,
     j = n;
   // we start from last node of table and then we backtrack
   while (i > 0 || j > 0) {
     if (text1[i - 1] === text2[j - 1]) {
+      // We start i and j from end of str1 and str2
+      // if both characters are equal means inlcude anyone of str1[i] or str2[j] as both are equal and move i--, j-- both and index--
       str[index] = str[i - 1];
       i--, j--, index--;
     } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      // if both are not equal, we have 2 options
+      // either include str1 ith index and leave j as it is
       i--;
     } else {
+      // or take jth index of str2 and leave str1 as it is
       j--;
     }
   }
@@ -153,6 +162,10 @@ Explanation: The longest common substrings
 are "A", "B", "C" all having length 1.
 */
 function longestCommonSubstr(text1, text2, m, n) {
+  // We need DP table for LCS but with slight modification
+  // In subsequence, things need not to be consecutive so while filling the DP table, we were considering (ith index of str1 & leave jth index of str2) + (jth index of str2 and leave ith index of str1)
+  // But here its substring and substring need to be consecutive so we will check result of dp[i-1][j-1] means Longest common substring we got till last index of both strings and if current element are equal i.e str1[i]==str2[j] then we fill dp[i][j] = 1 + dp[i-1][j-1]
+  // Else we simply fill 0 because common substrings should be consecutive
   // Initialize dp array
   const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
   let ans = 0;
@@ -398,6 +411,10 @@ var shortestCommonSupersequence = function (text1, text2) {
     }
   }
 
+  // We know, while calculating LCS DP table, if str1[i]==str2[j], we check diagnol element dp[i-1][j-1] and 1 + dp[i-1][j-1]
+  // if both do not match we go up i.e dp[i-1][j] or left i.e dp[i][j-1], if we go 'up' this time we need to add that element in our supersequence and sameway if we go 'left' we need to add that element also in our supersequence
+  // because supersequence means its contains both str1 and str2 in its subsequence
+  // at the end, we check if anyone of i and j are still left, we add them all into our supersequence
   // LCS code ends here,
   // Now we preprocess for the supersequence
   let i = m,
@@ -487,21 +504,30 @@ var numDistinct = function (s, t) {
 
 function helper(s, t, i, j, dp) {
   // Base case
+  // j<0 means we have exhausted second string so our operation is successful
   if (j < 0) return 1;
+  // i<0 means first string is exhausted and no subsequence could be formed
   if (i < 0) return 0;
   if (dp[i][j] != -1) return dp[i][j];
 
   // if matching
   if (s[i] == t[j]) {
+    // if both matches, case 1: simply move one-one element backward as one element is matched for sunsequence + another case: it may happen that duplicates are present in str1 which can make str2 with other characters of str1 so i remains as it is, only j moves
     return (dp[i][j] =
       helper(s, t, i - 1, j - 1, dp) + helper(s, t, i - 1, j, dp));
   } else {
+    // if not matching, move i in str1 and keep j as it is
+    // we need to match i with j
     return (dp[i][j] = helper(s, t, i - 1, j, dp));
   }
 }
 
 var numDistinctTabulation = function (s, t) {
   // bottom up Approach
+  // In base case, we have i<0 and j<0 but in DP table we cannot find for -1 index so we will handle it by adding +1
+  // i<0 becomes i==0, j<0 becomes j==0
+  // n-1 becomes n, m-1 becomes m
+  // Refer notes for better understanding
   let n = s.length;
   let m = t.length;
   let dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
@@ -555,8 +581,9 @@ var minDistance = function (word1, word2) {
   // if both character are same, we skip that index so call for i-1,j-1
   // if both character not same means we need to do any one operation from Insertion, Deletion, Replacement
   // We will perform the operation which is minimum of all
+  // We need to make word1 to word2 in minimum number of operations
   // For Deletion, we do i-1,j
-  // For Insertion, we do j-1 because if we insert into word1, it makes i and j same when we skip them so simply we can swrite it as j-1 means we are skiping that index of word2
+  // For Insertion, we do j-1 because if we insert into word1, it makes i and j same when we skip them so simply we can write it as j-1 means we are skiping that index of word2
   // For replacement, we do i-1,j-1 because we are just skipping that character of both word1 and word2
   // get 1+min(insertion,deletion,replacement) and store in dp array
   const m = word1.length;
@@ -702,7 +729,7 @@ function helper(i, j, s, p, dp) {
   if (i < 0 && j < 0) return true;
   // 2. if i is exhausted, j still left, unsuccessful
   if (i < 0 && j >= 0) return false;
-  // 3. if j is exhausted(empty) but i still has "*" in it
+  // 3. if j is exhausted(empty) but i still left means it can happen that i has "*" as character left in it which will be counted in successful case so we need to check for it.
   if (j < 0 && i >= 0) {
     for (let k = 0; k <= i; k++) {
       // if anyone is not '*' means unsuccessful comparison
@@ -718,11 +745,13 @@ function helper(i, j, s, p, dp) {
   if (dp[i][j] != -1) return dp[i][j];
 
   // recurrence
+  // s[i] = ? means we can skip that character in p[j] as ? matches any one character (given)
   if (s[i] == p[j] || s[i] == "?") {
     // both match
     return (dp[i][j] = helper(i - 1, j - 1, s, p, dp));
   }
 
+  // s[i] = * means we can take any sequence as matched
   if (s[i] == "*") {
     // either take one at a time or take sequence at a time
     return (dp[i][j] = helper(i - 1, j, s, p, dp) | helper(i, j - 1, s, p, dp));

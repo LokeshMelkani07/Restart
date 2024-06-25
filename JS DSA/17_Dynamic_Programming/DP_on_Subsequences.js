@@ -187,6 +187,11 @@ var minimumDifference = function (nums) {
   }
 
   // we have dp table filled
+  // We fill the dp table for "subset sum equal to k"
+  // In the table dp[n][k] means for nth index, sum = k possible or not
+  // So to solve current problem, we make use of that filled dp table
+  // Iterate over all value of k in last row, such that everytime we pick s1 = k, s2 = target - s1 and take |s1-s2| and take minimum as output
+  // To optimise it further and avoid repeating values, we can iterate only till k/2
   let mini = 1e9;
   for (let i = 0; i <= total / 2; i++) {
     if (dp[n - 1][i] == true) {
