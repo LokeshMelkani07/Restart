@@ -759,3 +759,58 @@ class Graph {
     return result;
   }
 }
+
+// Maximum Total Importance of Roads
+/*
+You are given an integer n denoting the number of cities in a country. The cities are numbered from 0 to n - 1.
+
+You are also given a 2D integer array roads where roads[i] = [ai, bi] denotes that there exists a bidirectional road connecting cities ai and bi.
+
+You need to assign each city with an integer value from 1 to n, where each value can only be used once. The importance of a road is then defined as the sum of the values of the two cities it connects.
+
+Return the maximum total importance of all roads possible after assigning the values optimally.
+
+Example 1:
+Input: n = 5, roads = [[0,1],[1,2],[2,3],[0,2],[1,3],[2,4]]
+Output: 43
+Explanation: The figure above shows the country and the assigned values of [2,4,5,3,1].
+- The road (0,1) has an importance of 2 + 4 = 6.
+- The road (1,2) has an importance of 4 + 5 = 9.
+- The road (2,3) has an importance of 5 + 3 = 8.
+- The road (0,2) has an importance of 2 + 5 = 7.
+- The road (1,3) has an importance of 4 + 3 = 7.
+- The road (2,4) has an importance of 5 + 1 = 6.
+The total importance of all roads is 6 + 9 + 8 + 7 + 7 + 6 = 43.
+It can be shown that we cannot obtain a greater total importance than 43.
+*/
+var maximumImportance = function (n, roads) {
+  // Basically, Its a graph problem where matrix shows all the connected nodes as roads to cities
+  // n = total number of nodes / city
+  // 0 <= city <= n-1
+  const counts = [];
+
+  for (const [city1, city2] of roads) {
+    counts[city1] = (counts[city1] ?? 0) + 1;
+    counts[city2] = (counts[city2] ?? 0) + 1;
+  }
+
+  console.log("counts ", counts);
+  // counts stores number of connections each road has from 0 to n
+  const pairs = [];
+  // Push each node with its count in a pair
+  for (let i = 0; i < n; i++) {
+    pairs.push([i, counts[i] ?? 0]);
+  }
+
+  // Sort the pairs based on descending order of city value
+  pairs.sort((pair1, pair2) => pair2[1] - pair1[1]);
+  console.log("pairs ", pairs);
+  let sum = 0;
+
+  // We are assigning values to each city and calculting the importance
+  for (let i = 0; i < n; i++) {
+    sum += (n - i) * pairs[i][1];
+  }
+
+  return sum;
+};
