@@ -217,7 +217,7 @@ Since all customers got correct change, we output true.
 var lemonadeChange = function (bills) {
   // Problem says
   // Hum ek nimbu paani bech rhe h jo ki hai 5$ ka
-  // 3 type ki denominations hain bas, $5, $10, $15
+  // 3 type ki denominations hain bas, $5, $10
   // humare paas ek bills array h where bills[i] means amount that customer gives me
   // hume customer se paise leke usme se 5$ kaatke bache hue usko vapas dene hai
   // starting mai apne paas 0$ hai means $5 = 0, $10 = 0, $15 = 0

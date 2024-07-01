@@ -206,3 +206,35 @@ var sumOfSquares = function (nums) {
 
   return sum;
 };
+
+// Three Consecutive Odds
+/*
+Given an integer array arr, return true if there are three consecutive odd numbers in the array. Otherwise, return false.
+
+Example 1:
+Input: arr = [2,6,4,1]
+Output: false
+Explanation: There are no three consecutive odds.
+*/
+var threeConsecutiveOdds = function (arr) {
+  // from index = 1 to n-2
+  // for every i, check i, i+1 and i-1, if they are odd or not
+  let n = arr.length;
+  if (n <= 2) {
+    return false;
+  }
+
+  if (n == 3) {
+    return arr[0] % 2 == 1 && arr[1] % 2 == 1 && arr[2] % 2 == 1;
+  }
+
+  for (let i = 1; i < n - 1; i++) {
+    if (arr[i] % 2 == 1) {
+      if (arr[i - 1] % 2 == 1 && arr[i + 1] % 2 == 1) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
