@@ -165,7 +165,7 @@ function checkPrime(n) {
 // HCF = Highest Common Factor
 // Say we have n1 and n2 GCD(n1,n2) means Out of all divisors of n1 and n2, HCF will be the greatest common divisor present in both n1 and n2
 // n1 = 9 -> 1, 3, 9
-// n2 = 12 -> 1, 2, 6, 2, 4, 12
+// n2 = 12 -> 1, 2, 6, 3, 4, 12
 // GCD(n1,n2) = max(1,3) = 3
 // We can find the factor using looping from 1 to min(n1,n2) because if n1 = 9, n2 = 20. We cannot get GCD(9,20) beyond 9 so its better to loop till the minimum of both
 function GCD(n1, n2) {
@@ -279,7 +279,7 @@ function powerExponentationOptimised(x, n) {
   n = Math.abs(n);
   let ans = 1;
   while (n > 0) {
-    if (x % 2 == 1) {
+    if (n % 2 == 1) {
       ans = ans * x;
       x = x - 1;
     } else {

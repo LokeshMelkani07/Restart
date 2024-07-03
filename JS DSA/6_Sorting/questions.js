@@ -1,8 +1,8 @@
 // How Many Numbers Are Smaller Than the Current Number
 // Given the array nums, for each nums[i] find out how many numbers in the array are smaller than it. That is, for each nums[i] you have to count the number of valid j's such that j != i and nums[j] < nums[i]. Return the answer in an array.
 /*
-Example 1:
 
+Example 1:
 Input: nums = [8,1,2,2,3]
 Output: [4,0,1,1,3]
 Explanation:
@@ -358,4 +358,72 @@ var minMovesToSeat = function (seats, students) {
   }
 
   return count;
+};
+
+// Minimum Difference Between Largest and Smallest Value in Three Moves
+/*
+You are given an integer array nums.
+
+In one move, you can choose one element of nums and change it to any value.
+
+Return the minimum difference between the largest and smallest value of nums after performing at most three moves.
+
+Example 1:
+Input: nums = [5,3,2,4]
+Output: 0
+Explanation: We can make at most 3 moves.
+In the first move, change 2 to 3. nums becomes [5,3,3,4].
+In the second move, change 4 to 3. nums becomes [5,3,3,3].
+In the third move, change 5 to 3. nums becomes [3,3,3,3].
+After performing 3 moves, the difference between the minimum and maximum is 3 - 3 = 0.
+*/
+var minDifference = function (nums) {
+  /*
+    We have 4 plans:
+
+kill 3 biggest elements
+kill 2 biggest elements + 1 smallest elements
+kill 1 biggest elements + 2 smallest elements
+kill 3 smallest elements
+
+Example from @himanshusingh11:
+
+A = [1,5,6,13,14,15,16,17]
+n = 8
+
+Case 1: kill 3 biggest elements
+
+All three biggest elements can be replaced with 14
+[1,5,6,13,14,15,16,17] -> [1,5,6,13,14,14,14,14] == can be written as A[n-4] - A[0] == (14-1 = 13)
+
+Case 2: kill 2 biggest elements + 1 smallest elements
+
+[1,5,6,13,14,15,16,17] -> [5,5,6,13,14,15,15,15] == can be written as A[n-3] - A[1] == (15-5 = 10)
+
+Case 3: kill 1 biggest elements + 2 smallest elements
+
+[1,5,6,13,14,15,16,17] -> [6,6,6,13,14,15,16,16] == can be written as A[n-2] - A[2] == (16-6 = 10)
+
+Case 4: kill 3 smallest elements
+
+[1,5,6,13,14,15,16,17] -> [13,13,13,13,14,15,16,17] == can be written as A[n-1] - A[3] == (17-13 = 4)
+
+Answer is minimum of all these cases!
+    */
+
+  let n = nums.length;
+  if (n <= 4) return 0; // if length is <= 4, we will make largest element same as smallest element, rest all we make 0 and difference become 0 as we have atmost 3 moves to perform
+
+  // Sort the array
+  nums.sort((a, b) => a - b);
+
+  // Evaluate the minimum difference possible with at most 3 moves
+  let minDiff = Math.min(
+    nums[n - 1] - nums[3], // Change 3 smallest elements
+    nums[n - 2] - nums[2], // Change 2 smallest and 1 largest element
+    nums[n - 3] - nums[1], // Change 1 smallest and 2 largest elements
+    nums[n - 4] - nums[0] // Change 3 largest elements
+  );
+
+  return minDiff;
 };

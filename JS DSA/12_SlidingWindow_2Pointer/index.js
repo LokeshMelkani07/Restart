@@ -233,12 +233,15 @@ var totalFruit = function (tree) {
     while (hashMap.size > 2) {
       const leftFruit = tree[left];
       if (hashMap.get(leftFruit) === 0) {
+        // if frequency is 0 means delete it completely
         hashMap.delete(leftFruit);
       } else {
+        // else reduce its frequency by 1
         hashMap.set(leftFruit, hashMap.get(leftFruit) - 1);
       }
       left++;
     }
+    // store maxLen
     maxLen = Math.max(maxLen, right - left + 1);
   }
   return maxLen;
