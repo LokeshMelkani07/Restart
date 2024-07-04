@@ -57,6 +57,11 @@ class MaxHeap {
   // Heapify up after insertion
   // Take the last element which is just inserted, go to its parent and swap if needed till time we do not reach the first element of array
   heapifyUp() {
+    // Just take last element just added ka index as current index.
+    // Now till currentIndex > 0 and currentIndex > its parent
+    // swap them
+    // everytime change currentIndex with parentIndex
+    // So our heap properties are satisfied and a new element is added successfully in our max Heap.
     let currentIndex = this.heap.length - 1;
 
     while (
@@ -78,6 +83,12 @@ class MaxHeap {
 
     // Swap lastValue of array with first value and remove first value from array
     // Now apply HeapifyDown to satisfy Heap properties in the array
+
+    // Do nothing
+    // Deletion in max heap means deleting the root.
+    // Just take last element and pop it our from heap array.
+    // Store it in 0th index
+    // Now go to its children starting from 0th index, make swaps based on properties of max heap till our array length is finished.
     const maxValue = this.heap[0];
     const lastValue = this.heap.pop();
 
@@ -86,6 +97,7 @@ class MaxHeap {
       this.heapifyDown();
     }
 
+    // Return the deleted root
     return maxValue;
   }
 
@@ -101,11 +113,16 @@ class MaxHeap {
   heapifyDown() {
     let currentIndex = 0;
 
+    // Everytime we are updating the currentIndex
     while (this.getLeftChildIndex(currentIndex) < this.heap.length) {
+      // Extracting left child
       const leftChildIndex = this.getLeftChildIndex(currentIndex);
+      // Extracting right child
       const rightChildIndex = this.getRightChildIndex(currentIndex);
+      // Let say larger one is left child
       let largerChildIndex = leftChildIndex;
 
+      // check if rightChild > leftChild so change largerChild to rightChild
       if (
         rightChildIndex < this.heap.length &&
         this.heap[rightChildIndex] > this.heap[leftChildIndex]
@@ -113,10 +130,13 @@ class MaxHeap {
         largerChildIndex = rightChildIndex;
       }
 
+      // if currentIndex > largerChild means properties are intact, do not disturb
       if (this.heap[currentIndex] > this.heap[largerChildIndex]) {
         break;
       }
 
+      // if not, then swap because we are making a max heap so parent should be larger
+      // change currentIndex to largerChildIndex
       this.swap(currentIndex, largerChildIndex);
       currentIndex = largerChildIndex;
     }
@@ -475,18 +495,22 @@ var findMaximizedCapital = function (k, w, profits, capital) {
 
   /* Run the projects. */
   let pq = new MaxPriorityQueue(),
-    pp = 0;
+    i = 0;
   while (k > 0) {
     /* Add all the projects fundable with the current operating capital. */
-    while (pp < projects.length && projects[pp][1] <= w) {
-      pq.enqueue(pp, projects[pp][0]);
-      pp++;
+    while (i < projects.length && projects[i][1] <= w) {
+      pq.enqueue(i, projects[i][0]);
+      i++;
     }
 
+    // pq.size == 0 means apne pe capital hi nhi h kisi project ko krne ka so bahaar aajao
     if (pq.size() === 0) break;
 
     /* Choose the most profitable available project. */
+    // choose the project with maximum project as its a max heap and add into our capital
     let el = pq.dequeue();
+    // our maxHeap stores element like {priority: something, element: something}
+    // So we while pushing, push priority:i, element: project[i]
     w += el.priority;
     k--;
   }

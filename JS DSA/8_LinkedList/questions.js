@@ -380,6 +380,11 @@ var reverseBetween = function (head, left, right) {
   // At the end of reversing the list, we need to link last rev node i.e right to prevNode and we need to link prev node to last node of LL so we store left index node at first_rev_node
   let first_rev_node = prev;
   // we will start reversing such that first node points to null which we will handle later
+  // The below procedure till end of loop is same as reverse list-I
+  // temp act as prev
+  // nextNode act as next
+  // curr act as curr
+  // just that now the loop runs right-left times.
   let temp = null;
 
   // for right-left number of times, reverse the links
@@ -689,3 +694,37 @@ function flattenLinkedList(head) {
 
   return head;
 }
+
+// Merge Nodes in Between Zeros
+/*
+You are given the head of a linked list, which contains a series of integers separated by 0's. The beginning and end of the linked list will have Node.val == 0.
+
+For every two consecutive 0's, merge all the nodes lying in between them into a single node whose value is the sum of all the merged nodes. The modified list should not contain any 0's.
+
+Return the head of the modified linked list.
+*/
+
+var mergeNodes = function (head) {
+  // We will keep one pointer to first node after 0 whose value we will modify later to sum of all values till we encounter next 0 say modify
+  // nextSum is pointer which we move to take sum between 2 0's
+  // Once we have sum, we modify the node, move nextSum to first node after 0-0 pair
+  // Now we move modify.next = nextSum and modify = nextSum and repeat same procedure till we are at end of LL
+  // at the end we return head.next which is 0-> (ye vala)
+  let modify = head.next;
+  let nextSum = modify;
+
+  while (nextSum !== null) {
+    let sum = 0;
+    while (nextSum.val !== 0) {
+      sum += nextSum.val;
+      nextSum = nextSum.next;
+    }
+    modify.val = sum;
+    nextSum = nextSum.next;
+
+    modify.next = nextSum;
+    modify = modify.next;
+  }
+
+  return head.next;
+};
