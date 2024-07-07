@@ -371,30 +371,34 @@ var getMaximumGold = function (grid) {
   let maxGold = 0;
 
   const dfsBacktrack = (i, j, currentGold) => {
+    // we check for out of bound condition
     if (i < 0 || j < 0 || i >= row || j >= col || grid[i][j] == 0) {
       return 0;
     } //out of bound conditions
 
+    // collect the gold and store it
     const goldInCurrentCell = grid[i][j];
     currentGold += goldInCurrentCell;
 
-    //mark Visited
+    //mark Visited and make gold in it as 0 now
     grid[i][j] = 0;
 
     //update Max Gold
     maxGold = Math.max(maxGold, currentGold);
 
-    //traverse all dir
+    //traverse all dir up, down,right left
     dfsBacktrack(i + 1, j, currentGold);
     dfsBacktrack(i - 1, j, currentGold);
     dfsBacktrack(i, j + 1, currentGold);
     dfsBacktrack(i, j - 1, currentGold);
 
+    // On backtrack, put that gold back in that block
     //backtrack
     grid[i][j] = goldInCurrentCell;
   };
 
   //main
+  // We start from index 0,0 and move till last row, last col
   for (let i = 0; i < row; i++) {
     for (let j = 0; j < col; j++) {
       if (grid[i][j] !== 0) {

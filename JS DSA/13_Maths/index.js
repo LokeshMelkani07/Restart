@@ -362,3 +362,51 @@ function rangePrime(queries) {
     console(arr[R] - arr[L - 1]);
   }
 }
+
+// Water Bottles
+/*
+There are numBottles water bottles that are initially full of water. You can exchange numExchange empty water bottles from the market with one full water bottle.
+
+The operation of drinking a full water bottle turns it into an empty bottle.
+
+Given the two integers numBottles and numExchange, return the maximum number of water bottles you can drink.
+
+Example 1:
+Input: numBottles = 9, numExchange = 3
+Output: 13
+Explanation: You can exchange 3 empty bottles to get 1 full water bottle.
+Number of water bottles you can drink: 9 + 3 + 1 = 13.
+*/
+var numWaterBottles = function (numBottles, numExchange) {
+  /*
+  9 totalBottle, 3 emptyGives1fullBottle
+  6 bachi 3peeli 1exhangeMaiMili = total 7 bottle h ab
+  4 6p 1e = 5
+  2 9p 1e = 3
+  0 12p 1e = 1
+  1 13p 0e = 0
+  Total humne 13 peeli
+
+  har baar apan
+  total - numExhange = bachi
+  add into peeli
+  bachi + 1
+  till total bottl > numexhange
+  bachi + peeli
+
+  numBottles = 15, numExchange = 4
+  11b 4p 1e = 12
+  8b 8p 1e = 9
+  5b 12p 1e = 6
+  2b 16 1e = 3 < 4 so add bachi kuchi into total
+  3 + 16 = 19
+  */
+  let total = 0;
+
+  while (numBottles >= numExchange) {
+    total += numExchange;
+    numBottles = numBottles - numExchange + 1;
+  }
+
+  return total + numBottles;
+};
