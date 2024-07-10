@@ -2530,3 +2530,110 @@ var minPatches = function (nums, n) {
   // return total number of patches added
   return patch;
 };
+
+// Average Waiting Time
+/*
+There is a restaurant with a single chef. You are given an array customers, where customers[i] = [arrivali, timei]:
+
+arrivali is the arrival time of the ith customer. The arrival times are sorted in non-decreasing order.
+timei is the time needed to prepare the order of the ith customer.
+When a customer arrives, he gives the chef his order, and the chef starts preparing it once he is idle. The customer waits till the chef finishes preparing his order. The chef does not prepare food for more than one customer at a time. The chef prepares food for customers in the order they were given in the input.
+
+Return the average waiting time of all customers. Solutions within 10-5 from the actual answer are considered accepted.
+
+Example 2:
+Input: customers = [[5,2],[5,4],[10,3],[20,1]]
+Output: 3.25000
+Explanation:
+1) The first customer arrives at time 5, the chef takes his order and starts preparing it immediately at time 5, and finishes at time 7, so the waiting time of the first customer is 7 - 5 = 2.
+2) The second customer arrives at time 5, the chef takes his order and starts preparing it at time 7, and finishes at time 11, so the waiting time of the second customer is 11 - 5 = 6.
+3) The third customer arrives at time 10, the chef takes his order and starts preparing it at time 11, and finishes at time 14, so the waiting time of the third customer is 14 - 10 = 4.
+4) The fourth customer arrives at time 20, the chef takes his order and starts preparing it immediately at time 20, and finishes at time 21, so the waiting time of the fourth customer is 21 - 20 = 1.
+So the average waiting time = (2 + 6 + 4 + 1) / 4 = 3.25.
+*/
+var averageWaitingTime = function (customers) {
+  // array shows [arrival time, time to prepare dish]
+  // chef can prepare only one dish at a time
+  // start timer from arrival time of first customer
+  // waiting time of any customer is, difference between time customer arrives and number of seconds it take for his dish to prepare
+  // [[5,2],[5,4],[10,3],[20,1]] if time < arrival time means chef can take rest and start working from arrival time of that bigger customer so timer starts from arrival[i] of that bigger customer.
+  /*
+    Running example:  customers = [[5,2],[5,4],[10,3],[20,1]]
+time = 5, wTime = 0
+5 >= 5, 5 + 2 = 7, wTime = 7 - 5 = 2
+7 >= 5, 7 + 4 = 11, wTime = 11 - 5 = 6
+11 >= 10, 11 + 3 = 14, wTime = 14 - 10 = 4
+14 >= 20 (N0), 20 + 1 = 21, 21 - 20 = 1
+
+
+time = cursomer[0][0] wTime = 0
+for(i = 0 -> n)
+  if(time >= customer[i][0]) 5 5 10 3
+  {
+     time += customer[i][1];
+  }
+  else{
+      time = customer[i][0] + customer[i][0];
+  }
+
+  wTime += time - customer[i][0];
+
+wTime/n;
+*/
+
+  let n = customers.length;
+  let wTime = 0;
+  let time = customers[0][0];
+
+  for (let i = 0; i < n; i++) {
+    if (time >= customers[i][0]) {
+      time += customers[i][1];
+    } else {
+      time = customers[i][0] + customers[i][1];
+    }
+    console.log(wTime);
+    wTime += time - customers[i][0];
+  }
+
+  return wTime / n;
+};
+
+// Crawler Log Folder
+/*
+The Leetcode file system keeps a log each time some user performs a change folder operation.
+
+The operations are described below:
+
+"../" : Move to the parent folder of the current folder. (If you are already in the main folder, remain in the same folder).
+"./" : Remain in the same folder.
+"x/" : Move to the child folder named x (This folder is guaranteed to always exist).
+You are given a list of strings logs where logs[i] is the operation performed by the user at the ith step.
+
+The file system starts in the main folder, then the operations in logs are performed.
+
+Return the minimum number of operations needed to go back to the main folder after the change folder operations.
+
+Example 1:
+Input: logs = ["d1/","d2/","../","d21/","./"]
+Output: 2
+Explanation: Use this change folder operation "../" 2 times and go back to the main folder.
+*/
+var minOperations = function (logs) {
+  // Very simple Question
+  // Make a count variable
+  // Everytime we go to another folder means we encounter 'something/', we do count++
+  // When we encounter './' means stay as it is
+  // when we encounter '../' means count--
+  // At the end count gives us minimum number of operations to go back to root
+  let count = 0;
+  let n = logs.length;
+  for (let i = 0; i < n; i++) {
+    if (logs[i] == "../" && count > 0) {
+      count--;
+    } else if (logs[i] != "./" && logs[i] != "../") {
+      count++;
+    }
+  }
+
+  return count > 0 ? count : 0;
+};
