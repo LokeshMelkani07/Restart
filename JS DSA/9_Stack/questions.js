@@ -948,3 +948,67 @@ function evaluatePrefix(prefix) {
   // The final result will be at the top of the stack
   return stack.pop();
 }
+
+// Reverse Substrings Between Each Pair of Parentheses
+/*
+You are given a string s that consists of lower case English letters and brackets.
+
+Reverse the strings in each pair of matching parentheses, starting from the innermost one.
+
+Your result should not contain any brackets.
+
+Example 1:
+Input: s = "(abcd)"
+Output: "dcba"
+
+Example 2:
+Input: s = "(u(love)i)"
+Output: "iloveu"
+Explanation: The substring "love" is reversed first, then the whole string is reversed.
+
+Example 3:
+Input: s = "(ed(et(oc))el)"
+Output: "leetcode"
+Explanation: First, we reverse the substring "oc", then "etco", and finally, the whole string.
+*/
+var reverseParentheses = function (s) {
+  // We just need to reverse whatever is between ( )
+  // We will use a stack where we push till we encounter ')'
+  // When we encounter ")", we pop all elements in LIFO fashion and reverse them and push whole reversed string in stack
+  // We keep on doing it till end of string
+  // At the end we empty the stack in a result string
+  // answer comes in reverse order when we console log we observe it
+  // return reverse(result)
+  let n = s.length;
+  let st = [];
+  for (let i = 0; i < n; i++) {
+    if (s[i] != ")") {
+      st.push(s[i]);
+    } else {
+      let res = "";
+      while (st.length > 0 && st[st.length - 1] != "(") {
+        res += st.pop();
+      }
+
+      console.log("Res ", res);
+      let reverseStr = reverseString(res);
+      st.pop();
+      st.push(reverseStr);
+    }
+  }
+
+  let result = "";
+  while (st.length != 0) {
+    result += st.pop();
+  }
+
+  return reverseString(result);
+};
+
+function reverseString(s) {
+  let str = s.split("");
+  let newStr = str.reverse();
+  let returnString = newStr.join("");
+  // console.log(returnString);
+  return returnString;
+}
