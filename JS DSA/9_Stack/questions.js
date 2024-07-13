@@ -1092,3 +1092,97 @@ function removePairs(str, target, check, point) {
 
   return { scr: score, res: res };
 }
+
+// Robot Collisions
+/*
+There are n 1-indexed robots, each having a position on a line, health, and movement direction.
+
+You are given 0-indexed integer arrays positions, healths, and a string directions (directions[i] is either 'L' for left or 'R' for right). All integers in positions are unique.
+
+All robots start moving on the line simultaneously at the same speed in their given directions. If two robots ever share the same position while moving, they will collide.
+
+If two robots collide, the robot with lower health is removed from the line, and the health of the other robot decreases by one. The surviving robot continues in the same direction it was going. If both robots have the same health, they are both removed from the line.
+
+Your task is to determine the health of the robots that survive the collisions, in the same order that the robots were given, i.e. final heath of robot 1 (if survived), final health of robot 2 (if survived), and so on. If there are no survivors, return an empty array.
+
+Return an array containing the health of the remaining robots (in the order they were given in the input), after no further collisions can occur.
+
+Note: The positions may be unsorted.
+
+Example 1:
+Input: positions = [5,4,3,2,1], healths = [2,17,9,15,10], directions = "RRRRR"
+Output: [2,17,9,15,10]
+Explanation: No collision occurs in this example, since all robots are moving in the same direction. So, the health of the robots in order from the first robot is returned, [2, 17, 9, 15, 10].
+
+Example 2:
+Input: positions = [3,5,2,6], healths = [10,10,15,12], directions = "RLRL"
+Output: [14]
+Explanation: There are 2 collisions in this example. Firstly, robot 1 and robot 2 will collide, and since both have the same health, they will be removed from the line. Next, robot 3 and robot 4 will collide and since robot 4's health is smaller, it gets removed, and robot 3's health becomes 15 - 1 = 14. Only robot 3 remains, so we return [14].
+*/
+var survivedRobotsHealths = function (positions, healths, directions) {
+  // Intiuiton is very simple
+  // Sirf vahi robot collide krenge jo opposite direcitons mai aa rhe h
+  // means if i -> goes to right
+  // i+1 -> goes to left
+  // considering i+1 > i always then only collision will happen
+  // collisions hote rhenge jabtak oppotsite direction vala bnda milta rhega
+  // we will club all attirbute of a robot in a array
+  // we will also store original index of each robot so that we can return original final position at the end of result.
+  // we will sort the robots based on positions so that i and i+1 vala funda can be applied.
+  // we will use stack to track
+  let robots = [];
+  for (let i = 0; i < positions.length; i++) {
+    robots.push([positions[i], healths[i], directions[i], i]);
+  }
+
+  // Sort robots by their positions
+  robots.sort((a, b) => a[0] - b[0]);
+
+  let stack = [];
+
+  for (let robot of robots) {
+    // if position is R as we are traversing in  -> direction, so collision never happens, just add
+    if (robot[2] === "R") {
+      stack.push(robot);
+    } else {
+      // if position is 'L' and at stack top we have 'R'
+      // collision ke chances hain
+      // jab tak collision hota rhega tab tak krte rho
+      // end mai jo bada hoga usko add krdena in stack
+      while (stack.length > 0 && stack[stack.length - 1][2] === "R") {
+        let lastRobot = stack[stack.length - 1];
+        // jiska health bada, uska health--
+        if (lastRobot[1] > robot[1]) {
+          // if stack.top ka health bada h, then just update its health
+          // no need to robot element now, make it health 0 and break out of loop
+          lastRobot[1]--;
+          robot[1] = 0;
+          break;
+        } else if (lastRobot[1] < robot[1]) {
+          // if new element ka health bdiya h, stack.pop
+          // update health of robot element and this operations goes on till there are further elements also inside stack which can collide with our current element
+          robot[1]--;
+          stack.pop();
+        } else {
+          // dono ka health same h toh dono bekaar h,
+          // stack.pop, current element ka health 0 krke break the loop
+          robot[1] = 0;
+          stack.pop();
+          break;
+        }
+      }
+      // agar abhi bhi robot element ka health>0 means na vo duplicate tha, na usse badi health ka koi stack mai already pada hua tha means push it
+      if (robot[1] > 0) {
+        stack.push(robot);
+      }
+    }
+  }
+
+  // Sort remaining robots by their original index
+  stack.sort((a, b) => a[3] - b[3]);
+
+  // store health of all
+  let result = stack.map((robot) => robot[1]);
+
+  return result;
+};
