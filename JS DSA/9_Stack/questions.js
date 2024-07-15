@@ -1186,3 +1186,108 @@ var survivedRobotsHealths = function (positions, healths, directions) {
 
   return result;
 };
+
+// Number of Atoms
+/*
+Given a string formula representing a chemical formula, return the count of each atom.
+
+The atomic element always starts with an uppercase character, then zero or more lowercase letters, representing the name.
+
+One or more digits representing that element's count may follow if the count is greater than 1. If the count is 1, no digits will follow.
+
+For example, "H2O" and "H2O2" are possible, but "H1O2" is impossible.
+Two formulas are concatenated together to produce another formula.
+
+For example, "H2O2He3Mg4" is also a formula.
+A formula placed in parentheses, and a count (optionally added) is also a formula.
+
+For example, "(H2O2)" and "(H2O2)3" are formulas.
+Return the count of all elements as a string in the following form: the first name (in sorted order), followed by its count (if that count is more than 1), followed by the second name (in sorted order), followed by its count (if that count is more than 1), and so on.
+
+The test cases are generated so that all the values in the output fit in a 32-bit integer.
+
+Example 1:
+Input: formula = "H2O"
+Output: "H2O"
+Explanation: The count of elements are {'H': 2, 'O': 1}.
+
+Example 2:
+Input: formula = "Mg(OH)2"
+Output: "H2MgO2"
+Explanation: The count of elements are {'H': 2, 'Mg': 1, 'O': 2}.
+
+Example 3:
+Input: formula = "K4(ON(SO3)2)2"
+Output: "K4N2O14S4"
+Explanation: The count of elements are {'K': 4, 'N': 2, 'O': 14, 'S': 4}.
+*/
+var countOfAtoms = function (formula) {
+  // While doing a dry run, we see that In "K4(ON(SO3)2)2", O occurs twice and everytime its count gets updated in a different way like ON vala 'O' cannot get multipled by SO3 vala O ka ()2 so we need a mechanisam to store element and its count simultanously.
+  // if we use a map with stack, we will not be able to update count efficiently because it will update all entries of 'O' in same entry, whereas we saw above that different O has different count
+  // We will store [element,count] in stack
+  // Whenever we encounter '(' we push it but when we see ')', means we need to multiply formula with a number, whatever is between (), thats part of our formula we need to miltiply its count
+  // So we pop from stack till we have (
+  // update count of elements and push them
+  // count is in form of string so make sure to convert it to integer before multiplying.
+  // store whole stack in a map and then sort it based on keys and store in a string
+  let n = formula.length;
+  let i = 0;
+  let st = [];
+  while (i < n) {
+    if (i < n && formula[i] >= "A" && formula[i] <= "Z") {
+      // we encounter Alphabet
+      let element = formula[i];
+      i++;
+      while (i < n && formula[i] >= "a" && formula[i] <= "z") {
+        element += formula[i];
+        i++;
+      }
+
+      let num = 0;
+      while (i < n && formula[i] >= "0" && formula[i] <= "9") {
+        num = num * 10 + (formula[i].charCodeAt(0) - "0".charCodeAt(0));
+        i++;
+      }
+
+      num = num || 1;
+      st.push([element, num]);
+    } else if (formula[i] === "(") {
+      st.push("(");
+      i++;
+    } else {
+      // we encounter ')'
+      let ele = {};
+      i++;
+      let num = 0;
+      while (i < n && formula[i] >= "0" && formula[i] <= "9") {
+        num = num * 10 + (formula[i].charCodeAt(0) - "0".charCodeAt(0));
+        i++;
+      }
+
+      num = num || 1;
+      while (st.length > 0 && st[st.length - 1] !== "(") {
+        let [element, count] = st.pop();
+        ele[element] = (ele[element] || 0) + count * num;
+      }
+
+      st.pop();
+      for (let element in ele) {
+        // new count ke saath element ko push krdia inside
+        st.push([element, ele[element]]);
+      }
+    }
+  }
+
+  let mpp = {};
+  while (st.length) {
+    let [ele, count] = st.pop();
+    mpp[ele] = (mpp[ele] || 0) + count;
+  }
+
+  let sortedKeys = Object.keys(mpp).sort();
+  let result = sortedKeys
+    .map((key) => key + (mpp[key] > 1 ? mpp[key] : ""))
+    .join("");
+
+  return result;
+};

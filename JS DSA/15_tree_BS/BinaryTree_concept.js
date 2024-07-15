@@ -900,3 +900,63 @@ var verticalTraversal = function (root) {
 
   return verticalOrder;
 };
+
+// Create Binary Tree From Descriptions
+/*
+You are given a 2D integer array descriptions where descriptions[i] = [parenti, childi, isLefti] indicates that parenti is the parent of childi in a binary tree of unique values. Furthermore,
+
+If isLefti == 1, then childi is the left child of parenti.
+If isLefti == 0, then childi is the right child of parenti.
+Construct the binary tree described by descriptions and return its root.
+
+The test cases will be generated such that the binary tree is valid.
+
+Example 1:
+Input: descriptions = [[20,15,1],[20,17,0],[50,20,1],[50,80,0],[80,19,1]]
+Output: [50,20,80,15,17,19]
+Explanation: The root node is the node with value 50 since it has no parent.
+The resulting binary tree is shown in the diagram.
+*/
+var createBinaryTree = function (descriptions) {
+  // we will store whole node inside the map
+  // if it has a child, we make a child node also inside map
+  // if parent has left, set its left
+  // if parent has right, set its right
+  // we store all child in set so that at the end, we can search for parent and return it
+  // our map contains whole tree
+  let nodeMap = new Map();
+  let isChild = new Set();
+
+  // Iterate through each description
+  for (let [parent, child, isLeft] of descriptions) {
+    // Add the parent node to the map if it doesn't exist
+    if (!nodeMap.has(parent)) {
+      nodeMap.set(parent, new TreeNode(parent));
+    }
+    // Add the child node to the map if it doesn't exist
+    if (!nodeMap.has(child)) {
+      nodeMap.set(child, new TreeNode(child));
+    }
+
+    // Set the child node as left or right child of the parent node
+    if (isLeft) {
+      nodeMap.get(parent).left = nodeMap.get(child);
+    } else {
+      nodeMap.get(parent).right = nodeMap.get(child);
+    }
+
+    // Mark this node as a child node
+    isChild.add(child);
+  }
+
+  // The root is the node that is not a child of any node
+  let root = null;
+  for (let [nodeVal, node] of nodeMap) {
+    if (!isChild.has(nodeVal)) {
+      root = node;
+      break;
+    }
+  }
+
+  return root;
+};
