@@ -960,3 +960,101 @@ var createBinaryTree = function (descriptions) {
 
   return root;
 };
+
+// Step-By-Step Directions From a Binary Tree Node to Another
+/*
+You are given the root of a binary tree with n nodes. Each node is uniquely assigned a value from 1 to n. You are also given an integer startValue representing the value of the start node s, and a different integer destValue representing the value of the destination node t.
+
+Find the shortest path starting from node s and ending at node t. Generate step-by-step directions of such path as a string consisting of only the uppercase letters 'L', 'R', and 'U'. Each letter indicates a specific direction:
+
+'L' means to go from a node to its left child node.
+'R' means to go from a node to its right child node.
+'U' means to go from a node to its parent node.
+Return the step-by-step directions of the shortest path from node s to node t.
+
+Example 1:
+Input: root = [5,1,2,3,null,6,4], startValue = 3, destValue = 6
+Output: "UURL"
+Explanation: The shortest path is: 3 → 1 → 5 → 2 → 6.
+
+Example 2:
+Input: root = [2,1], startValue = 2, destValue = 1
+Output: "L"
+Explanation: The shortest path is: 2 → 1.
+*/
+var getDirections = function (root, startValue, destValue) {
+  // We can go 'Up parent', 'Right child', 'Left child'
+  // We need soem mapping to store so that we can propagate to the parent for 'U' exploration
+  // Once we have the mapping
+  // startValue, destValue are just integers given we need to reach to the node
+  // so we make findNode to reach startNode
+  // once we have reached, we will start traversing from startNode till we have endNode
+  // We add into the path
+  let mpp = new Map();
+  makeParent(root, mpp);
+
+  let result = "";
+  let visited = new Set();
+  result = findResult(findNode(root, startValue), destValue, "", mpp, visited);
+
+  return result;
+};
+
+function makeParent(root, mpp) {
+  if (!root) {
+    return;
+  }
+
+  if (root.left) {
+    mpp.set(root.left.val, root);
+    makeParent(root.left, mpp);
+  }
+
+  if (root.right) {
+    mpp.set(root.right.val, root);
+    makeParent(root.right, mpp);
+  }
+}
+
+function findResult(node, end, result, mpp, visited) {
+  if (node.val === end) {
+    return result;
+  }
+
+  visited.add(node.val);
+
+  if (node.left && !visited.has(node.left.val)) {
+    let leftResult = findResult(node.left, end, result + "L", mpp, visited);
+    // if we have an answer from leftchild, return it
+    if (leftResult) return leftResult;
+  }
+
+  if (node.right && !visited.has(node.right.val)) {
+    let rightResult = findResult(node.right, end, result + "R", mpp, visited);
+    // if we have an answer from right child, return it
+    if (rightResult) return rightResult;
+  }
+
+  if (mpp.has(node.val) && !visited.has(mpp.get(node.val).val)) {
+    let upResult = findResult(
+      mpp.get(node.val),
+      end,
+      result + "U",
+      mpp,
+      visited
+    );
+    //  // if we have an answer from parent, return it
+    if (upResult) return upResult;
+  }
+
+  // no path found, return null
+  return null;
+}
+
+function findNode(root, value) {
+  // find the node of node.val == value
+  if (!root) return null;
+  if (root.val === value) return root;
+
+  return findNode(root.left, value) || findNode(root.right, value);
+}
