@@ -2637,3 +2637,64 @@ var minOperations = function (logs) {
 
   return count > 0 ? count : 0;
 };
+
+// Lucky Numbers in a Matrix
+/*
+Given an m x n matrix of distinct numbers, return all lucky numbers in the matrix in any order.
+
+A lucky number is an element of the matrix such that it is the minimum element in its row and maximum in its column.
+
+Example 1:
+Input: matrix = [[3,7,8],[9,11,13],[15,16,17]]
+Output: [15]
+Explanation: 15 is the only lucky number since it is the minimum in its row and the maximum in its column.
+
+Example 2:
+Input: matrix = [[1,10,4,2],[9,3,8,7],[15,16,17,12]]
+Output: [12]
+Explanation: 12 is the only lucky number since it is the minimum in its row and the maximum in its column.
+*/
+var luckyNumbers = function (matrix) {
+  // check minimum element of every row, store its col and now check its entire col
+  let m = matrix.length;
+  let n = matrix[0].length;
+  let miniRow = -1;
+  let lucky = [];
+  for (let i = 0; i < m; i++) {
+    // get minimum of every row and check if its lagrest in its col
+    let [miniRow, col] = checkRow(i, matrix);
+    if (checkCol(miniRow, col, i, matrix)) {
+      console.log("here");
+      lucky = [miniRow];
+      return lucky;
+    }
+  }
+
+  // if no such element found return []
+  return [];
+};
+
+function checkRow(row, matrix) {
+  // find minimum element of that row
+  let miniEle = +Infinity;
+  let colm = -1;
+  for (let i = 0; i < matrix[0].length; i++) {
+    if (matrix[row][i] < miniEle) {
+      miniEle = matrix[row][i];
+      colm = i;
+    }
+  }
+
+  return [miniEle, colm];
+}
+
+function checkCol(ele, col, row, matrix) {
+  // check if this element is largest in its col
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i][col] != ele && ele < matrix[i][col]) {
+      return false;
+    }
+  }
+
+  return true;
+}
