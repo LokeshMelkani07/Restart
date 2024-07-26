@@ -198,6 +198,80 @@ function dijkstra(graph, start) {
   return distances;
 }
 
+//  Find the City With the Smallest Number of Neighbors at a Threshold Distance
+/*
+There are n cities numbered from 0 to n-1. Given the array edges where edges[i] = [fromi, toi, weighti] represents a bidirectional and weighted edge between cities fromi and toi, and given the integer distanceThreshold.
+
+Return the city with the smallest number of cities that are reachable through some path and whose distance is at most distanceThreshold, If there are multiple such cities, return the city with the greatest number.
+
+Notice that the distance of a path connecting cities i and j is equal to the sum of the edges' weights along that path.
+
+Example 1:
+Input: n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4
+Output: 3
+Explanation: The figure above describes the graph.
+The neighboring cities at a distanceThreshold = 4 for each city are:
+City 0 -> [City 1, City 2]
+City 1 -> [City 0, City 2, City 3]
+City 2 -> [City 0, City 1, City 3]
+City 3 -> [City 1, City 2]
+Cities 0 and 3 have 2 neighboring cities at a distanceThreshold = 4, but we have to return city 3 since it has the greatest number.
+*/
+var findTheCity = function (n, edges, distanceThreshold) {
+  // We can think of something like dikshta algo because we need shortest distance
+  // dikshtra gives us shortest distance between a source node to any other destination node
+  // We have 0 to n-1 nodes so we run a loop and add all nodes in adj list and run a loop take each node as a source everytime
+  // At the end of algo we have distance array with distance of all nodes from source
+  // we run a loop and do count++ for all nodes with distance less than threshold and i != source, we add it into answer with count and node
+  // at the end in main function, we sort that array based on count or node number
+  let city = -Infinity;
+  let numOfCitiesVisited = Infinity;
+  // Making of Adjacency List
+  const list = new Array(n).fill().map(() => []);
+
+  edges.forEach(([u, v, w]) => {
+    list[u].push([v, w]);
+    list[v].push([u, w]);
+  });
+
+  // Now we calculate distance array for each node and store the cities visited within threshold
+  for (let i = 0; i < n; i++) {
+    const distances = dijkstra(list, i);
+    const currVisited = distances.filter((n) => n <= distanceThreshold).length;
+    if (currVisited <= numOfCitiesVisited) {
+      city = Math.max(city, i);
+      numOfCitiesVisited = currVisited;
+    }
+  }
+
+  return city;
+};
+
+function dijkstra(list, node) {
+  // For dijkstra, we use Priority queue to get min distance at top
+  // distance array to store distance of each node from source
+  // visited set to mark visited
+  const q = new PriorityQueue({
+    compare: (a, b) => a[1] - b[1],
+  });
+  const distances = new Array(list.length).fill(Infinity);
+  const visited = new Set();
+
+  distances[node] = 0;
+  q.enqueue([node, 0]);
+
+  while (q.size()) {
+    const [node, weight] = q.dequeue();
+    if (visited.has(node)) continue;
+    visited.add(node);
+    list[node]?.forEach(([v, w]) => {
+      distances[v] = Math.min(distances[v], weight + w);
+      q.enqueue([v, distances[v]]);
+    });
+  }
+  return distances;
+}
+
 // Implement Prim's algorithm for minimum spanning tree
 // This algorithm is used to get the minimum spanning tree means a tree where all nodes are connected in such a way that the addition of weights gives us the minimum number
 // For that purpose we will use a priority queue, where we store {node, weight} and pq always sorts in such a way that minimum weight is at top
