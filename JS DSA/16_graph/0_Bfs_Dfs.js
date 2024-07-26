@@ -221,3 +221,58 @@ var floodFill = function (image, sr, sc, color) {
 
   return image;
 };
+
+//  01 Matrix
+/*
+Given an m x n binary matrix mat, return the distance of the nearest 0 for each cell.
+
+The distance between two adjacent cells is 1.
+
+Example 1:
+Input: mat = [[0,0,0],[0,1,0],[0,0,0]]
+Output: [[0,0,0],[0,1,0],[0,0,0]]
+*/
+var updateMatrix = function (mat) {
+  // We will take a queue
+  // We will push all element with value = 0 in the queue
+  // Now we apply BFS technique and get the topmost element of queue
+  // traverse in its all 4 directions, if that value is != 0 then add its value + 1
+  // push it in queue
+  // At the end, our matrix contain all element with nearest distance to 0
+  let m = mat.length;
+  let n = mat[0].length;
+  let q = [];
+  let dRow = [-1, 0, +1, 0];
+  let dCol = [0, -1, 0, +1];
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (mat[i][j] == 0) {
+        q.push({ row: i, col: j });
+      } else {
+        // mark it -1 so that we have a clue that its not been processed yet
+        mat[i][j] = -1;
+      }
+    }
+  }
+
+  while (q.length) {
+    let { row, col } = q.shift();
+    // traverse 4 directionally
+    for (let i = 0; i < 4; i++) {
+      let directionRow = row + dRow[i];
+      let directionCol = col + dCol[i];
+      if (
+        directionRow < m &&
+        directionRow >= 0 &&
+        directionCol < n &&
+        directionCol >= 0 &&
+        mat[directionRow][directionCol] == -1
+      ) {
+        mat[directionRow][directionCol] = mat[row][col] + 1;
+        q.push({ row: directionRow, col: directionCol });
+      }
+    }
+  }
+
+  return mat;
+};
