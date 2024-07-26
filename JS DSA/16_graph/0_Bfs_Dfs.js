@@ -160,3 +160,64 @@ var orangesRotting = function (grid) {
 
   return time;
 };
+
+// Flood Fill
+/*
+An image is represented by an m x n integer grid image where image[i][j] represents the pixel value of the image.
+
+You are also given three integers sr, sc, and color. You should perform a flood fill on the image starting from the pixel image[sr][sc].
+
+To perform a flood fill, consider the starting pixel, plus any pixels connected 4-directionally to the starting pixel of the same color as the starting pixel, plus any pixels connected 4-directionally to those pixels (also with the same color), and so on. Replace the color of all of the aforementioned pixels with color.
+
+Return the modified image after performing the flood fill.
+
+Example 1:
+Input: image = [[1,1,1],[1,1,0],[1,0,1]], sr = 1, sc = 1, color = 2
+Output: [[2,2,2],[2,2,0],[2,0,1]]
+Explanation: From the center of the image with position (sr, sc) = (1, 1) (i.e., the red pixel), all pixels connected by a path of the same color as the starting pixel (i.e., the blue pixels) are colored with the new color.
+Note the bottom corner is not colored 2, because it is not 4-directionally connected to the starting pixel.
+*/
+var floodFill = function (image, sr, sc, color) {
+  // We will take a temp matrix where we make it same as image but temp[sr][sc] = 2 marked
+  // Now we do BFS so we add sr,sc in the queue
+  // Now we pick element from queue
+  // travel in its 4 direction and check for valid points
+  // mark the nodes in 4 direction as 2 in temp and add them in the queue but make sure to check that image[][] = 1 and != 2
+  // at the end, when queue gets empty, temp has our resultant matrix
+  let originalColor = image[sr][sc];
+
+  // If the starting pixel's color is the same as the new color, no need to do anything
+  if (originalColor === color) return image;
+
+  let m = image.length;
+  let n = image[0].length;
+  let queue = [{ row: sr, col: sc }];
+  let directions = [
+    [-1, 0],
+    [0, -1],
+    [1, 0],
+    [0, 1],
+  ];
+
+  while (queue.length) {
+    let { row, col } = queue.shift();
+    image[row][col] = color;
+
+    for (let [dRow, dCol] of directions) {
+      let newRow = row + dRow;
+      let newCol = col + dCol;
+
+      if (
+        newRow >= 0 &&
+        newRow < m &&
+        newCol >= 0 &&
+        newCol < n &&
+        image[newRow][newCol] === originalColor
+      ) {
+        queue.push({ row: newRow, col: newCol });
+      }
+    }
+  }
+
+  return image;
+};
