@@ -276,3 +276,264 @@ var updateMatrix = function (mat) {
 
   return mat;
 };
+
+// Surrounded Regions
+/*
+You are given an m x n matrix board containing letters 'X' and 'O', capture regions that are surrounded:
+
+Connect: A cell is connected to adjacent cells horizontally or vertically.
+Region: To form a region connect every 'O' cell.
+Surround: The region is surrounded with 'X' cells if you can connect the region with 'X' cells and none of the region cells are on the edge of the board.
+A surrounded region is captured by replacing all 'O's with 'X's in the input matrix board.
+
+Example 1:
+Input: board = [["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+
+Output: [["X","X","X","X"],["X","X","X","X"],["X","X","X","X"],["X","O","X","X"]]
+
+Explanation:
+In the above diagram, the bottom region is not captured because it is on the edge of the board and cannot be surrounded
+*/
+var solve = function (board) {
+  // '0' ke chaaro taraf dekho
+  // Agar uske (uppar, left, right, neeche) har jagah 'X' h toh hum usko bhi X bna skte h and ye kaam In a group of 0's mai bhi ho skta h
+  // like if a group of 0's has X in its all 4 directions then we can make them all into X
+  // We need to return this modified array
+  // We can observe one thing that all 0's which are connected to any O that is at boundary will never get converted
+  // So we need to start our BFS/DFS from boundary 0's
+  // All 0's other than ones in the boundary will definately get coverted to X as they will always be surrounded by X
+  // We need to have an visited matrix and start traversal from O in boundary
+  // We check first row (boundary), if we found an O, start dfs mark them visited as 1 (which means they will not be converted)
+  // We check first Col (Its another boundary), again same DFS
+  // We check last row and last col similary and look out for O's to apply BFS
+  // While start DFS, we will check in all 4 directions
+  // We can also apply BFS but it should also start from boundary O
+  // At last mark all 0's in visited as X and return it
+  let m = board.length;
+  let n = board[0].length;
+  let visited = Array.from({ length: m }, () => Array(n).fill(0));
+  let dRow = [-1, 0, +1, 0];
+  let dCol = [0, -1, 0, +1];
+
+  function dfs(row, col) {
+    // mark it visited
+    visited[row][col] = 1;
+
+    // travel in its 4 directions
+    for (let i = 0; i < 4; i++) {
+      let newRow = row + dRow[i];
+      let newCol = col + dCol[i];
+      if (
+        newRow >= 0 &&
+        newRow < m &&
+        newCol >= 0 &&
+        newCol < n &&
+        !visited[newRow][newCol] &&
+        board[newRow][newCol] == "O"
+      ) {
+        dfs(newRow, newCol);
+      }
+    }
+  }
+
+  // check for boundary row
+  for (let i = 0; i < m; i++) {
+    // check for first row
+    if (!visited[i][0] && board[i][0] == "O") {
+      dfs(i, 0);
+    }
+
+    // check for last row
+    if (!visited[i][n - 1] && board[i][n - 1] == "O") {
+      dfs(i, n - 1);
+    }
+  }
+
+  // check for boundary col
+  for (let j = 0; j < n; j++) {
+    // first col
+    if (!visited[0][j] && board[0][j] == "O") {
+      dfs(0, j);
+    }
+
+    // last col
+    if (!visited[m - 1][j] && board[m - 1][j] == "O") {
+      dfs(m - 1, j);
+    }
+  }
+
+  // check and modify all O's based on visited array
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (visited[i][j] == 0 && board[i][j] == "O") {
+        board[i][j] = "X";
+      }
+    }
+  }
+
+  return board;
+};
+
+// Number of Enclaves
+/*
+You are given an m x n binary matrix grid, where 0 represents a sea cell and 1 represents a land cell.
+
+A move consists of walking from one land cell to another adjacent (4-directionally) land cell or walking off the boundary of the grid.
+
+Return the number of land cells in grid for which we cannot walk off the boundary of the grid in any number of moves.
+
+Example 1:
+Input: grid = [[0,0,0,0],[1,0,1,0],[0,1,1,0],[0,0,0,0]]
+Output: 3
+Explanation: There are three 1s that are enclosed by 0s, and one 1 that is not enclosed because its on the boundary.
+
+Example 2:
+Input: grid = [[0,1,1,0],[0,0,1,0],[0,0,1,0],[0,0,0,0]]
+Output: 0
+Explanation: All 1s are either on the boundary or can reach the boundary.
+*/
+var numEnclaves = function (board) {
+  // Same as Above problem "Surrounded Regions"
+  // Just that hume vo vale 1's chahiye jo boundary par h
+  // Hume unn 1's ka count dena h jo boundary par nhi h means "Return the number of land cells in grid for which we cannot walk off the boundary of the grid in any number of moves."
+  // So we pick 1's in the boundary and start DFS on them, so that whole group attached to them is taken at once for which we use visited array
+  // We apply DFS on first row, last row, first col, last col and mark them visited accordingly if they are not visited and their value is 1 on boundary.
+  // To apply DFS, we need to check 4 directionally as given
+  // At the end, values which has marked visited==0 and has value = 1 are ones which are our answer so count and return them.
+  let m = board.length;
+  let n = board[0].length;
+  let visited = Array.from({ length: m }, () => Array(n).fill(0));
+  let dRow = [-1, 0, +1, 0];
+  let dCol = [0, -1, 0, +1];
+
+  function dfs(row, col) {
+    // mark it visited
+    visited[row][col] = 1;
+
+    // travel in its 4 directions
+    for (let i = 0; i < 4; i++) {
+      let newRow = row + dRow[i];
+      let newCol = col + dCol[i];
+      if (
+        newRow >= 0 &&
+        newRow < m &&
+        newCol >= 0 &&
+        newCol < n &&
+        !visited[newRow][newCol] &&
+        board[newRow][newCol] == 1
+      ) {
+        dfs(newRow, newCol);
+      }
+    }
+  }
+
+  // check for boundary row
+  for (let i = 0; i < m; i++) {
+    // check for first row
+    if (!visited[i][0] && board[i][0] == 1) {
+      dfs(i, 0);
+    }
+
+    // check for last row
+    if (!visited[i][n - 1] && board[i][n - 1] == 1) {
+      dfs(i, n - 1);
+    }
+  }
+
+  // check for boundary col
+  for (let j = 0; j < n; j++) {
+    // first col
+    if (!visited[0][j] && board[0][j] == 1) {
+      dfs(0, j);
+    }
+
+    // last col
+    if (!visited[m - 1][j] && board[m - 1][j] == 1) {
+      dfs(m - 1, j);
+    }
+  }
+
+  let count = 0;
+  // check and modify all O's based on visited array
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (visited[i][j] == 0 && board[i][j] == 1) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+};
+
+// Word Ladder [Important]
+/*
+A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words beginWord -> s1 -> s2 -> ... -> sk such that:
+
+Every adjacent pair of words differs by a single letter.
+Every si for 1 <= i <= k is in wordList. Note that beginWord does not need to be in wordList.
+sk == endWord
+Given two words, beginWord and endWord, and a dictionary wordList, return the number of words in the shortest transformation sequence from beginWord to endWord, or 0 if no such sequence exists.
+
+Example 1:
+Input: beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]
+Output: 5
+Explanation: One shortest transformation sequence is "hit" -> "hot" -> "dot" -> "dog" -> cog", which is 5 words long.
+*/
+var ladderLength = function (beginWord, endWord, wordList) {
+  // We are given a beginWord, endWord and list
+  // We need to count number of steps it took us to convert beginWord to endWord using words from list
+  // let say beginWord = "hit", endWord = "cog", list = ["hot","dot","dog","lot","log","cog"]
+  // we will start from "hit" and mark it level 1
+  // We will take h and replace it from a-z like ait,bit, cit, dit,...zit and every time we check if list contain that word, if yes. mark it level 2
+  // we have a possible guy to go on next step, now delete it from list because its been taken
+  // if no, now we go to h (i) t and now we i -> a-z and check everytime like hat, hbt, hct........hzt and check list everytime and do the same if we get another possible answer or not, mark it level 2 same
+  // Now same with h i (t) and mark it level 2
+  // Now we move to next level and pick each guy of level 2
+  // We make set of wordList so that we can search in less complexity
+  // So we everytime we replace and check and delete if found and increment level
+  // So this is kind of BFS we are following where we push {hit, 1} and now we run our algo with level+1 everytime till our resultant is "endWord"
+  // at the end, return level that represents number of transformations
+  let st = new Set(wordList);
+  if (!st.has(endWord)) {
+    return 0;
+  }
+
+  let q = [];
+  q.push({ word: beginWord, level: 1 });
+  st.delete(beginWord);
+
+  while (q.length) {
+    let ele = q.shift();
+    let wrd = ele.word;
+    let lvl = ele.level;
+
+    if (wrd === endWord) {
+      return lvl;
+    }
+
+    for (let i = 0; i < wrd.length; i++) {
+      // Picking that character up
+      let originalWord = wrd[i];
+      for (let chCode = 97; chCode <= 122; chCode++) {
+        // ASCII 'a' is 97 and 'z' is 122
+        // In JS, strings are immutable so we cannot modify them directly so we need to create a new string with that one changed character
+        // checking all possiblities of it, from a to z and putting that character and checking the set ony by one
+        let ch = String.fromCharCode(chCode);
+        // if that character is same as one we have already, do not check for it and continue
+        if (ch === originalWord) continue;
+
+        // make a new word with replaced character everytime and check if its a possible way
+        // if yes, store it in queue
+        let newWord = wrd.substring(0, i) + ch + wrd.substring(i + 1);
+
+        if (st.has(newWord)) {
+          st.delete(newWord);
+          q.push({ word: newWord, level: lvl + 1 });
+        }
+      }
+    }
+  }
+
+  return 0;
+};
