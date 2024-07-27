@@ -654,6 +654,109 @@ class Graph {
   }
 }
 
+// Minimum Cost to Convert String I || Floyd Warshall Algorithm
+// Notes Floyd Warshall: https://drive.google.com/file/d/11o6SC8EcHsrs1LToemNvMJtqkhgRy_4t/view?usp=sharing
+/*
+You are given two 0-indexed strings source and target, both of length n and consisting of lowercase English letters. You are also given two 0-indexed character arrays original and changed, and an integer array cost, where cost[i] represents the cost of changing the character original[i] to the character changed[i].
+
+You start with the string source. In one operation, you can pick a character x from the string and change it to the character y at a cost of z if there exists any index j such that cost[j] == z, original[j] == x, and changed[j] == y.
+
+Return the minimum cost to convert the string source to the string target using any number of operations. If it is impossible to convert source to target, return -1.
+
+Note that there may exist indices i, j such that original[j] == original[i] and changed[j] == changed[i].
+
+Example 1:
+Input: source = "abcd", target = "acbe", original = ["a","b","c","c","e","d"], changed = ["b","c","b","e","b","e"], cost = [2,5,5,1,2,20]
+Output: 28
+Explanation: To convert the string "abcd" to string "acbe":
+- Change value at index 1 from 'b' to 'c' at a cost of 5.
+- Change value at index 2 from 'c' to 'e' at a cost of 1.
+- Change value at index 2 from 'e' to 'b' at a cost of 2.
+- Change value at index 3 from 'd' to 'e' at a cost of 20.
+The total cost incurred is 5 + 1 + 2 + 20 = 28.
+It can be shown that this is the minimum possible cost.
+
+Example 2:
+Input: source = "aaaa", target = "bbbb", original = ["a","c"], changed = ["c","b"], cost = [1,2]
+Output: 12
+Explanation: To change the character 'a' to 'b' change the character 'a' to 'c' at a cost of 1, followed by changing the character 'c' to 'b' at a cost of 2, for a total cost of 1 + 2 = 3. To change all occurrences of 'a' to 'b', a total cost of 3 * 4 = 12 is incurred.
+*/
+var minimumCost = function (source, target, original, changed, cost) {
+  // if we carefully, see
+  // original and changed and cost form a adj list where original has u node, changed has v node, cost represents weight
+  // while converting any character from source[i] -> target[j]
+  // we need to take the shortest path between those 2 nodes
+  // So we will make use of floyd warshall algo to get the shortest distance between 2 nodes, this way we can convert source -> target in minimum cost
+  // Floyd Warshall algo also detects negative cycles but has TC: O(n3) and SC: O(n2)
+  // We can also apply dikshtra but cannot work for negative weights but if negative not present then we can apply it for each node and caclulate distance matrix for each node which will contain, shortest path between a source node to all nodes and will take less complexity than floyd warshall
+  // We can also apply bellman ford but it will also work for each source node
+  const mat = floyd(original, changed, cost);
+  // Now we have matrix containing shortest distance between 2 nodes
+  let n = source.length;
+  let m = target.length;
+  if (n != m || n == 0 || m == 0) {
+    return -1;
+  }
+
+  let minCost = 0;
+  for (let i = 0; i < n; i++) {
+    if (source[i] == target[i]) {
+      continue;
+    } else {
+      let src = source[i].charCodeAt(0) - "a".charCodeAt(0);
+      let dest = target[i].charCodeAt(0) - "a".charCodeAt(0);
+      minCost += mat[src][dest];
+    }
+  }
+
+  if (minCost == Infinity) {
+    return -1;
+  }
+
+  return minCost;
+};
+
+function floyd(original, changed, cost) {
+  // We have "a", "b"...."z" as our nodes so first we store them in form of indexes in our matrix
+  // max size of matrix we take is 26 because we might get any character between "a" to "z"
+  // First we create a matrix based on information provided
+  const mat = Array.from({ length: 26 }, () => Array(26).fill(Infinity));
+
+  for (let i = 0; i < 26; i++) {
+    mat[i][i] = 0;
+  }
+
+  // Now we fill values given to us
+  let n = original.length;
+  for (let i = 0; i < n; i++) {
+    // original = ["a","b","c","c","e","d"], changed = ["b","c","b","e","b","e"], cost = [2,5,5,1,2,20] so we need to convert "a","b".. to their index so that we can fill matrix
+    let from = original[i].charCodeAt(0) - "a".charCodeAt(0);
+    let to = changed[i].charCodeAt(0) - "a".charCodeAt(0);
+    mat[from][to] = Math.min(mat[from][to], cost[i]);
+  }
+
+  // Now we have filled our adjacency matrix so now
+  // Let us fill it
+  for (let k = 0; k < 26; k++) {
+    for (let i = 0; i < 26; i++) {
+      for (let j = 0; j < 26; j++) {
+        if (mat[i][k] < Infinity && mat[k][j] < Infinity) {
+          mat[i][j] = Math.min(mat[i][j], mat[i][k] + mat[k][j]);
+        }
+      }
+    }
+  }
+
+  // To detect negative cycle
+  for (let i = 0; i < 26; i++) {
+    if (mat[i][i] < 0) {
+      return -1;
+    }
+  }
+
+  return mat;
+}
+
 // Union And Find By Rank (Dis-joint Set)
 // In this Union means to make a set of 2 elements or nodes where one act as a parent another act as a child (for assumption: Take it as a tree)
 // Find means to check whether one is inside set of another and way of checking it is check who is its parent, if parent is same means they are inside same set
