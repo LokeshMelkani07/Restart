@@ -537,3 +537,144 @@ var ladderLength = function (beginWord, endWord, wordList) {
 
   return 0;
 };
+
+// Is Graph Bipartite?
+/*
+There is an undirected graph with n nodes, where each node is numbered between 0 and n - 1. You are given a 2D array graph, where graph[u] is an array of nodes that node u is adjacent to. More formally, for each v in graph[u], there is an undirected edge between node u and node v. The graph has the following properties:
+
+There are no self-edges (graph[u] does not contain u).
+There are no parallel edges (graph[u] does not contain duplicate values).
+If v is in graph[u], then u is in graph[v] (the graph is undirected).
+The graph may not be connected, meaning there may be two nodes u and v such that there is no path between them.
+A graph is bipartite if the nodes can be partitioned into two independent sets A and B such that every edge in the graph connects a node in set A and a node in set B.
+
+Return true if and only if it is bipartite.
+
+Example 1:
+Input: graph = [[1,2,3],[0,2],[0,1,3],[0,2]]
+Output: false
+Explanation: There is no way to partition the nodes into two independent sets such that every edge connects a node in one and a node in the other.
+
+Example 2:
+Input: graph = [[1,3],[0,2],[1,3],[0,2]]
+Output: true
+Explanation: We can partition the nodes into two sets: {0, 2} and {1, 3}.
+*/
+var isBipartite = function (graph) {
+  // Question can be modified like: We are given a undirected graph and we need to colour our graph by using only 2 type of colors, such that mo 2 adjacent nodes have same colour. So, we need to return true if we can color whole graph keeping above condition in mind else return false
+  // One of the observations is: if graph contain odd number of nodes cycle, it can never be bipartite, if its contain even cycle or has linear nodes, it can be bipartite
+  // We will start from node 0 to n-1 to cover all components, we apply DFS and we pick a colour 0 (initially for node 0), now we make DFS calls and mark its neighbours with different colour everytime, we need a visited array which we call colour array that gives us colour of a node initally all -1
+  // If we have a neighbour which is already coloured and has same colour has parent, return false, the graph cannot be bipartite
+  let n = graph.length;
+  let color = Array(n).fill(-1);
+  for (let i = 0; i < n; i++) {
+    if (color[i] == -1) {
+      if (dfs(i, 0, graph, color) == false) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+function dfs(node, col, graph, colorArray) {
+  colorArray[node] = col;
+  for (let neighbour of graph[node]) {
+    if (colorArray[neighbour] == -1) {
+      if (dfs(neighbour, !col, graph, colorArray) == false) {
+        return false;
+      }
+    } else if (colorArray[neighbour] == col) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Number of Distinct Islands
+/*
+Given a boolean 2D matrix grid of size n * m. You have to find the number of distinct islands where a group of connected 1s (horizontally or vertically) forms an island. Two islands are considered to be distinct if and only if one island is not equal to another (not rotated or reflected).
+
+Example 1:
+Input:
+grid[][] = {{1, 1, 0, 0, 0},
+            {1, 1, 0, 0, 0},
+            {0, 0, 0, 1, 1},
+            {0, 0, 0, 1, 1}}
+Output:
+1
+Explanation:
+grid[][] = {{1, 1, 0, 0, 0},
+            {1, 1, 0, 0, 0},
+            {0, 0, 0, 1, 1},
+            {0, 0, 0, 1, 1}}
+Same colored islands are equal.
+We have 2 equal islands, so we
+have only 1 distinct island.
+*/
+
+class Solution {
+  //Function to count the number of distinct islands.
+  countDistinctIslands(grid) {
+    // We need to collect all 1's which are in groups
+    // The group can have any number of 1's in it
+    // We will pick the starting 1 and do dfs on it, we will traverse all its connected 1's so one island is there
+    // Now we go to any other 1 and do same
+    // This way we travel all nodes of matrix and check if its a land means has value = 1 and its not visited yet, do BFS on it.
+    // We go in all 8 directions of it because its been said that "group of connected 1s (horizontally or vertically) forms an island"
+    // This way whenever we finish a bfs call, we do count++ and at the end we have count of number of distinct islands
+    let m = grid.length;
+    let n = grid[0].length;
+    let visited = Array({ length: m }, () => Array(n).fill(0));
+    let count = 0;
+    for (let row = 0; row < m; row++) {
+      for (let col = 0; col < n; col++) {
+        if (!visited[row][col] && grid[row][col] == 1) {
+          this.bfs(row, col, visited, grid);
+          count++;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  bfs(row, col, visited, grid) {
+    visited[row][col] = 1;
+    let q = [];
+    q.push({ r: row, c: col });
+    let m = grid.length;
+    let n = grid[0].length;
+
+    while (q.length) {
+      let ele = q.shift();
+      let dRow = ele.r;
+      let dCol = ele.c;
+
+      // Traverse in 8 directions
+      // If we write down all 8 directions on basis of row,col
+      // We see row goes like row -1 , row, row+1
+      // col goes like col-1, col, col+1
+      // This way we can simplify these traversal using only 2 loops
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          let directionRow = dRow + i;
+          let directionCol = dCol + j;
+          if (
+            directionRow < m &&
+            directionRow >= 0 &&
+            directionCol < n &&
+            directionCol >= 0 &&
+            !visited[directionRow][directionCol] &&
+            grid[directionRow][directionCol] === 1
+          ) {
+            visited[directionRow][directionCol] = 1;
+            q.push({ r: directionRow, c: directionCol });
+          }
+        }
+      }
+    }
+  }
+}
