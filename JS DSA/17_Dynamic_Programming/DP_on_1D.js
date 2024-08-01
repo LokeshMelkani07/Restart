@@ -306,3 +306,83 @@ function robLinear(nums) {
 
   return dp[n - 1];
 }
+
+// Filling Bookcase Shelves
+/*
+You are given an array books where books[i] = [thicknessi, heighti] indicates the thickness and height of the ith book. You are also given an integer shelfWidth.
+
+We want to place these books in order onto bookcase shelves that have a total width shelfWidth.
+
+We choose some of the books to place on this shelf such that the sum of their thickness is less than or equal to shelfWidth, then build another level of the shelf of the bookcase so that the total height of the bookcase has increased by the maximum height of the books we just put down. We repeat this process until there are no more books to place.
+
+Note that at each step of the above process, the order of the books we place is the same order as the given sequence of books.
+
+For example, if we have an ordered list of 5 books, we might place the first and second book onto the first shelf, the third book on the second shelf, and the fourth and fifth book on the last shelf.
+Return the minimum possible height that the total bookshelf can be after placing shelves in this manner.
+
+Input: books = [[1,1],[2,3],[2,3],[1,1],[1,1],[1,1],[1,2]], shelfWidth = 4
+Output: 6
+Explanation:
+The sum of the heights of the 3 shelves is 1 + 3 + 2 = 6.
+Notice that book number 2 does not have to be on the first shelf.
+*/
+
+var minHeightShelves = function (books, shelfWidth) {
+  // books[i] means [thickeness, heigh] of ith book
+  // shelfWidth is width of shelf total we have
+  // we need to place these books in same sequence of i as given
+  // we can place atmost width of shelfwidth
+  // we need to consider height of books and place all of them in such a way that all books gets placed in minimum height of shelf
+  // One observation is we cannot sort it because it will then distort the order of books which we cannot afford
+  // while placing books we need to keep of check of width that thickness of one level <= shelfWidth
+  // at the same time, need to take care of the minimum height
+  // We will do a pick/Not pick approach
+  // We will get the min height possible from both approach
+  // Starting from 0th index, if current width is lesser than shelfWidth, then only we can add that element into that level
+  // base case: when we reach the end index
+  let n = books.length;
+  let dp = new Array(n)
+    .fill(null)
+    .map(() => new Array(shelfWidth + 1).fill(-1));
+  return helper(0, books, 0, n - 1, shelfWidth, 0, dp);
+};
+
+function helper(ind, books, width, n, shelfWidth, height, dp) {
+  // base cases
+  if (ind == n) {
+    if (width + books[ind][0] <= shelfWidth) {
+      return Math.max(height, books[ind][1]);
+    } else {
+      return height + books[ind][1];
+    }
+  }
+
+  // Memoization check
+  if (dp[ind][width] !== -1) {
+    return dp[ind][width];
+  }
+
+  let pick = +Infinity;
+  let notPick = +Infinity;
+  let heightMin = 0;
+  if (width + books[ind][0] <= shelfWidth) {
+    // pick it
+    pick = helper(
+      ind + 1,
+      books,
+      width + books[ind][0],
+      n,
+      shelfWidth,
+      Math.max(height, books[ind][1]),
+      dp
+    );
+  }
+
+  notPick =
+    height +
+    helper(ind + 1, books, books[ind][0], n, shelfWidth, books[ind][1], dp);
+
+  heightMin = Math.min(pick, notPick);
+
+  return (dp[ind][width] = heightMin);
+}
