@@ -663,3 +663,76 @@ var longestSubarray = function (nums, limit) {
 
   return maxLength;
 };
+
+// Minimum Swaps to Group All 1's Together II
+/*
+A swap is defined as taking two distinct positions in an array and swapping the values in them.
+
+A circular array is defined as an array where we consider the first element and the last element to be adjacent.
+
+Given a binary circular array nums, return the minimum number of swaps required to group all 1's present in the array together at any location.
+
+Example 1:
+Input: nums = [0,1,0,1,1,0,0]
+Output: 1
+Explanation: Here are a few of the ways to group all the 1's together:
+[0,0,1,1,1,0,0] using 1 swap.
+[0,1,1,1,0,0,0] using 1 swap.
+[1,1,0,0,0,0,1] using 2 swaps (using the circular property of the array).
+There is no way to group all 1's together with 0 swaps.
+Thus, the minimum number of swaps required is 1.
+
+Example 2:
+Input: nums = [0,1,1,1,0,0,1,1,0]
+Output: 2
+Explanation: Here are a few of the ways to group all the 1's together:
+[1,1,1,0,0,0,0,1,1] using 2 swaps (using the circular property of the array).
+[1,1,1,1,1,0,0,0,0] using 2 swaps.
+There is no way to group all 1's together with 0 or 1 swaps.
+Thus, the minimum number of swaps required is 2.
+
+Example 3:
+Input: nums = [1,1,0,0,1]
+Output: 0
+Explanation: All the 1's are already grouped together due to the circular property of the array.
+Thus, the minimum number of swaps required is 0.
+*/
+var minSwaps = function (nums) {
+  // Here we need to group all 1's together
+  // What can be min number of swap to do that considering its an binary circular array
+  // Max group of all 1's will be equal to total number of 1's in the array
+  // we will take window of size = total number of 1's in array
+  // We count number of zeroes in the window everytime and push window forward one by one and everytime count number of 0's
+  // We need a window where number of 0's is minimum so that min number of swaps are needed to group all 1's together
+  // To handle circular array, we will run this window till windowSize + array_size because [1,1,0,0,1] is also already group of all 1's together as its a circular array so last element is adjacent to first one so we will have to handle circular case also
+  let cnt_1 = 0; // to count number of 1's in array
+  let n = nums.length;
+  for (let i = 0; i < n; i++) {
+    if (nums[i] == 1) {
+      cnt_1++;
+    }
+  }
+
+  let windowSize = cnt_1; // window size will be equal to count of number of 1's in array
+  let cnt_0 = 0;
+  for (let i = 0; i < windowSize; i++) {
+    if (nums[i] == 0) {
+      cnt_0++; // counting number of zeroes for first window
+    }
+  }
+
+  // Storing min number of 0's in any window so that we can return it as answer
+  let min = cnt_0;
+  // Now we start processing for whole circular array
+  for (let i = windowSize; i < n + windowSize; i++) {
+    // counting number of 0's in window, %n to handle circular case
+    if (nums[i % n] == 0) cnt_0++;
+    // While moving window, if first element is 0, decrease the count while moving
+    if (nums[i - windowSize] == 0) cnt_0--;
+
+    // Store min number of 0's in a window
+    min = Math.min(min, cnt_0);
+  }
+
+  return min;
+};
